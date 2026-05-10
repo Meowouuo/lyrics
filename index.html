@@ -82,6 +82,38 @@
             margin-bottom: 16px;
         }
 
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border: 1px solid #eee;
+            background: #fff;
+            color: #666;
+        }
+
+        .filter-tab:hover { background: #f5f5f5; }
+
+        .filter-tab.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
         .search-bar { margin-bottom: 16px; position: relative; }
 
         .search-input {
@@ -110,13 +142,43 @@
             color: #ccc;
         }
 
+        /* Artist Section */
+        .artist-section { margin-bottom: 20px; }
+
+        .artist-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 4px;
+            margin-bottom: 8px;
+        }
+
+        .artist-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .artist-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .artist-count {
+            font-size: 12px;
+            color: #999;
+            margin-left: 8px;
+        }
+
         .song-card {
             display: flex;
             align-items: center;
             padding: 14px 16px;
             background: #fafafa;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
             border: 1px solid transparent;
@@ -125,25 +187,7 @@
         .song-card:hover { background: #f0f0f0; border-color: #e0e0e0; }
         .song-card:active { transform: scale(0.98); }
 
-        .song-card-cover {
-            width: 52px;
-            height: 52px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 24px;
-        }
-
-        .song-card-cover.c0 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .song-card-cover.c1 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .song-card-cover.c2 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .song-card-cover.c3 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .song-card-cover.c4 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-        .song-card-cover.c5 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
-
-        .song-card-info { margin-left: 14px; flex: 1; min-width: 0; }
+        .song-card-info { flex: 1; min-width: 0; }
 
         .song-card-title {
             font-size: 16px;
@@ -367,9 +411,15 @@
         <div class="song-list-page" id="songListPage">
             <div class="page-title">🎵 粤拼歌词</div>
             <div class="page-subtitle">粤语歌词 · 粤拼对照 · 学唱粤语歌</div>
+            
+            <!-- Filter Tabs -->
+            <div class="filter-tabs" id="filterTabs">
+                <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">全部</div>
+            </div>
+
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲名或歌手..." oninput="filterSongs()">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲名..." oninput="filterSongs()">
             </div>
             <div id="songList"></div>
         </div>
@@ -409,8 +459,7 @@
             lyricistJyutping: "lam4 sik1",
             composer: "陈辉阳",
             composerJyutping: "can4 fai1 joeng4",
-            coverClass: "c0",
-            emoji: "🎤",
+            color: "#f5576c",
             sections: [
                 {
                     label: "主歌",
@@ -435,8 +484,7 @@
             lyricistJyutping: "lam4 sik1",
             composer: "Christopher Chak",
             composerJyutping: "—",
-            coverClass: "c1",
-            emoji: "🏔️",
+            color: "#4facfe",
             sections: [
                 {
                     label: "主歌",
@@ -480,8 +528,7 @@
             lyricistJyutping: "lam4 sik1",
             composer: "陈小霞",
             composerJyutping: "can4 siu2 haa4",
-            coverClass: "c2",
-            emoji: "🕰️",
+            color: "#43e97b",
             sections: [
                 {
                     label: "主歌",
@@ -519,8 +566,7 @@
             lyricistJyutping: "wong4 gaa1 keoi1",
             composer: "黄家驹",
             composerJyutping: "wong4 gaa1 keoi1",
-            coverClass: "c3",
-            emoji: "❤️",
+            color: "#fa709a",
             sections: [
                 {
                     label: "主歌",
@@ -556,8 +602,7 @@
             lyricistJyutping: "lam4 zan3 koeng4",
             composer: "Makaino Koji",
             composerJyutping: "—",
-            coverClass: "c4",
-            emoji: "🎶",
+            color: "#a18cd1",
             sections: [
                 {
                     label: "主歌",
@@ -596,8 +641,7 @@
             lyricistJyutping: "wong4 gaa1 keoi1",
             composer: "黄家驹",
             composerJyutping: "wong4 gaa1 keoi1",
-            coverClass: "c5",
-            emoji: "🌊",
+            color: "#fccb90",
             sections: [
                 {
                     label: "主歌",
@@ -631,7 +675,12 @@
         }
     ];
 
+    // Get unique artists
+    const artists = [...new Set(songs.map(s => s.artist))];
+    const artistColors = ['#f5576c', '#4facfe', '#43e97b', '#fa709a', '#a18cd1', '#fccb90', '#667eea', '#764ba2'];
+
     let currentSong = null;
+    let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
     let fontLevel = 0;
     const fontSizes = [
@@ -640,30 +689,94 @@
         { jyutping: 17, chinese: 26 }
     ];
 
+    // Initialize filter tabs
+    function initFilterTabs() {
+        const tabsContainer = document.getElementById('filterTabs');
+        let tabsHTML = '<div class="filter-tab active" data-filter="all" onclick="setFilter(\'all\')">全部</div>';
+        
+        artists.forEach((artist, index) => {
+            tabsHTML += `<div class="filter-tab" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</div>`;
+        });
+        
+        tabsContainer.innerHTML = tabsHTML;
+    }
+
+    function setFilter(artist) {
+        currentFilter = artist;
+        
+        // Update tab styles
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            if (tab.dataset.filter === artist) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        
+        renderSongList();
+    }
+
     function renderSongList(filter = '') {
         const list = document.getElementById('songList');
-        const filtered = songs.filter(s =>
-            s.title.includes(filter) || s.artist.includes(filter) ||
-            s.titleJyutping.toLowerCase().includes(filter.toLowerCase())
-        );
+        let filtered = songs;
+        
+        // Apply artist filter
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(s => s.artist === currentFilter);
+        }
+        
+        // Apply search filter
+        if (filter) {
+            filtered = filtered.filter(s => s.title.includes(filter));
+        }
+
         if (filtered.length === 0) {
             list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><div class="text">没有找到匹配的歌曲</div></div>';
             return;
         }
-        list.innerHTML = filtered.map(song => `
-            <div class="song-card" onclick="openSong(${song.id})">
-                <div class="song-card-cover ${song.coverClass}">${song.emoji}</div>
-                <div class="song-card-info">
-                    <div class="song-card-title">${song.title}</div>
-                    <div class="song-card-artist">${song.artist}</div>
+
+        // Group by artist
+        const grouped = {};
+        filtered.forEach(song => {
+            if (!grouped[song.artist]) {
+                grouped[song.artist] = [];
+            }
+            grouped[song.artist].push(song);
+        });
+
+        let html = '';
+        Object.entries(grouped).forEach(([artist, artistSongs]) => {
+            const artistIndex = artists.indexOf(artist);
+            const color = artistColors[artistIndex % artistColors.length];
+            
+            html += `
+                <div class="artist-section">
+                    <div class="artist-header">
+                        <div class="artist-dot" style="background: ${color}"></div>
+                        <div class="artist-name">${artist}</div>
+                        <div class="artist-count">${artistSongs.length}首</div>
+                    </div>
+            `;
+            
+            html += artistSongs.map(song => `
+                <div class="song-card" onclick="openSong(${song.id})">
+                    <div class="song-card-info">
+                        <div class="song-card-title">${song.title}</div>
+                        <div class="song-card-artist">${song.lyricist} 作词 · ${song.composer} 作曲</div>
+                    </div>
+                    <div class="song-card-arrow">›</div>
                 </div>
-                <div class="song-card-arrow">›</div>
-            </div>
-        `).join('');
+            `).join('');
+            
+            html += '</div>';
+        });
+
+        list.innerHTML = html;
     }
 
     function filterSongs() {
-        renderSongList(document.getElementById('searchInput').value.trim());
+        const query = document.getElementById('searchInput').value.trim();
+        renderSongList(query);
     }
 
     function openSong(id) {
@@ -774,6 +887,8 @@
         setTimeout(() => toast.remove(), 2000);
     }
 
+    // Initialize
+    initFilterTabs();
     renderSongList();
     </script>
 </body>
