@@ -708,7 +708,7 @@
             <div class="search-box">
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲..." oninput="filterSongs()">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
             </div>
 
@@ -870,9 +870,22 @@
         if (currentFilter !== 'all') {
             filtered = filtered.filter(s => s.artist === currentFilter);
         }
-        const searchQuery = document.getElementById('searchInput').value.trim();
+        const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
         if (searchQuery) {
-            filtered = filtered.filter(s => s.title.includes(searchQuery));
+            filtered = filtered.filter(s => {
+                // 搜索歌名、歌手、填词、作曲
+                if (s.title.toLowerCase().includes(searchQuery)) return true;
+                if (s.artist.toLowerCase().includes(searchQuery)) return true;
+                if (s.lyricist && s.lyricist.toLowerCase().includes(searchQuery)) return true;
+                if (s.composer && s.composer.toLowerCase().includes(searchQuery)) return true;
+                // 搜索歌词内容
+                const lyricsText = s.lyrics
+                    .filter(l => l.chars)
+                    .map(l => l.chars.join(''))
+                    .join('');
+                if (lyricsText.toLowerCase().includes(searchQuery)) return true;
+                return false;
+            });
         }
 
         let html = '';
