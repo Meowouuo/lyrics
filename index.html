@@ -267,33 +267,60 @@
 
         .song-title-row {
             display: flex;
-            align-items: baseline;
+            align-items: flex-end;
             gap: 16px;
             margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
         .song-title-main {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        @media (min-width: 1024px) {
+            .song-title-main { gap: 6px; }
+        }
+
+        .title-char-group {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title-char-jyutping {
+            font-size: 11px;
+            color: #999;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            margin-bottom: 2px;
+            height: 14px;
+        }
+        @media (min-width: 1024px) {
+            .title-char-jyutping { font-size: 13px; height: 16px; }
+        }
+
+        .title-char-hanzi {
             font-size: 28px;
             font-weight: 700;
             color: #000;
+            line-height: 1.2;
         }
         @media (min-width: 1024px) {
-            .song-title-main { font-size: 36px; }
-        }
-
-        .song-title-jyutping {
-            font-size: 14px;
-            color: #999;
-            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            .title-char-hanzi { font-size: 36px; }
         }
 
         .song-meta-row {
             display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
             font-size: 14px;
             color: #666;
+        }
+
+        .song-meta-row-inner {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
         }
 
         .song-meta-item {
@@ -519,20 +546,23 @@
                 <div class="song-header">
                     <div class="song-title-row">
                         <h1 class="song-title-main" id="songTitle"></h1>
-                        <span class="song-title-jyutping" id="songTitleJp"></span>
                     </div>
                     <div class="song-meta-row">
-                        <div class="song-meta-item">
-                            <span class="song-meta-label">歌手</span>
-                            <span id="songArtist"></span>
+                        <div class="song-meta-row-inner">
+                            <div class="song-meta-item">
+                                <span class="song-meta-label">歌手</span>
+                                <span id="songArtist"></span>
+                            </div>
                         </div>
-                        <div class="song-meta-item">
-                            <span class="song-meta-label">作词</span>
-                            <span id="songLyricist"></span>
-                        </div>
-                        <div class="song-meta-item">
-                            <span class="song-meta-label">作曲</span>
-                            <span id="songComposer"></span>
+                        <div class="song-meta-row-inner">
+                            <div class="song-meta-item">
+                                <span class="song-meta-label">作词</span>
+                                <span id="songLyricist"></span>
+                            </div>
+                            <div class="song-meta-item">
+                                <span class="song-meta-label">作曲</span>
+                                <span id="songComposer"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -751,9 +781,20 @@
         document.getElementById('mobileTitle').textContent = currentSong.title;
         document.getElementById('appContainer').classList.add('view-lyrics');
 
-        // Update song info
-        document.getElementById('songTitle').textContent = currentSong.title;
-        document.getElementById('songTitleJp').textContent = currentSong.titleJyutping.join(' ');
+        // Update song info - 歌名也使用逐字粤拼显示
+        const titleContainer = document.getElementById('songTitle');
+        let titleHtml = '';
+        for (let i = 0; i < currentSong.title.length; i++) {
+            const char = currentSong.title[i];
+            const jp = currentSong.titleJyutping[i] || '';
+            titleHtml += `
+                <span class="title-char-group">
+                    <span class="title-char-jyutping">${jp}</span>
+                    <span class="title-char-hanzi">${char}</span>
+                </span>
+            `;
+        }
+        titleContainer.innerHTML = titleHtml;
         document.getElementById('songArtist').textContent = currentSong.artist;
         document.getElementById('songLyricist').textContent = currentSong.lyricist;
         document.getElementById('songComposer').textContent = currentSong.composer;
