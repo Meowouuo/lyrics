@@ -8,265 +8,315 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-            background: #f0f0f0;
+            background: #f5f5f5;
             color: #333;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ===== Container ===== */
+        /* ===== Mobile: Single Column Layout ===== */
         .app-container {
-            max-width: 960px;
+            max-width: 100%;
             margin: 0 auto;
             background: #fff;
             min-height: 100vh;
-            position: relative;
         }
-        @media (min-width: 768px) {
-            body { background: #e8e8e8; }
+
+        /* ===== Desktop: Split Layout ===== */
+        @media (min-width: 1024px) {
+            body { background: #f0f0f0; }
             .app-container {
-                margin: 24px auto;
-                border-radius: 16px;
-                min-height: calc(100vh - 48px);
-                box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-                overflow: hidden;
+                display: flex;
+                max-width: 1400px;
+                min-height: 100vh;
+                margin: 0 auto;
+                background: #fff;
             }
         }
 
-        /* ===== Header ===== */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* ===== Sidebar (Left) ===== */
+        .sidebar {
             background: #fff;
             border-bottom: 1px solid #eee;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        @media (min-width: 768px) {
-            .header { padding: 18px 32px; border-bottom: 1px solid #e8e8e8; }
+        @media (min-width: 1024px) {
+            .sidebar {
+                width: 360px;
+                min-width: 360px;
+                border-right: 1px solid #e8e8e8;
+                border-bottom: none;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                position: sticky;
+                top: 0;
+            }
         }
-        .header-title { font-size: 18px; font-weight: 600; color: #000; }
-        .back-btn {
-            position: absolute;
-            left: 24px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: #333;
-            cursor: pointer;
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            line-height: 1;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .back-btn:hover { background: #f5f5f5; }
 
-        /* ===== Song List ===== */
-        .song-list-page { padding: 20px 24px; padding-bottom: 80px; }
-        @media (min-width: 768px) {
-            .song-list-page { padding: 28px 40px; padding-bottom: 80px; }
+        .sidebar-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
         }
-        .page-title {
-            font-size: 26px;
+        @media (min-width: 1024px) {
+            .sidebar-header { padding: 24px 28px; }
+        }
+
+        .logo {
+            font-size: 22px;
             font-weight: 700;
             color: #000;
             margin-bottom: 4px;
-            padding-top: 4px;
         }
-        @media (min-width: 768px) {
-            .page-title { font-size: 32px; }
+        @media (min-width: 1024px) {
+            .logo { font-size: 24px; }
         }
-        .page-subtitle {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 20px;
+
+        .logo-sub {
+            font-size: 13px;
+            color: #999;
         }
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
+
+        .search-box {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
         }
-        .filter-tabs::-webkit-scrollbar { display: none; }
-        .filter-tab {
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            border: 1px solid #eee;
-            background: #fff;
-            color: #666;
+        @media (min-width: 1024px) {
+            .search-box { padding: 16px 28px; }
         }
-        .filter-tab:hover { background: #f5f5f5; }
-        .filter-tab.active {
-            background: #000;
-            color: #fff;
-            border-color: #000;
-        }
-        .search-bar { margin-bottom: 20px; position: relative; }
+
         .search-input {
             width: 100%;
-            padding: 12px 16px 12px 42px;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            font-size: 15px;
+            padding: 10px 14px 10px 38px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
             background: #fafafa;
             outline: none;
             transition: all 0.2s;
         }
         .search-input:focus {
-            border-color: #ddd;
+            border-color: #ccc;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
         }
+
         .search-icon {
             position: absolute;
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 15px;
-            color: #ccc;
+            color: #bbb;
         }
 
-        /* ===== Artist Section ===== */
-        .artist-section { margin-bottom: 24px; }
-        .artist-header {
+        .search-wrapper { position: relative; }
+
+        /* Artist Filter */
+        .artist-filter {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        @media (min-width: 1024px) {
+            .artist-filter {
+                padding: 16px 28px;
+                overflow-x: hidden;
+                white-space: normal;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+
+        .artist-filter::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            display: inline-block;
+            padding: 6px 14px;
+            margin-right: 8px;
+            border-radius: 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e8e8e8;
+            background: #fff;
+            color: #666;
+        }
+        @media (min-width: 1024px) {
+            .filter-btn { margin-right: 0; }
+        }
+
+        .filter-btn:hover { background: #f5f5f5; }
+        .filter-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* Song List */
+        .song-list {
+            padding: 8px 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .song-item {
             display: flex;
             align-items: center;
-            padding: 10px 4px;
-            margin-bottom: 8px;
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
         }
-        .artist-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 10px;
+        @media (min-width: 1024px) {
+            .song-item { padding: 14px 28px; }
+        }
+
+        .song-item:hover { background: #f8f8f8; }
+        .song-item.active {
+            background: #f5f5f5;
+            border-left-color: #000;
+        }
+
+        .song-number {
+            width: 28px;
+            font-size: 13px;
+            color: #bbb;
             flex-shrink: 0;
         }
-        .artist-name {
+
+        .song-info-compact {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .song-title-compact {
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 500;
             color: #000;
-        }
-        .artist-count {
-            font-size: 12px;
-            color: #999;
-            margin-left: 8px;
-        }
-        .song-card {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            background: #fafafa;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-        .song-card:hover { background: #f0f0f0; border-color: #e0e0e0; }
-        .song-card:active { transform: scale(0.99); }
-        .song-card-info { flex: 1; min-width: 0; }
-        .song-card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #000;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .song-card-artist { font-size: 13px; color: #999; }
-        .song-card-arrow { color: #ccc; font-size: 20px; flex-shrink: 0; margin-left: 12px; }
 
-        /* ===== Lyrics Page ===== */
-        .lyrics-page { display: none; padding-bottom: 80px; }
-        .lyrics-page.active { display: block; }
-        .song-list-page.hidden { display: none; }
-
-        /* Song Info */
-        .song-info {
-            padding: 32px 24px 24px;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        @media (min-width: 768px) {
-            .song-info { padding: 40px 48px 32px; }
-        }
-        .song-title-block { margin-bottom: 24px; }
-        .song-meta-block {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 16px 32px;
-            justify-content: center;
+        .song-artist-compact {
+            font-size: 12px;
+            color: #999;
         }
 
-        /* Character-Jyutping Pair */
-        .char-line {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 4px 10px;
-            margin-bottom: 16px;
+        /* ===== Main Content (Right) ===== */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            background: #fff;
         }
-        .char-pair {
+        @media (min-width: 1024px) {
+            .main-content {
+                overflow-y: auto;
+                height: 100vh;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        .char-jyutping {
-            font-size: 11px;
-            color: #999;
-            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
-            margin-bottom: 2px;
-            height: 14px;
-        }
-        .char-jyutping:empty::before { content: "\00a0"; }
-        .char-chinese {
-            font-size: 32px;
-            font-weight: 600;
-            color: #000;
-        }
-        @media (min-width: 768px) {
-            .char-chinese { font-size: 40px; }
-            .char-jyutping { font-size: 12px; height: 16px; }
-            .char-line { gap: 6px 14px; }
-        }
-        .meta-pair .char-jyutping {
-            font-size: 9px;
-            color: #bbb;
-            height: 12px;
-        }
-        .meta-pair .char-chinese {
-            font-size: 14px;
-            color: #666;
-            font-weight: 400;
+            justify-content: center;
+            min-height: 60vh;
+            padding: 40px;
+            text-align: center;
         }
 
-        /* Lyrics Body */
-        .lyrics-body { padding: 24px 24px; }
-        @media (min-width: 768px) {
-            .lyrics-body { padding: 32px 48px; }
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
         }
-        .lyric-line {
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Lyrics View */
+        .lyrics-view {
+            padding: 24px;
+        }
+        @media (min-width: 1024px) {
+            .lyrics-view {
+                padding: 40px 48px;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Song Header */
+        .song-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .song-title-row {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 18px;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .song-title-main {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000;
+        }
+        @media (min-width: 1024px) {
+            .song-title-main { font-size: 36px; }
+        }
+
+        .song-title-jyutping {
+            font-size: 14px;
+            color: #999;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+        }
+
+        .song-meta-row {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .song-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .song-meta-label {
+            color: #999;
+        }
+
+        /* Lyrics Content */
+        .lyrics-content {
+            line-height: 2.2;
+        }
+
+        .lyric-line {
+            margin-bottom: 20px;
             animation: fadeIn 0.3s ease forwards;
             opacity: 0;
         }
+
         .lyric-line:nth-child(1) { animation-delay: 0.02s; }
         .lyric-line:nth-child(2) { animation-delay: 0.04s; }
         .lyric-line:nth-child(3) { animation-delay: 0.06s; }
@@ -275,193 +325,256 @@
         .lyric-line:nth-child(6) { animation-delay: 0.12s; }
         .lyric-line:nth-child(7) { animation-delay: 0.14s; }
         .lyric-line:nth-child(8) { animation-delay: 0.16s; }
-        .lyric-line:nth-child(9) { animation-delay: 0.18s; }
-        .lyric-line:nth-child(10) { animation-delay: 0.20s; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .lyric-speaker {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            margin-top: 2px;
-            color: #ddd;
-            font-size: 16px;
-        }
-        .lyric-content {
-            flex: 1;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px 6px;
-        }
-        @media (min-width: 768px) {
-            .lyric-content { gap: 6px 10px; }
-        }
-        .lyric-pair {
-            display: flex;
+
+        .char-group {
+            display: inline-flex;
             flex-direction: column;
             align-items: center;
+            margin-right: 4px;
+            vertical-align: bottom;
         }
-        .lyric-pair .jp {
+        @media (min-width: 1024px) {
+            .char-group { margin-right: 6px; }
+        }
+
+        .char-jyutping {
             font-size: 10px;
             color: #aaa;
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             margin-bottom: 1px;
-            height: 13px;
+            height: 12px;
         }
-        .lyric-pair .jp:empty::before { content: "\00a0"; }
-        .lyric-pair .ch {
+        @media (min-width: 1024px) {
+            .char-jyutping { font-size: 11px; height: 14px; }
+        }
+
+        .char-jyutping:empty::before { content: "\00a0"; }
+
+        .char-hanzi {
             font-size: 20px;
             font-weight: 500;
             color: #000;
         }
-        @media (min-width: 768px) {
-            .lyric-pair .jp { font-size: 12px; height: 15px; }
-            .lyric-pair .ch { font-size: 26px; }
+        @media (min-width: 1024px) {
+            .char-hanzi { font-size: 24px; }
         }
 
-        /* ===== Bottom Bar ===== */
-        .bottom-bar {
+        /* Toolbar */
+        .toolbar {
             position: fixed;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 960px;
+            left: 0;
+            right: 0;
             background: #fff;
             border-top: 1px solid #eee;
-            padding: 10px 24px;
+            padding: 12px 24px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            z-index: 100;
+            align-items: center;
         }
-        @media (min-width: 768px) {
-            .bottom-bar {
-                border-radius: 0 0 16px 16px;
-                padding: 12px 40px;
+        @media (min-width: 1024px) {
+            .toolbar {
+                position: sticky;
+                bottom: 0;
+                padding: 12px 48px;
+                max-width: 800px;
+                margin: 0 auto;
             }
         }
-        .bottom-actions { display: flex; gap: 24px; }
-        .bottom-action-btn {
+
+        .toolbar-left {
+            display: flex;
+            gap: 16px;
+        }
+
+        .toolbar-btn {
             background: none;
             border: none;
-            color: #999;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            transition: color 0.2s;
-        }
-        .bottom-action-btn:hover { color: #666; }
-        .bottom-action-btn .icon { font-size: 20px; }
-        .share-btn {
-            background: #07C160;
-            color: #fff;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
+            color: #666;
             font-size: 13px;
-            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: background 0.2s;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
-        .share-btn:hover { background: #06ad56; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
-        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-state .text { font-size: 14px; }
-        .toast {
-            position: fixed;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.75);
+
+        .toolbar-btn:hover {
+            background: #f5f5f5;
+            color: #000;
+        }
+
+        .toolbar-btn .icon {
+            font-size: 18px;
+        }
+
+        .toolbar-btn.primary {
+            background: #000;
             color: #fff;
-            padding: 10px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-            pointer-events: none;
         }
-        ::-webkit-scrollbar { width: 6px; }
+
+        .toolbar-btn.primary:hover {
+            background: #333;
+        }
+
+        /* Mobile Header (only on mobile) */
+        .mobile-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+        @media (min-width: 1024px) {
+            .mobile-header { display: none; }
+        }
+
+        .mobile-header-title {
+            font-size: 17px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .mobile-back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Mobile View Toggle */
+        .mobile-only { display: block; }
+        .desktop-only { display: none; }
+
+        @media (min-width: 1024px) {
+            .mobile-only { display: none; }
+            .desktop-only { display: block; }
+        }
+
+        /* View States */
+        .view-lyrics .sidebar {
+            display: none;
+        }
+        @media (min-width: 1024px) {
+            .view-lyrics .sidebar { display: flex; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #ccc; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header" id="header">
-            <button class="back-btn" id="backBtn" style="display:none;" onclick="goBack()">←</button>
-            <span class="header-title" id="headerTitle">粤拼歌词</span>
-        </div>
-        <div class="song-list-page" id="songListPage">
-            <div class="page-title">🎵 粤拼歌词</div>
-            <div class="page-subtitle">粤语歌词 · 粤拼对照 · 学唱粤语歌</div>
-            <div class="filter-tabs" id="filterTabs">
-                <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">全部</div>
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar: Song List -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🎵 粤拼歌词</div>
+                <div class="logo-sub">粤语歌词 · 粤拼对照</div>
             </div>
-            <div class="search-bar">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲名..." oninput="filterSongs()">
+
+            <div class="search-box">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲..." oninput="filterSongs()">
+                </div>
             </div>
-            <div id="songList"></div>
-        </div>
-        <div class="lyrics-page" id="lyricsPage">
-            <div class="song-info" id="songInfo"></div>
-            <div class="lyrics-body" id="lyricsBody"></div>
-        </div>
-        <div class="bottom-bar">
-            <div class="bottom-actions">
-                <button class="bottom-action-btn" onclick="toggleFavorite()">
-                    <span class="icon" id="favIcon">☆</span>
-                    <span>收藏</span>
-                </button>
-                <button class="bottom-action-btn" onclick="toggleFontSize()">
-                    <span class="icon">Aa</span>
-                    <span>字号</span>
-                </button>
+
+            <div class="artist-filter" id="artistFilter">
+                <span class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</span>
             </div>
-            <button class="share-btn" onclick="shareSong()">
-                <span>💬</span>
-                <span>分享给好友</span>
-            </button>
-        </div>
+
+            <div class="song-list" id="songList"></div>
+        </aside>
+
+        <!-- Main Content: Lyrics -->
+        <main class="main-content">
+            <!-- Mobile Header -->
+            <div class="mobile-header" id="mobileHeader" style="display:none;">
+                <button class="mobile-back-btn" onclick="showSongList()">←</button>
+                <span class="mobile-header-title" id="mobileTitle">粤拼歌词</span>
+                <span style="width:28px;"></span>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">🎵</div>
+                <div class="empty-title">选择一首歌</div>
+                <div class="empty-desc">从左侧列表选择歌曲查看歌词</div>
+            </div>
+
+            <!-- Lyrics View -->
+            <div class="lyrics-view" id="lyricsView" style="display:none;">
+                <div class="song-header">
+                    <div class="song-title-row">
+                        <h1 class="song-title-main" id="songTitle"></h1>
+                        <span class="song-title-jyutping" id="songTitleJp"></span>
+                    </div>
+                    <div class="song-meta-row">
+                        <div class="song-meta-item">
+                            <span class="song-meta-label">歌手</span>
+                            <span id="songArtist"></span>
+                        </div>
+                        <div class="song-meta-item">
+                            <span class="song-meta-label">作词</span>
+                            <span id="songLyricist"></span>
+                        </div>
+                        <div class="song-meta-item">
+                            <span class="song-meta-label">作曲</span>
+                            <span id="songComposer"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lyrics-content" id="lyricsContent"></div>
+
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <button class="toolbar-btn" onclick="toggleFavorite()">
+                            <span class="icon" id="favIcon">☆</span>
+                            <span>收藏</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="adjustFontSize(-1)">
+                            <span class="icon">A-</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="adjustFontSize(1)">
+                            <span class="icon">A+</span>
+                        </button>
+                    </div>
+                    <button class="toolbar-btn primary" onclick="shareSong()">
+                        <span>分享</span>
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
+
     <script>
-    // 数据格式：每个字对应一个粤拼音节
+    // Song Data
     const songs = [
         {
             id: 1,
             title: "重复犯错",
             titleJyutping: ["cung4","fuk1","faan6","co3"],
             artist: "古巨基",
-            artistJyutping: ["gu2","geoi6","gei1"],
             lyricist: "林夕",
-            lyricistJyutping: ["lam4","sik1"],
             composer: "陈辉阳",
-            composerJyutping: ["can4","fai1","joeng4"],
-            color: "#f5576c",
             lyrics: [
-                { chars: ["不","知","你"], jp: ["bat1","zi1","nei5"] },
-                { chars: ["难","过","寂","寞"], jp: ["naan4","gwo3","zik6","mok6"] },
-                { chars: ["听","到","你","说"], jp: ["ting1","dou3","nei5","syut3"] },
-                { chars: ["毫","不","快","乐"], jp: ["hou4","bat1","faai3","lok6"] },
-                { chars: ["令","我","想"], jp: ["ling6","ngo5","soeng2"] },
-                { chars: ["我","这","一","生"], jp: ["ngo5","ze2","jat1","saang1"] },
-                { chars: ["往","后","娱","乐"], jp: ["wong5","hau6","jyu4","lok6"] },
-                { chars: ["亦","难","快","乐"], jp: ["jik6","naan4","faai3","lok6"] },
+                { chars: ["不","知","你"," ","难","过","寂","寞"], jp: ["bat1","zi1","nei5","","naan4","gwo3","zik6","mok6"] },
+                { chars: ["听","到","你","说"," ","毫","不","快","乐"], jp: ["ting1","dou3","nei5","syut3","","hou4","bat1","faai3","lok6"] },
+                { chars: ["令","我","想"," ","我","这","一","生"], jp: ["ling6","ngo5","soeng2","","ngo5","ze2","jat1","saang1"] },
+                { chars: ["往","后","娱","乐"," ","亦","难","快","乐"], jp: ["wong5","hau6","jyu4","lok6","","jik6","naan4","faai3","lok6"] },
                 { chars: ["如","若","我","还","尊","重","爱","情"], jp: ["jyu4","joek6","ngo5","waan4","zyun1","zung6","oi3","cing4"] },
                 { chars: ["无","谓","问","那","次","飞","关","岛","畅","泳"], jp: ["mou4","wai6","man6","naa5","ci3","fei1","gwaan1","dou2","coeng3","wing6"] },
                 { chars: ["其","实","你"], jp: ["kei4","sat6","nei5"] },
@@ -484,35 +597,7 @@
                 { chars: ["难","道","你","我","以","相","恋","失","恋","去","切","磋"], jp: ["naan4","dou6","nei5","ngo5","ji5","soeng1","lyun2","sat1","lyun2","heoi3","cit3","co1"] },
                 { chars: ["会","令","情","侣","受","苦","已","是","爱"], jp: ["wui5","ling6","cing4","leoi5","sau6","fu2","ji5","si6","oi3"] },
                 { chars: ["但","我","答","应","我"], jp: ["daan6","ngo5","daap3","jing1","ngo5"] },
-                { chars: ["永","不","要","重","复","犯","错"], jp: ["wing5","bat1","jiu3","cung4","fuk1","faan6","co3"] },
-                { chars: ["最","惨","恋","爱","会","有","过","程"], jp: ["zeoi3","caam2","lyun2","oi3","wui5","jau5","gwo3","cing4"] },
-                { chars: ["到","沙","滩","多","一","次","看","星","星"], jp: ["dou3","saa1","taan4","do1","jat1","ci3","hon3","sing1","sing1"] },
-                { chars: ["亦","难","以","偿","命"], jp: ["jik6","naan4","ji5","soeng4","ming6"] },
-                { chars: ["当","初","与","你","有","过","爱","情"], jp: ["dong1","co1","jyu5","nei5","jau5","gwo3","oi3","cing4"] },
-                { chars: ["同","样","一","吻","有","任","何","反","应"], jp: ["tung4","joeng6","jat1","man5","jau5","jam6","ho4","faan2","jing3"] },
-                { chars: ["已","结","成","冰"], jp: ["ji5","git3","sing4","bing1"] },
-                { chars: ["如","若","我","还","尊","重","爱","情"], jp: ["jyu4","joek6","ngo5","waan4","zyun1","zung6","oi3","cing4"] },
-                { chars: ["我","会","放","弃","了","呼","吸","般","镇","定"], jp: ["ngo5","wui5","fong3","hei3","liu5","fu1","kap1","bun1","zan3","ding6"] },
-                { chars: ["唯","望","你"], jp: ["wai4","mong6","nei5"] },
-                { chars: ["吻","别","时","做","回","些","反","应"], jp: ["man5","bit6","si4","zou6","wui4","se1","faan2","jing3"] },
-                { chars: ["没","有","感","情","不","怨","命"], jp: ["mut6","jau5","gam2","cing4","bat1","jyun3","ming6"] },
-                { chars: ["突","然","之","间"], jp: ["dat6","jin4","zi1","gaan1"] },
-                { chars: ["很","喜","欢","你","恨","我"], jp: ["han2","hei2","fun1","nei5","han6","ngo5"] },
-                { chars: ["我","从","未","爱","到"], jp: ["ngo5","cung4","mei6","oi3","dou3"] },
-                { chars: ["要","生","生","死","死","那","么","多"], jp: ["jiu3","saang1","saang1","sei2","sei2","naa5","me1","do1"] },
-                { chars: ["结","束","感","情","最","悲","壮","结","果"], jp: ["git3","cuk1","gam2","cing4","zeoi3","bei1","zong3","git3","gwo2"] },
-                { chars: ["原","来","似"], jp: ["jyun4","loi4","ci5"] },
-                { chars: ["以","掌","心","扑","火"], jp: ["ji5","zoeng2","sam1","puk1","fo2"] },
-                { chars: ["未","算","得","到"], jp: ["mei6","syun3","dak1","dou3"] },
-                { chars: ["偏","得","到","你","是","哪","位","错"], jp: ["pin1","dak1","dou3","nei5","si6","naa5","wai2","co3"] },
-                { chars: ["难","道","你","我","以","相","恋","失","恋","去","切","磋"], jp: ["naan4","dou6","nei5","ngo5","ji5","soeng1","lyun2","sat1","lyun2","heoi3","cit3","co1"] },
-                { chars: ["会","令","情","侣","受","苦","已","是","爱"], jp: ["wui5","ling6","cing4","leoi5","sau6","fu2","ji5","si6","oi3"] },
-                { chars: ["但","我","答","应","我"], jp: ["daan6","ngo5","daap3","jing1","ngo5"] },
-                { chars: ["永","不","要","重","复","犯","错"], jp: ["wing5","bat1","jiu3","cung4","fuk1","faan6","co3"] },
-                { chars: ["回","味","过","去","每","一","吻"], jp: ["wui4","mei6","gwo3","heoi3","mui5","jat1","man5"] },
-                { chars: ["真","切","得"], jp: ["zan1","cit3","dak1"] },
-                { chars: ["于","嘴","边","掠","过"], jp: ["jyu1","zeoi2","bin1","loek6","gwo3"] },
-                { chars: ["你","的","内","心","竟","在","避","我"], jp: ["nei5","dik1","noi6","sam1","ging2","zoi6","bei6","ngo5"] }
+                { chars: ["永","不","要","重","复","犯","错"], jp: ["wing5","bat1","jiu3","cung4","fuk1","faan6","co3"] }
             ]
         },
         {
@@ -520,23 +605,13 @@
             title: "喜欢你",
             titleJyutping: ["hei2","fun1","nei5"],
             artist: "Beyond",
-            artistJyutping: ["Beyond"],
             lyricist: "黄家驹",
-            lyricistJyutping: ["wong4","gaa1","keoi1"],
             composer: "黄家驹",
-            composerJyutping: ["wong4","gaa1","keoi1"],
-            color: "#4facfe",
             lyrics: [
-                { chars: ["细","雨","带","风"], jp: ["sai3","jyu5","daai3","fung1"] },
-                { chars: ["湿","透","黄","昏"], jp: ["sap1","tau3","wong4","fan1"] },
-                { chars: ["的","街","道"], jp: ["dik1","gaai1","dou6"] },
-                { chars: ["抹","去","雨","水"], jp: ["maat3","heoi3","jyu5","seoi2"] },
-                { chars: ["双","眼","无","故"], jp: ["soeng1","ngaan5","mou4","gu3"] },
-                { chars: ["地","仰","望"], jp: ["dei6","joeng5","mong6"] },
-                { chars: ["望","向","孤","单"], jp: ["mong6","hoeng3","gu1","daan1"] },
-                { chars: ["的","晚","灯"], jp: ["dik1","maan5","dang1"] },
-                { chars: ["是","那","伤","感"], jp: ["si6","naa5","soeng1","gam2"] },
-                { chars: ["的","记","忆"], jp: ["dik1","gei3","jik1"] },
+                { chars: ["细","雨","带","风","湿","透","黄","昏","的","街","道"], jp: ["sai3","jyu5","daai3","fung1","sap1","tau3","wong4","fan1","dik1","gaai1","dou6"] },
+                { chars: ["抹","去","雨","水","双","眼","无","故","地","仰","望"], jp: ["maat3","heoi3","jyu5","seoi2","soeng1","ngaan5","mou4","gu3","dei6","joeng5","mong6"] },
+                { chars: ["望","向","孤","单","的","晚","灯"], jp: ["mong6","hoeng3","gu1","daan1","dik1","maan5","dang1"] },
+                { chars: ["是","那","伤","感","的","记","忆"], jp: ["si6","naa5","soeng1","gam2","dik1","gei3","jik1"] },
                 { chars: ["喜","欢","你"], jp: ["hei2","fun1","nei5"] },
                 { chars: ["那","双","眼","动","人"], jp: ["naa5","soeng1","ngaan5","dung6","jan4"] },
                 { chars: ["笑","声","更","迷","人"], jp: ["siu3","sing1","gang3","mai4","jan4"] },
@@ -551,29 +626,14 @@
             title: "海阔天空",
             titleJyutping: ["hoi2","fut3","tin1","hung1"],
             artist: "Beyond",
-            artistJyutping: ["Beyond"],
             lyricist: "黄家驹",
-            lyricistJyutping: ["wong4","gaa1","keoi1"],
             composer: "黄家驹",
-            composerJyutping: ["wong4","gaa1","keoi1"],
-            color: "#43e97b",
             lyrics: [
-                { chars: ["今","天","我"], jp: ["gam1","tin1","ngo5"] },
-                { chars: ["寒","夜","里"], jp: ["hon4","je6","leoi5"] },
-                { chars: ["看","雪","飘","过"], jp: ["hon3","syut3","piu1","gwo3"] },
-                { chars: ["怀","着","冷"], jp: ["waai4","zoek6","laang5"] },
-                { chars: ["却","了","的"], jp: ["koek3","liu5","dik1"] },
-                { chars: ["心","窝"], jp: ["sam1","wo1"] },
-                { chars: ["漂","远","方"], jp: ["piu1","jyun5","fong1"] },
-                { chars: ["风","雨","里"], jp: ["fung1","jyu5","leoi5"] },
-                { chars: ["追","赶"], jp: ["zeoi1","gon2"] },
-                { chars: ["雾","里"], jp: ["mou6","leoi5"] },
-                { chars: ["分","不","清"], jp: ["fan1","bat1","cing1"] },
-                { chars: ["影","踪"], jp: ["jing2","zung1"] },
-                { chars: ["原","谅","我"], jp: ["jyun4","loeng6","ngo5"] },
-                { chars: ["这","一","生"], jp: ["ze5","jat1","saang1"] },
-                { chars: ["不","羁","放","纵"], jp: ["bat1","gei1","fong3","zung3"] },
-                { chars: ["爱","自","由"], jp: ["oi3","zi6","jau4"] }
+                { chars: ["今","天","我","寒","夜","里","看","雪","飘","过"], jp: ["gam1","tin1","ngo5","hon4","je6","leoi5","hon3","syut3","piu1","gwo3"] },
+                { chars: ["怀","着","冷","却","了","的","心","窝","漂","远","方"], jp: ["waai4","zoek6","laang5","koek3","liu5","dik1","sam1","wo1","piu1","jyun5","fong1"] },
+                { chars: ["风","雨","里","追","赶"], jp: ["fung1","jyu5","leoi5","zeoi1","gon2"] },
+                { chars: ["雾","里","分","不","清","影","踪"], jp: ["mou6","leoi5","fan1","bat1","cing1","jing2","zung1"] },
+                { chars: ["原","谅","我","这","一","生","不","羁","放","纵","爱","自","由"], jp: ["jyun4","loeng6","ngo5","ze5","jat1","saang1","bat1","gei1","fong3","zung3","oi3","zi6","jau4"] }
             ]
         },
         {
@@ -581,25 +641,14 @@
             title: "富士山下",
             titleJyutping: ["fu2","si6","saan1","haa6"],
             artist: "陈奕迅",
-            artistJyutping: ["can4","jik6","seon3"],
             lyricist: "林夕",
-            lyricistJyutping: ["lam4","sik1"],
             composer: "Christopher Chak",
-            composerJyutping: ["—"],
-            color: "#fa709a",
             lyrics: [
-                { chars: ["拦","路","雨"], jp: ["laan4","lou6","jyu5"] },
-                { chars: ["偏","似","雪","花"], jp: ["pin1","ci5","syut3","faa1"] },
-                { chars: ["饮","泣","的","你"], jp: ["jam2","kap1","dik1","nei5"] },
-                { chars: ["冻","吗"], jp: ["dung3","maa3"] },
-                { chars: ["这","风","褛"], jp: ["ze5","fung1","lau6"] },
-                { chars: ["我","给","你"], jp: ["ngo5","kap1","nei5"] },
-                { chars: ["磨","到"], jp: ["mo4","dou3"] },
-                { chars: ["有","襟","花"], jp: ["jau5","kam1","faa1"] },
-                { chars: ["原","谅","我"], jp: ["jyun4","loeng6","ngo5"] },
-                { chars: ["不","再","送","花"], jp: ["bat1","zoi3","sung3","faa1"] },
-                { chars: ["伤","口"], jp: ["soeng1","hau2"] },
-                { chars: ["应","要","结","疤"], jp: ["jing1","jiu3","git3","baa1"] }
+                { chars: ["拦","路","雨","偏","似","雪","花"], jp: ["laan4","lou6","jyu5","pin1","ci5","syut3","faa1"] },
+                { chars: ["饮","泣","的","你","冻","吗"], jp: ["jam2","kap1","dik1","nei5","dung3","maa3"] },
+                { chars: ["这","风","褛","我","给","你","磨","到","有","襟","花"], jp: ["ze5","fung1","lau6","ngo5","kap1","nei5","mo4","dou3","jau5","kam1","faa1"] },
+                { chars: ["原","谅","我","不","再","送","花"], jp: ["jyun4","loeng6","ngo5","bat1","zoi3","sung3","faa1"] },
+                { chars: ["伤","口","应","要","结","疤"], jp: ["soeng1","hau2","jing1","jiu3","git3","baa1"] }
             ]
         },
         {
@@ -607,21 +656,12 @@
             title: "十年",
             titleJyutping: ["sap6","nin4"],
             artist: "陈奕迅",
-            artistJyutping: ["can4","jik6","seon3"],
             lyricist: "林夕",
-            lyricistJyutping: ["lam4","sik1"],
             composer: "陈小霞",
-            composerJyutping: ["can4","siu2","haa4"],
-            color: "#a18cd1",
             lyrics: [
-                { chars: ["如","果","那"], jp: ["jyu4","gwo2","naa5"] },
-                { chars: ["两","个","字"], jp: ["loeng5","go3","zi6"] },
-                { chars: ["没","有","颤","抖"], jp: ["mut6","jau5","zin3","tau3"] },
-                { chars: ["我","不","会"], jp: ["ngo5","bat1","wui5"] },
-                { chars: ["发","觉","我"], jp: ["faat3","gok3","ngo5"] },
-                { chars: ["难","受"], jp: ["naan4","sau6"] },
-                { chars: ["十","年","之","前"], jp: ["sap6","nin4","zi1","cin4"] },
-                { chars: ["我","不","认","识","你"], jp: ["ngo5","bat1","jing6","sik1","nei5"] },
+                { chars: ["如","果","那","两","个","字","没","有","颤","抖"], jp: ["jyu4","gwo2","naa5","loeng5","go3","zi6","mut6","jau5","zin3","tau3"] },
+                { chars: ["我","不","会","发","觉","我","难","受"], jp: ["ngo5","bat1","wui5","faat3","gok3","ngo5","naan4","sau6"] },
+                { chars: ["十","年","之","前","我","不","认","识","你"], jp: ["sap6","nin4","zi1","cin4","ngo5","bat1","jing6","sik1","nei5"] },
                 { chars: ["你","不","属","于","我"], jp: ["nei5","bat1","suk6","jyu1","ngo5"] }
             ]
         },
@@ -630,167 +670,133 @@
             title: "千千阙歌",
             titleJyutping: ["cin1","cin1","kyut3","go1"],
             artist: "陈慧娴",
-            artistJyutping: ["can4","wai6","jin4"],
             lyricist: "林振强",
-            lyricistJyutping: ["lam4","zan3","koeng4"],
             composer: "Makaino Koji",
-            composerJyutping: ["—"],
-            color: "#fccb90",
             lyrics: [
-                { chars: ["徐","徐","回","望"], jp: ["ceoi4","ceoi4","wui4","mong6"] },
-                { chars: ["曾","属","于"], jp: ["cang4","suk6","jyu1"] },
-                { chars: ["彼","此","的"], jp: ["bei2","ci2","dik1"] },
-                { chars: ["晚","上"], jp: ["maan5","soeng6"] },
-                { chars: ["来","日","纵","是"], jp: ["loi4","jat6","zung3","si6"] },
-                { chars: ["千","千","阙","歌"], jp: ["cin1","cin1","kyut3","go1"] },
-                { chars: ["飘","于","远","方"], jp: ["piu1","jyu1","jyun5","fong1"] },
-                { chars: ["我","路","上"], jp: ["ngo5","lou6","soeng6"] }
+                { chars: ["徐","徐","回","望","曾","属","于","彼","此","的","晚","上"], jp: ["ceoi4","ceoi4","wui4","mong6","cang4","suk6","jyu1","bei2","ci2","dik1","maan5","soeng6"] },
+                { chars: ["来","日","纵","是","千","千","阙","歌"], jp: ["loi4","jat6","zung3","si6","cin1","cin1","kyut3","go1"] },
+                { chars: ["飘","于","远","方","我","路","上"], jp: ["piu1","jyu1","jyun5","fong1","ngo5","lou6","soeng6"] }
             ]
         }
     ];
 
     const artists = [...new Set(songs.map(s => s.artist))];
-    const artistColors = ['#f5576c', '#4facfe', '#43e97b', '#fa709a', '#a18cd1', '#fccb90'];
-
     let currentSong = null;
     let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
-    let fontLevel = 0;
-    const fontSizes = [
-        { jyutping: 10, chinese: 20 },
-        { jyutping: 11, chinese: 23 },
-        { jyutping: 12, chinese: 26 }
-    ];
+    let fontSize = 20;
 
-    function initFilterTabs() {
-        const tabsContainer = document.getElementById('filterTabs');
-        let tabsHTML = '<div class="filter-tab active" data-filter="all" onclick="setFilter(\'all\')">全部</div>';
-        artists.forEach((artist) => {
-            tabsHTML += `<div class="filter-tab" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</div>`;
+    // Initialize
+    function init() {
+        renderArtistFilter();
+        renderSongList();
+    }
+
+    function renderArtistFilter() {
+        const container = document.getElementById('artistFilter');
+        let html = '<span class="filter-btn active" data-filter="all" onclick="setFilter(\'all\')">全部</span>';
+        artists.forEach(artist => {
+            html += `<span class="filter-btn" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</span>`;
         });
-        tabsContainer.innerHTML = tabsHTML;
+        container.innerHTML = html;
     }
 
     function setFilter(artist) {
         currentFilter = artist;
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.filter === artist);
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === artist);
         });
         renderSongList();
     }
 
-    function renderSongList(filter = '') {
-        const list = document.getElementById('songList');
+    function renderSongList() {
+        const container = document.getElementById('songList');
         let filtered = songs;
         if (currentFilter !== 'all') {
             filtered = filtered.filter(s => s.artist === currentFilter);
         }
-        if (filter) {
-            filtered = filtered.filter(s => s.title.includes(filter));
+        const searchQuery = document.getElementById('searchInput').value.trim();
+        if (searchQuery) {
+            filtered = filtered.filter(s => s.title.includes(searchQuery));
         }
-        if (filtered.length === 0) {
-            list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><div class="text">没有找到匹配的歌曲</div></div>';
-            return;
-        }
-        const grouped = {};
-        filtered.forEach(song => {
-            if (!grouped[song.artist]) grouped[song.artist] = [];
-            grouped[song.artist].push(song);
-        });
+
         let html = '';
-        Object.entries(grouped).forEach(([artist, artistSongs]) => {
-            const artistIndex = artists.indexOf(artist);
-            const color = artistColors[artistIndex % artistColors.length];
-            html += `<div class="artist-section"><div class="artist-header"><div class="artist-dot" style="background: ${color}"></div><div class="artist-name">${artist}</div><div class="artist-count">${artistSongs.length}首</div></div>`;
-            html += artistSongs.map(song => `
-                <div class="song-card" onclick="openSong(${song.id})">
-                    <div class="song-card-info">
-                        <div class="song-card-title">${song.title}</div>
-                        <div class="song-card-artist">${song.lyricist} 作词 · ${song.composer} 作曲</div>
+        filtered.forEach((song, index) => {
+            const isActive = currentSong && currentSong.id === song.id;
+            html += `
+                <div class="song-item ${isActive ? 'active' : ''}" onclick="selectSong(${song.id})">
+                    <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
+                    <div class="song-info-compact">
+                        <div class="song-title-compact">${song.title}</div>
+                        <div class="song-artist-compact">${song.artist}</div>
                     </div>
-                    <div class="song-card-arrow">›</div>
                 </div>
-            `).join('');
-            html += '</div>';
+            `;
         });
-        list.innerHTML = html;
+        container.innerHTML = html;
     }
 
     function filterSongs() {
-        renderSongList(document.getElementById('searchInput').value.trim());
+        renderSongList();
     }
 
-    // Render character-jyutping pairs
-    function renderCharLine(chars, jps, isMeta = false) {
-        const size = fontSizes[fontLevel];
-        const pairClass = isMeta ? 'meta-pair' : '';
-        let html = '<div class="char-line">';
-        for (let i = 0; i < chars.length; i++) {
-            const jp = jps[i] || '';
-            html += `
-                <div class="char-pair ${pairClass}">
-                    <div class="char-jyutping" style="font-size:${isMeta ? 9 : size.jyutping}px">${jp}</div>
-                    <div class="char-chinese" style="font-size:${isMeta ? 14 : size.chinese}px">${chars[i]}</div>
-                </div>
-            `;
-        }
-        html += '</div>';
-        return html;
-    }
-
-    function openSong(id) {
+    function selectSong(id) {
         currentSong = songs.find(s => s.id === id);
         if (!currentSong) return;
-        document.getElementById('songListPage').classList.add('hidden');
-        document.getElementById('lyricsPage').classList.add('active');
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').textContent = currentSong.title;
-        updateFavIcon();
 
-        // Render song info with char-by-char jyutping
-        document.getElementById('songInfo').innerHTML = `
-            <div class="song-title-block">
-                ${renderCharLine(currentSong.title.split(''), currentSong.titleJyutping)}
-            </div>
-            <div class="song-meta-block">
-                ${renderCharLine(['歌','手','：'].concat(currentSong.artist.split('')), ['go1','sau2','：'].concat(currentSong.artistJyutping), true)}
-                ${renderCharLine(['填','词','：'].concat(currentSong.lyricist.split('')), ['tin4','ci4','：'].concat(currentSong.lyricistJyutping), true)}
-                ${renderCharLine(['作','曲','：'].concat(currentSong.composer.split('')), ['zok3','kuk1','：'].concat(currentSong.composerJyutping), true)}
-            </div>
-        `;
+        // Update UI
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('lyricsView').style.display = 'block';
+        document.getElementById('mobileHeader').style.display = 'flex';
+        document.getElementById('mobileTitle').textContent = currentSong.title;
+        document.getElementById('appContainer').classList.add('view-lyrics');
+
+        // Update song info
+        document.getElementById('songTitle').textContent = currentSong.title;
+        document.getElementById('songTitleJp').textContent = currentSong.titleJyutping.join(' ');
+        document.getElementById('songArtist').textContent = currentSong.artist;
+        document.getElementById('songLyricist').textContent = currentSong.lyricist;
+        document.getElementById('songComposer').textContent = currentSong.composer;
+
+        // Render lyrics
         renderLyrics();
-        window.scrollTo(0, 0);
+        updateFavIcon();
+        renderSongList(); // Update active state
     }
 
     function renderLyrics() {
         if (!currentSong) return;
-        const size = fontSizes[fontLevel];
+        const container = document.getElementById('lyricsContent');
         let html = '';
         currentSong.lyrics.forEach((line, idx) => {
             html += '<div class="lyric-line">';
-            html += '<div class="lyric-speaker">🔊</div>';
-            html += '<div class="lyric-content">';
             for (let i = 0; i < line.chars.length; i++) {
+                const char = line.chars[i];
                 const jp = line.jp[i] || '';
-                html += `
-                    <div class="lyric-pair">
-                        <div class="jp" style="font-size:${size.jyutping}px">${jp}</div>
-                        <div class="ch" style="font-size:${size.chinese}px">${line.chars[i]}</div>
-                    </div>
-                `;
+                if (char === ' ') {
+                    html += '<span style="display:inline-block;width:12px;"></span>';
+                } else {
+                    html += `
+                        <span class="char-group">
+                            <span class="char-jyutping" style="font-size:${fontSize * 0.5}px">${jp}</span>
+                            <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
+                        </span>
+                    `;
+                }
             }
-            html += '</div></div>';
+            html += '</div>';
         });
-        document.getElementById('lyricsBody').innerHTML = html;
+        container.innerHTML = html;
     }
 
-    function goBack() {
-        document.getElementById('lyricsPage').classList.remove('active');
-        document.getElementById('songListPage').classList.remove('hidden');
-        document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('headerTitle').textContent = '粤拼歌词';
-        currentSong = null;
-        window.scrollTo(0, 0);
+    function showSongList() {
+        document.getElementById('appContainer').classList.remove('view-lyrics');
+        document.getElementById('mobileHeader').style.display = 'none';
+    }
+
+    function adjustFontSize(delta) {
+        fontSize = Math.max(16, Math.min(32, fontSize + delta * 2));
+        renderLyrics();
     }
 
     function toggleFavorite() {
@@ -800,7 +806,6 @@
         else favorites.push(currentSong.id);
         localStorage.setItem('jyutping_favs', JSON.stringify(favorites));
         updateFavIcon();
-        showToast(favorites.includes(currentSong.id) ? '已收藏 ⭐' : '已取消收藏');
     }
 
     function updateFavIcon() {
@@ -808,40 +813,18 @@
         const icon = document.getElementById('favIcon');
         const isFav = favorites.includes(currentSong.id);
         icon.textContent = isFav ? '★' : '☆';
-        icon.style.color = isFav ? '#FFD700' : '';
-    }
-
-    function toggleFontSize() {
-        fontLevel = (fontLevel + 1) % fontSizes.length;
-        if (currentSong) {
-            openSong(currentSong.id);
-        }
-        showToast('字号：' + ['标准', '大', '特大'][fontLevel]);
     }
 
     function shareSong() {
         if (!currentSong) return;
-        const text = `🎵 ${currentSong.title} - ${currentSong.artist}\n\n` +
-            currentSong.lyrics.map(l => l.jp.join(' ') + '\n' + l.chars.join('')).join('\n\n');
+        const text = `🎵 ${currentSong.title} - ${currentSong.artist}`;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => showToast('歌词已复制到剪贴板 📋'));
-        } else {
-            showToast('浏览器不支持复制');
+            navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
         }
     }
 
-    function showToast(msg) {
-        const existing = document.querySelector('.toast');
-        if (existing) existing.remove();
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-
-    initFilterTabs();
-    renderSongList();
+    // Init
+    init();
     </script>
 </body>
 </html>
