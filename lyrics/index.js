@@ -3,19 +3,19 @@
  * 
  * ===== 新增歌曲步骤 =====
  * 1. 在 lyrics/ 文件夹下创建 "歌名.js" 文件（参照现有文件格式）
- * 2. 在下方 songFiles 数组中添加一行：'歌名.js'
+ * 2. 在下方 songFiles 数组中添加一行：'lyrics/歌名.js'
  * 3. 提交即可，无需修改 index.html
  * 
  * ===== songFiles =====
  * 每个元素是相对于网站根目录的 JS 文件路径
  */
 const songFiles = [
-    '重复犯错.js',
-    '喜欢你.js',
-    '海阔天空.js',
-    '富士山下.js',
-    '明年今日.js',
-    '千千阙歌.js',
+    'lyrics/重复犯错.js',
+    'lyrics/喜欢你.js',
+    'lyrics/海阔天空.js',
+    'lyrics/富士山下.js',
+    'lyrics/明年今日.js',
+    'lyrics/千千阙歌.js',
 ];
 
 /**
