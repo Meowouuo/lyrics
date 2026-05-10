@@ -202,6 +202,27 @@
         .song-artist-compact {
             font-size: 12px;
             color: #999;
+            display: flex;
+            align-items: flex-end;
+            gap: 1px;
+        }
+
+        .song-artist-char-group {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .song-artist-jyutping {
+            font-size: 7px;
+            color: #ccc;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            height: 9px;
+        }
+
+        .song-artist-hanzi {
+            font-size: 12px;
+            color: #999;
         }
 
         /* ===== Main Content (Right) ===== */
@@ -331,7 +352,21 @@
 
         .song-meta-label {
             color: #999;
-            margin-bottom: 2px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .song-meta-label-jyutping {
+            font-size: 9px;
+            color: #bbb;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            height: 11px;
+        }
+
+        .song-meta-label-hanzi {
+            font-size: 14px;
+            color: #999;
         }
 
         .meta-name-group {
@@ -573,17 +608,26 @@
                     <div class="song-meta-row">
                         <div class="song-meta-row-inner">
                             <div class="song-meta-item">
-                                <span class="song-meta-label">歌手</span>
+                                <span class="song-meta-label">
+                                    <span class="song-meta-label-jyutping">go1 sau2</span>
+                                    <span class="song-meta-label-hanzi">歌手</span>
+                                </span>
                                 <span id="songArtist"></span>
                             </div>
                         </div>
                         <div class="song-meta-row-inner">
                             <div class="song-meta-item">
-                                <span class="song-meta-label">作词</span>
+                                <span class="song-meta-label">
+                                    <span class="song-meta-label-jyutping">zok3 ci4</span>
+                                    <span class="song-meta-label-hanzi">作词</span>
+                                </span>
                                 <span id="songLyricist"></span>
                             </div>
                             <div class="song-meta-item">
-                                <span class="song-meta-label">作曲</span>
+                                <span class="song-meta-label">
+                                    <span class="song-meta-label-jyutping">zok3 kuk1</span>
+                                    <span class="song-meta-label-hanzi">作曲</span>
+                                </span>
                                 <span id="songComposer"></span>
                             </div>
                         </div>
@@ -827,12 +871,13 @@
         let html = '';
         filtered.forEach((song, index) => {
             const isActive = currentSong && currentSong.id === song.id;
+            const artistHtml = renderCompactArtistWithJyutping(song.artist, song.artistJyutping);
             html += `
                 <div class="song-item ${isActive ? 'active' : ''}" onclick="selectSong(${song.id})">
                     <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
                     <div class="song-info-compact">
                         <div class="song-title-compact">${song.title}</div>
-                        <div class="song-artist-compact">${song.artist}</div>
+                        <div class="song-artist-compact">${artistHtml}</div>
                     </div>
                 </div>
             `;
