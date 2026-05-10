@@ -644,18 +644,21 @@
         </main>
     </div>
 
-    <!-- 引入歌词数据文件 -->
-    <script src="songs.js"></script>
+    <!-- 引入歌曲清单（动态加载歌词文件） -->
+    <script src="lyrics/index.js"></script>
     <script>
     // 应用状态
-    const artists = [...new Set(songs.map(s => s.artist))];
+    let songs = [];
+    let artists = [];
     let currentSong = null;
     let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
     let fontSize = 20;
 
-    // 初始化
-    function init() {
+    // 异步初始化：先加载歌曲数据，再渲染页面
+    async function init() {
+        songs = await loadAllSongs();
+        artists = [...new Set(songs.map(s => s.artist))];
         renderArtistFilter();
         renderSongList();
     }
