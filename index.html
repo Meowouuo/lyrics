@@ -537,6 +537,163 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #ccc; }
+
+        /* ===== Correction Mode ===== */
+        .correction-mode .char-group {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px;
+            margin-right: 2px;
+            transition: all 0.15s;
+            position: relative;
+        }
+        @media (min-width: 1024px) {
+            .correction-mode .char-group { margin-right: 4px; }
+        }
+        .correction-mode .char-group:hover {
+            background: #e8f4fd;
+        }
+        .correction-mode .char-group.selected {
+            background: #d0e8ff;
+            outline: 2px solid #4a9eff;
+            outline-offset: -1px;
+        }
+        .correction-mode .char-group.corrected {
+            background: #fff3cd;
+            outline: 2px solid #ffc107;
+            outline-offset: -1px;
+        }
+        .correction-mode .char-group.corrected .char-jyutping {
+            color: #d48806;
+            font-weight: 600;
+        }
+
+        /* Correction banner */
+        .correction-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff3cd;
+            border-bottom: 2px solid #ffc107;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 100;
+            font-size: 14px;
+            color: #856404;
+            animation: slideDown 0.2s ease;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        .correction-banner-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .correction-banner-btn.submit {
+            background: #28a745;
+            color: #fff;
+        }
+        .correction-banner-btn.submit:hover { background: #218838; }
+        .correction-banner-btn.submit:disabled { background: #ccc; cursor: not-allowed; }
+        .correction-banner-btn.cancel {
+            background: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        .correction-banner-btn.cancel:hover { background: #f5f5f5; }
+
+        /* Edit popup */
+        .edit-popup {
+            position: fixed;
+            z-index: 200;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            padding: 16px;
+            min-width: 200px;
+            animation: popIn 0.15s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .edit-popup-title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        .edit-popup-chars {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .edit-popup-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .edit-popup-input:focus {
+            border-color: #4a9eff;
+        }
+        .edit-popup-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+        .edit-popup-btn {
+            padding: 5px 14px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .edit-popup-btn.confirm {
+            background: #4a9eff;
+            color: #fff;
+        }
+        .edit-popup-btn.confirm:hover { background: #3a8bee; }
+        .edit-popup-btn.dismiss {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .edit-popup-btn.dismiss:hover { background: #eee; }
+
+        /* Overlay */
+        .edit-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 150;
+        }
+
+        /* Correction count badge */
+        .correction-count {
+            background: #dc3545;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
@@ -739,6 +896,10 @@
     }
 
     function selectSong(id) {
+        // Exit correction mode if active
+        if (correctionMode) {
+            toggleCorrectionMode();
+        }
         currentSong = songs.find(s => s.id === id);
         renderSongList();
         renderLyrics();
@@ -792,7 +953,7 @@
                     return '<br>';
                 }
                 return `
-                    <span class="char-group">
+                    <span class="char-group" data-line="${index}" data-char="${i}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${i})">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
@@ -847,12 +1008,265 @@
         }
     }
 
-    // 纠错：跳转到 GitHub Issues
-    function submitFeedback() {
+    // ===== 纠错模式 =====
+    let correctionMode = false;
+    let corrections = []; // { lineIndex, charIndex, originalJp, newJp, char }
+    let selectedChars = []; // [{ lineIndex, charIndex }]
+
+    function toggleCorrectionMode() {
+        correctionMode = !correctionMode;
+        const lyricsContent = document.getElementById('lyricsContent');
+        const toolbar = document.querySelector('.toolbar');
+
+        if (correctionMode) {
+            lyricsContent.classList.add('correction-mode');
+            corrections = [];
+            selectedChars = [];
+            showCorrectionBanner();
+            updateCorrectionBtn();
+        } else {
+            lyricsContent.classList.remove('correction-mode');
+            hideCorrectionBanner();
+            clearSelection();
+            clearCorrections();
+            updateCorrectionBtn();
+        }
+    }
+
+    function updateCorrectionBtn() {
+        const btn = document.querySelector('.toolbar-btn[onclick="submitFeedback()"]');
+        if (!btn) return;
+        if (correctionMode) {
+            btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
+            btn.style.color = '#d48806';
+        } else {
+            btn.innerHTML = '<span class="icon">✏️</span><span>纠错</span>';
+            btn.style.color = '';
+        }
+    }
+
+    function showCorrectionBanner() {
+        // Remove existing banner
+        hideCorrectionBanner();
+        const banner = document.createElement('div');
+        banner.className = 'correction-banner';
+        banner.id = 'correctionBanner';
+        banner.innerHTML = `
+            <span>✏️ 纠错模式：点击字即可修改粤拼</span>
+            <span id="correctionCountText" style="font-weight:600;"></span>
+            <button class="correction-banner-btn submit" id="submitCorrectionsBtn" onclick="submitCorrections()" disabled>提交反馈</button>
+            <button class="correction-banner-btn cancel" onclick="toggleCorrectionMode()">退出</button>
+        `;
+        document.body.appendChild(banner);
+    }
+
+    function hideCorrectionBanner() {
+        const existing = document.getElementById('correctionBanner');
+        if (existing) existing.remove();
+    }
+
+    function updateCorrectionCount() {
+        const text = document.getElementById('correctionCountText');
+        const btn = document.getElementById('submitCorrectionsBtn');
+        if (!text || !btn) return;
+        if (corrections.length > 0) {
+            text.innerHTML = `<span class="correction-count">${corrections.length}</span> 处修改`;
+            btn.disabled = false;
+        } else {
+            text.textContent = '';
+            btn.disabled = true;
+        }
+    }
+
+    function onCharClick(event, lineIndex, charIndex) {
+        if (!correctionMode) return;
+        event.stopPropagation();
+
+        const charGroup = event.currentTarget;
+
+        // If already corrected, allow re-edit
+        if (charGroup.classList.contains('corrected')) {
+            showEditPopup(charGroup, lineIndex, charIndex);
+            return;
+        }
+
+        // Toggle selection
+        const idx = selectedChars.findIndex(s => s.lineIndex === lineIndex && s.charIndex === charIndex);
+        if (idx > -1) {
+            selectedChars.splice(idx, 1);
+            charGroup.classList.remove('selected');
+        } else {
+            selectedChars.push({ lineIndex, charIndex });
+            charGroup.classList.add('selected');
+        }
+
+        // If we have selection, show edit popup
+        if (selectedChars.length > 0) {
+            // Use the last clicked char's position for popup
+            showEditPopup(charGroup, lineIndex, charIndex);
+        }
+    }
+
+    function showEditPopup(charGroup, lineIndex, charIndex) {
+        closeEditPopup();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'edit-overlay';
+        overlay.id = 'editOverlay';
+        overlay.onclick = () => { clearSelection(); closeEditPopup(); };
+        document.body.appendChild(overlay);
+
+        const popup = document.createElement('div');
+        popup.className = 'edit-popup';
+        popup.id = 'editPopup';
+
+        // Gather selected chars info
+        let charsInfo = [];
+        let currentJp = '';
+
+        if (selectedChars.length > 0) {
+            // Sort by position
+            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
+            charsInfo = sorted.map(s => {
+                const line = currentSong.lyrics[s.lineIndex];
+                return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], lineIndex: s.lineIndex, charIndex: s.charIndex };
+            });
+            currentJp = charsInfo.map(c => c.jp).join(' ');
+        } else {
+            // Single char re-edit (already corrected)
+            const line = currentSong.lyrics[lineIndex];
+            const existingCorrection = corrections.find(c => c.lineIndex === lineIndex && c.charIndex === charIndex);
+            charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], lineIndex, charIndex }];
+            currentJp = charsInfo[0].jp;
+        }
+
+        const charsText = charsInfo.map(c => c.char).join('');
+        const title = charsInfo.length === 1 ? '修改粤拼' : `修改 ${charsInfo.length} 个字的粤拼`;
+
+        popup.innerHTML = `
+            <div class="edit-popup-title">${title}</div>
+            <div class="edit-popup-chars">${charsText}</div>
+            <input class="edit-popup-input" id="editJpInput" type="text" value="${currentJp}" placeholder="输入粤拼，多字用空格分隔"
+                   onkeydown="if(event.key==='Enter')confirmEdit();if(event.key==='Escape'){clearSelection();closeEditPopup();}">
+            <div class="edit-popup-actions">
+                <button class="edit-popup-btn dismiss" onclick="clearSelection();closeEditPopup();">取消</button>
+                <button class="edit-popup-btn confirm" onclick="confirmEdit()">确认</button>
+            </div>
+        `;
+
+        document.body.appendChild(popup);
+
+        // Position popup near the clicked element
+        const rect = charGroup.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        let top = rect.bottom + 8;
+        let left = rect.left + rect.width / 2 - popupRect.width / 2;
+
+        // Keep within viewport
+        if (top + popupRect.height > window.innerHeight - 60) {
+            top = rect.top - popupRect.height - 8;
+        }
+        if (left < 8) left = 8;
+        if (left + popupRect.width > window.innerWidth - 8) {
+            left = window.innerWidth - popupRect.width - 8;
+        }
+
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+
+        // Focus input
+        setTimeout(() => {
+            const input = document.getElementById('editJpInput');
+            if (input) { input.focus(); input.select(); }
+        }, 50);
+    }
+
+    function closeEditPopup() {
+        const popup = document.getElementById('editPopup');
+        const overlay = document.getElementById('editOverlay');
+        if (popup) popup.remove();
+        if (overlay) overlay.remove();
+    }
+
+    function confirmEdit() {
+        const input = document.getElementById('editJpInput');
+        if (!input) return;
+        const newJp = input.value.trim();
+        if (!newJp) return;
+
+        if (selectedChars.length > 0) {
+            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
+            const newJpArr = newJp.split(/\s+/);
+
+            sorted.forEach((s, i) => {
+                const line = currentSong.lyrics[s.lineIndex];
+                const originalJp = line.jp[s.charIndex];
+                const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
+
+                // Update or add correction
+                const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
+                if (existingIdx > -1) {
+                    corrections[existingIdx].newJp = correctedJp;
+                } else {
+                    corrections.push({
+                        lineIndex: s.lineIndex,
+                        charIndex: s.charIndex,
+                        char: line.chars[s.charIndex],
+                        originalJp: originalJp,
+                        newJp: correctedJp
+                    });
+                }
+
+                // Update DOM
+                const charEl = document.querySelector(`.char-group[data-line="${s.lineIndex}"][data-char="${s.charIndex}"]`);
+                if (charEl) {
+                    charEl.classList.remove('selected');
+                    charEl.classList.add('corrected');
+                    charEl.querySelector('.char-jyutping').textContent = correctedJp;
+                }
+            });
+        }
+
+        selectedChars = [];
+        closeEditPopup();
+        updateCorrectionCount();
+    }
+
+    function clearSelection() {
+        selectedChars = [];
+        document.querySelectorAll('.char-group.selected').forEach(el => el.classList.remove('selected'));
+    }
+
+    function clearCorrections() {
+        corrections = [];
+        document.querySelectorAll('.char-group.corrected').forEach(el => {
+            el.classList.remove('corrected');
+            const originalJp = el.dataset.originalJp;
+            el.querySelector('.char-jyutping').textContent = originalJp;
+        });
+    }
+
+    function submitCorrections() {
+        if (corrections.length === 0) return;
+
         const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
-        const title = encodeURIComponent(`[粤拼纠错] ${song}`);
-        const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n\n**错误描述：**\n请描述哪一行的粤拼有误，以及正确的粤拼是什么。\n\n**错误行：**\n> 在这里粘贴歌词行\n\n**正确粤拼：**\n> 在这里提供正确的粤拼\n\n---\n\n请尽量提供完整信息，方便快速修正，谢谢！`);
+
+        // Build correction details
+        let correctionDetails = corrections.map(c => {
+            const line = currentSong.lyrics[c.lineIndex];
+            const lineText = line.chars.join('');
+            return `| 第${c.lineIndex + 1}行 | ${c.char} | ${c.originalJp} | ${c.newJp} | ${lineText} |`;
+        }).join('\n');
+
+        const title = encodeURIComponent(`[粤拼纠错] ${song}（${corrections.length}处）`);
+        const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n**修改数量：** ${corrections.length} 处\n\n| 行 | 字 | 原粤拼 | 正确粤拼 | 所在行 |\n|---|---|---|---|---|\n${correctionDetails}\n\n---\n*由网页纠错模式提交*`);
         window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=纠错`, '_blank');
+    }
+
+    // 纠错：进入纠错模式（替换原跳转逻辑）
+    function submitFeedback() {
+        if (!currentSong) return;
+        toggleCorrectionMode();
     }
 
     // 投稿：跳转到 GitHub Issues
