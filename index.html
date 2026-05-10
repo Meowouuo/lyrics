@@ -788,6 +788,9 @@
             }
             const lineHtml = line.chars.map((char, i) => {
                 const jp = line.jp[i] || '';
+                if (char === ' ') {
+                    return '<span style="display:inline-block;width:0.5em;"></span>';
+                }
                 return `
                     <span class="char-group">
                         <span class="char-jyutping">${jp}</span>
