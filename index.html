@@ -6,7 +6,6 @@
     <title>粤拼歌词 | Cantonese Lyrics with Jyutping</title>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
             background: #f5f5f5;
@@ -14,7 +13,6 @@
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
-
         .app-container {
             max-width: 480px;
             margin: 0 auto;
@@ -23,7 +21,6 @@
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.08);
         }
-
         @media (min-width: 768px) {
             .app-container {
                 margin-top: 20px;
@@ -33,8 +30,6 @@
                 overflow: hidden;
             }
         }
-
-        /* Header */
         .header {
             position: sticky;
             top: 0;
@@ -46,9 +41,7 @@
             align-items: center;
             justify-content: center;
         }
-
         .header-title { font-size: 17px; font-weight: 600; color: #000; }
-
         .back-btn {
             position: absolute;
             left: 16px;
@@ -64,10 +57,7 @@
             align-items: center;
             line-height: 1;
         }
-
-        /* Song List */
         .song-list-page { padding: 12px 16px; padding-bottom: 80px; }
-
         .page-title {
             font-size: 24px;
             font-weight: 700;
@@ -75,14 +65,11 @@
             margin-bottom: 4px;
             padding-top: 8px;
         }
-
         .page-subtitle {
             font-size: 13px;
             color: #aaa;
             margin-bottom: 16px;
         }
-
-        /* Filter Tabs */
         .filter-tabs {
             display: flex;
             gap: 8px;
@@ -91,9 +78,7 @@
             padding-bottom: 4px;
             -webkit-overflow-scrolling: touch;
         }
-
         .filter-tabs::-webkit-scrollbar { display: none; }
-
         .filter-tab {
             padding: 8px 16px;
             border-radius: 20px;
@@ -105,17 +90,13 @@
             background: #fff;
             color: #666;
         }
-
         .filter-tab:hover { background: #f5f5f5; }
-
         .filter-tab.active {
             background: #000;
             color: #fff;
             border-color: #000;
         }
-
         .search-bar { margin-bottom: 16px; position: relative; }
-
         .search-input {
             width: 100%;
             padding: 10px 16px 10px 40px;
@@ -126,13 +107,11 @@
             outline: none;
             transition: all 0.2s;
         }
-
         .search-input:focus {
             border-color: #ddd;
             background: #fff;
             box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
         }
-
         .search-icon {
             position: absolute;
             left: 14px;
@@ -141,17 +120,13 @@
             font-size: 14px;
             color: #ccc;
         }
-
-        /* Artist Section */
         .artist-section { margin-bottom: 20px; }
-
         .artist-header {
             display: flex;
             align-items: center;
             padding: 12px 4px;
             margin-bottom: 8px;
         }
-
         .artist-dot {
             width: 8px;
             height: 8px;
@@ -159,19 +134,16 @@
             margin-right: 10px;
             flex-shrink: 0;
         }
-
         .artist-name {
             font-size: 15px;
             font-weight: 600;
             color: #000;
         }
-
         .artist-count {
             font-size: 12px;
             color: #999;
             margin-left: 8px;
         }
-
         .song-card {
             display: flex;
             align-items: center;
@@ -183,12 +155,9 @@
             transition: all 0.2s ease;
             border: 1px solid transparent;
         }
-
         .song-card:hover { background: #f0f0f0; border-color: #e0e0e0; }
         .song-card:active { transform: scale(0.98); }
-
         .song-card-info { flex: 1; min-width: 0; }
-
         .song-card-title {
             font-size: 16px;
             font-weight: 600;
@@ -198,22 +167,16 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .song-card-artist { font-size: 13px; color: #999; }
         .song-card-arrow { color: #ccc; font-size: 20px; flex-shrink: 0; margin-left: 8px; }
-
-        /* Lyrics Page */
         .lyrics-page { display: none; padding-bottom: 80px; }
         .lyrics-page.active { display: block; }
         .song-list-page.hidden { display: none; }
-
-        /* Song Info */
         .song-info {
             padding: 28px 20px 20px;
             text-align: center;
             border-bottom: 1px solid #f0f0f0;
         }
-
         .song-info-jyutping {
             font-size: 13px;
             color: #aaa;
@@ -221,37 +184,28 @@
             letter-spacing: 0.5px;
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
         }
-
         .song-info-title {
             font-size: 26px;
             font-weight: 700;
             color: #000;
             margin-bottom: 14px;
         }
-
         .song-meta {
             display: flex;
             justify-content: center;
             gap: 24px;
             flex-wrap: wrap;
         }
-
         .song-meta-item { text-align: center; }
-
         .song-meta-jyutping {
             font-size: 11px;
             color: #ccc;
             margin-bottom: 2px;
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
         }
-
         .song-meta-text { font-size: 13px; color: #666; }
-
-        /* Lyrics Body */
         .lyrics-body { padding: 16px 20px; }
-
         .lyric-section { margin-bottom: 24px; }
-
         .lyric-section-label {
             font-size: 11px;
             color: #ccc;
@@ -260,7 +214,6 @@
             padding-left: 2px;
             font-weight: 500;
         }
-
         .lyric-line {
             display: flex;
             align-items: flex-start;
@@ -269,9 +222,7 @@
             animation: fadeIn 0.3s ease forwards;
             opacity: 0;
         }
-
         .lyric-line:last-child { border-bottom: none; }
-
         .lyric-line:nth-child(1) { animation-delay: 0.02s; }
         .lyric-line:nth-child(2) { animation-delay: 0.04s; }
         .lyric-line:nth-child(3) { animation-delay: 0.06s; }
@@ -282,12 +233,10 @@
         .lyric-line:nth-child(8) { animation-delay: 0.16s; }
         .lyric-line:nth-child(9) { animation-delay: 0.18s; }
         .lyric-line:nth-child(10) { animation-delay: 0.20s; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .lyric-speaker {
             width: 28px;
             height: 28px;
@@ -300,9 +249,7 @@
             color: #ddd;
             font-size: 14px;
         }
-
         .lyric-content { flex: 1; min-width: 0; }
-
         .lyric-jyutping {
             font-size: 13px;
             color: #aaa;
@@ -312,7 +259,6 @@
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             word-break: break-all;
         }
-
         .lyric-chinese {
             font-size: 20px;
             font-weight: 500;
@@ -320,8 +266,6 @@
             line-height: 1.6;
             letter-spacing: 1px;
         }
-
-        /* Bottom Bar */
         .bottom-bar {
             position: fixed;
             bottom: 0;
@@ -337,13 +281,10 @@
             justify-content: space-between;
             z-index: 100;
         }
-
         @media (min-width: 768px) {
             .bottom-bar { border-radius: 0 0 16px 16px; }
         }
-
         .bottom-actions { display: flex; gap: 20px; }
-
         .bottom-action-btn {
             background: none;
             border: none;
@@ -356,10 +297,8 @@
             gap: 2px;
             transition: color 0.2s;
         }
-
         .bottom-action-btn:hover { color: #666; }
         .bottom-action-btn .icon { font-size: 20px; }
-
         .share-btn {
             background: #07C160;
             color: #fff;
@@ -374,15 +313,10 @@
             gap: 6px;
             transition: background 0.2s;
         }
-
         .share-btn:hover { background: #06ad56; }
-
-        /* Empty State */
         .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state .text { font-size: 14px; }
-
-        /* Toast */
         .toast {
             position: fixed;
             top: 60px;
@@ -397,7 +331,6 @@
             animation: fadeIn 0.3s ease;
             pointer-events: none;
         }
-
         ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
@@ -407,28 +340,22 @@
             <button class="back-btn" id="backBtn" style="display:none;" onclick="goBack()">←</button>
             <span class="header-title" id="headerTitle">粤拼歌词</span>
         </div>
-
         <div class="song-list-page" id="songListPage">
             <div class="page-title">🎵 粤拼歌词</div>
             <div class="page-subtitle">粤语歌词 · 粤拼对照 · 学唱粤语歌</div>
-            
-            <!-- Filter Tabs -->
             <div class="filter-tabs" id="filterTabs">
                 <div class="filter-tab active" data-filter="all" onclick="setFilter('all')">全部</div>
             </div>
-
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
                 <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲名..." oninput="filterSongs()">
             </div>
             <div id="songList"></div>
         </div>
-
         <div class="lyrics-page" id="lyricsPage">
             <div class="song-info" id="songInfo"></div>
             <div class="lyrics-body" id="lyricsBody"></div>
         </div>
-
         <div class="bottom-bar">
             <div class="bottom-actions">
                 <button class="bottom-action-btn" onclick="toggleFavorite()">
@@ -446,118 +373,10 @@
             </button>
         </div>
     </div>
-
     <script>
     const songs = [
         {
             id: 1,
-            title: "重复犯错",
-            titleJyutping: "cung4 fuk1 faan6 co3",
-            artist: "古巨基",
-            artistJyutping: "gu2 geoi6 gei1",
-            lyricist: "林夕",
-            lyricistJyutping: "lam4 sik1",
-            composer: "陈辉阳",
-            composerJyutping: "can4 fai1 joeng4",
-            color: "#f5576c",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "bat1 zi1 nei5 naan4 gwo3 zik6 mok6", chinese: "不知你难过寂寞" },
-                        { jyutping: "ting1 dou3 nei5 syut3 wui5 ji5 nei5", chinese: "听到你说会记你" },
-                        { jyutping: "hou2 noi6 m4 hoi1 sam1", chinese: "很久不开心" },
-                        { jyutping: "jiu3 m4 giu3 nei5 dou1 dak1 nei5", chinese: "叫不叫你都得起" },
-                        { jyutping: "m4 wui5 jek6 zung6 ji3 jau6 hai2", chinese: "唔会重试又在" },
-                        { jyutping: "nei5 bun3 min6 cung4 fuk1 faan6 co3", chinese: "你面前重复犯错" }
-                    ]
-                }
-            ]
-        },
-        {
-            id: 2,
-            title: "富士山下",
-            titleJyutping: "fu2 si6 saan1 haa6",
-            artist: "陈奕迅",
-            artistJyutping: "can4 jik6 seon3",
-            lyricist: "林夕",
-            lyricistJyutping: "lam4 sik1",
-            composer: "Christopher Chak",
-            composerJyutping: "—",
-            color: "#4facfe",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "laan4 lou6 jyu5 pin1 ci5 syut3 faa1", chinese: "拦路雨偏似雪花" },
-                        { jyutping: "jam2 kap1 dik1 nei5 dung3 maa3", chinese: "饮泣的你冻吗" },
-                        { jyutping: "ze5 fung1 lau6 ngo5 kap1 nei5", chinese: "这风褛我给你" },
-                        { jyutping: "mo4 dou3 jau5 kam1 faa1", chinese: "磨到有襟花" },
-                        { jyutping: "lin4 tiu4 liu5 zik1 jat6 m4 paa3", chinese: "连调了职也不怕" },
-                        { jyutping: "zem2 mo1 ci2 zung1 gin1 gyun1 waa4", chinese: "怎么始终牵挂" },
-                        { jyutping: "fu2 sam1 zyun2 zung6 gam1 tin1", chinese: "苦心选中今天" },
-                        { jyutping: "soeng2 ce1 nei5 wui1 gaa1", chinese: "想车你回家" },
-                        { jyutping: "jyun4 loeng6 ngo5 bat1 zoi3 sung3 faa1", chinese: "原谅我不再送花" },
-                        { jyutping: "saang1 hong2 jing1 jiu3 git3 paa4", chinese: "伤口应要结疤" },
-                        { jyutping: "faa1 pin4 pou1 mun5 sam1 leoi5", chinese: "花瓣铺满心里" },
-                        { jyutping: "fan4 coeng4 coi4 haa6", chinese: "坟场才害怕" }
-                    ]
-                },
-                {
-                    label: "副歌",
-                    lines: [
-                        { jyutping: "jyu4 joek6 nei5 fei1 ngo5 bat1 gaa3", chinese: "如若你非我不嫁" },
-                        { jyutping: "bei2 ci2 zung1 bit1 fo2 faa3", chinese: "彼此终必火化" },
-                        { jyutping: "jat1 sang1 jat1 sai3 dang2 jat1 tin1", chinese: "一生一世等一天" },
-                        { jyutping: "seoi1 jiu3 dai6 gaa3", chinese: "需要代价" },
-                        { jyutping: "seoi4 dou1 zi2 dak1 naa5 soeng1 sau2", chinese: "谁都只得那双手" },
-                        { jyutping: "kaau3 jiu5 pou5 jik6 naan4 jam6 nei5", chinese: "靠拥抱亦难任你" },
-                        { jyutping: "jung2 jau5 jiu3 jung1 dung3 sik1 tau1", chinese: "拥有要懂失去" },
-                        { jyutping: "zem2 sou3", chinese: "怎接受" }
-                    ]
-                }
-            ]
-        },
-        {
-            id: 3,
-            title: "十年",
-            titleJyutping: "sap6 nin4",
-            artist: "陈奕迅",
-            artistJyutping: "can4 jik6 seon3",
-            lyricist: "林夕",
-            lyricistJyutping: "lam4 sik1",
-            composer: "陈小霞",
-            composerJyutping: "can4 siu2 haa4",
-            color: "#43e97b",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "jat1 ci3 jat1 cek3 coeng4 hei2 tau4", chinese: "如果那两个字没有颤抖" },
-                        { jyutping: "ngo5 hui2 bat1 wui5 faan6 sau2", chinese: "我不会发觉我难受" },
-                        { jyutping: "sei3 hoi1 sam1 laap6 zuk6 hou2 sau1", chinese: "怎么说出口" },
-                        { jyutping: "bat1 wui5 dei3 tau4", chinese: "也不过是分手" },
-                        { jyutping: "jat1 ci3 ceot1 tau4 hai2 jat1 sai3 hou2", chinese: "如果对于明天没有要求" },
-                        { jyutping: "cip3 baan3 ding3 hai2 ci3 ging1 jau5", chinese: "牵牵手就像旅游" },
-                        { jyutping: "bat1 zi6 jat1 cek3 heoi3 zau6 siu3", chinese: "不识一个去处" },
-                        { jyutping: "bat1 zi6 jat1 go3 tau4 dou3", chinese: "不识一个尽头" }
-                    ]
-                },
-                {
-                    label: "副歌",
-                    lines: [
-                        { jyutping: "jiu4 jat1 cek3 jat1 cek3 jat1 cek3", chinese: "就一个一个一个" },
-                        { jyutping: "gwo3 sai3 jat1 cek3 jat1 cek3 jat1 cek3", chinese: "过十年一个一个" },
-                        { jyutping: "ngo5 dei6 dou1 wui5 zung6 jyu4 jat1 cek3", chinese: "我们都会重聚于一个" },
-                        { jyutping: "jat1 cek3 jat1 cek3 jat1 cek3", chinese: "一个一个一个" },
-                        { jyutping: "jat1 cek3 jat1 cek3 jat1 cek3", chinese: "一个一个一个" },
-                        { jyutping: "zau6 hai2 nei5 wui5 tau4 dou3", chinese: "就在你回头处" }
-                    ]
-                }
-            ]
-        },
-        {
-            id: 4,
             title: "喜欢你",
             titleJyutping: "hei2 fun1 nei5",
             artist: "Beyond",
@@ -566,31 +385,238 @@
             lyricistJyutping: "wong4 gaa1 keoi1",
             composer: "黄家驹",
             composerJyutping: "wong4 gaa1 keoi1",
+            color: "#f5576c",
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "sai3 jyu5 daai3 fung1 sap1 tau3 wong4 fan1 dik1 gaai1 dou6", chinese: "细雨带风湿透黄昏的街道" },
+                    { jyutping: "maat3 heoi3 jyu5 seoi2 soeng1 ngaan5 mou4 gu3 dei6 joeng5 mong6", chinese: "抹去雨水双眼无故地仰望" },
+                    { jyutping: "mong6 hoeng3 gu1 daan1 dik1 maan5 dang1", chinese: "望向孤单的晚灯" },
+                    { jyutping: "si6 naa5 soeng1 gam2 dik1 gei3 jik1", chinese: "是那伤感的记忆" },
+                    { jyutping: "zoi3 ci3 faan6 hei2 sam1 leoi5 mou4 sou3 dik1 si1 nim6", chinese: "再次泛起心里无数的思念" },
+                    { jyutping: "ji5 wong5 pin3 hak1 faan1 siu3 jing4 gwaa3 zoi6 min6 soeng2", chinese: "以往片刻欢笑仍挂在脸上" },
+                    { jyutping: "jyun6 nei5 ci2 hak1 ho2 wui5 zi1", chinese: "愿你此刻可会知" },
+                    { jyutping: "si6 ngo5 zung1 sam1 dik1 syut3 sing1", chinese: "是我衷心的说声" },
+                    { jyutping: "hei2 fun1 nei5", chinese: "喜欢你" },
+                    { jyutping: "naa5 soeng1 ngaan5 dung6 jan4", chinese: "那双眼动人" },
+                    { jyutping: "siu3 sing1 gang3 mai4 jan4", chinese: "笑声更迷人" },
+                    { jyutping: "jyun6 zoi3 ho2 hing1 fu2 nei5", chinese: "愿再可轻抚你" },
+                    { jyutping: "naa5 ho2 oi3 min6 jung4", chinese: "那可爱面容" },
+                    { jyutping: "waan5 sau2 syut3 mung6 waa6", chinese: "挽手说梦话" },
+                    { jyutping: "zoeng6 zok6 tin1 nei5 gung6 ngo5", chinese: "像昨天你共我" },
+                    { jyutping: "mun5 daai3 lei5 soeng2 dik1 ngo5 cang4 ging1 do1 cung1 dung6", chinese: "满带理想的我曾经多冲动" },
+                    { jyutping: "leoi5 jyun3 jyu5 taa1 soeng1 oi3 naan4 jau5 zi6 jau4", chinese: "屡怨与她相爱难有自由" },
+                    { jyutping: "jyun6 nei5 ci2 hak1 ho2 wui5 zi1", chinese: "愿你此刻可会知" },
+                    { jyutping: "si6 ngo5 zung1 sam1 dik1 syut3 sing1", chinese: "是我衷心的说声" },
+                    { jyutping: "hei2 fun1 nei5", chinese: "喜欢你" },
+                    { jyutping: "naa5 soeng1 ngaan5 dung6 jan4", chinese: "那双眼动人" },
+                    { jyutping: "siu3 sing1 gang3 mai4 jan4", chinese: "笑声更迷人" },
+                    { jyutping: "jyun6 zoi3 ho2 hing1 fu2 nei5", chinese: "愿再可轻抚你" },
+                    { jyutping: "naa5 ho2 oi3 min6 jung4", chinese: "那可爱面容" },
+                    { jyutping: "waan5 sau2 syut3 mung6 waa6", chinese: "挽手说梦话" },
+                    { jyutping: "zoeng6 zok6 tin1 nei5 gung6 ngo5", chinese: "像昨天你共我" },
+                    { jyutping: "mui5 maan5 je6 leoi5 zi6 ngo5 duk6 hang4", chinese: "每晚夜里自我独行" },
+                    { jyutping: "ceoi4 syu3 dong6 do1 bing1 laang5", chinese: "随处荡多冰冷" },
+                    { jyutping: "ji5 wong5 wai6 liu5 zi6 ngo5 zang1 aa3", chinese: "以往为了自我挣扎" },
+                    { jyutping: "cung4 bat1 zi1 taa1 dik1 tung3 fu2", chinese: "从不知她的痛苦" },
+                    { jyutping: "hei2 fun1 nei5", chinese: "喜欢你" },
+                    { jyutping: "naa5 soeng1 ngaan5 dung6 jan4", chinese: "那双眼动人" },
+                    { jyutping: "siu3 sing1 gang3 mai4 jan4", chinese: "笑声更迷人" },
+                    { jyutping: "jyun6 zoi3 ho2 hing1 fu2 nei5", chinese: "愿再可轻抚你" },
+                    { jyutping: "naa5 ho2 oi3 min6 jung4", chinese: "那可爱面容" },
+                    { jyutping: "waan5 sau2 syut3 mung6 waa6", chinese: "挽手说梦话" },
+                    { jyutping: "zoeng6 zok6 tin1 nei5 gung6 ngo5", chinese: "像昨天你共我" }
+                ]
+            }]
+        },
+        {
+            id: 2,
+            title: "海阔天空",
+            titleJyutping: "hoi2 fut3 tin1 hung1",
+            artist: "Beyond",
+            artistJyutping: "Beyond",
+            lyricist: "黄家驹",
+            lyricistJyutping: "wong4 gaa1 keoi1",
+            composer: "黄家驹",
+            composerJyutping: "wong4 gaa1 keoi1",
+            color: "#4facfe",
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "gam1 tin1 ngo5 hon4 je6 leoi5 hon3 syut3 piu1 gwo3", chinese: "今天我寒夜里看雪飘过" },
+                    { jyutping: "waai4 zoek6 laang5 hei2 liu5 dik1 sam1 wo1 piu1 jyun5 fong1", chinese: "怀着冷却了的心窝漂远方" },
+                    { jyutping: "fung1 jyu5 leoi5 zeoi1 gong2", chinese: "风雨里追赶" },
+                    { jyutping: "mou6 leoi5 fan1 bat1 cing1 jing2 zung1", chinese: "雾里分不清影踪" },
+                    { jyutping: "tin1 hung1 hoi2 fut3 nei5 jyu5 ngo5", chinese: "天空海阔你与我" },
+                    { jyutping: "ho2 wui5 bin3", chinese: "可会变" },
+                    { jyutping: "seoi4 mut6 zoi6 bin3", chinese: "谁没在变" },
+                    { jyutping: "do1 siu3 ci3 jing4 zoek6 laang5 ngaan5 jyu5 ciu3 siu3", chinese: "多少次迎着冷眼与嘲笑" },
+                    { jyutping: "cung4 mou5 jau5 fong3 hei6 gwo3 sam1 zung1 dik1 lei5 soeng2", chinese: "从没有放弃过心中的理想" },
+                    { jyutping: "jat1 saa3 naa5 fu2 fat1", chinese: "一刹那恍惚" },
+                    { jyutping: "joek6 jau5 so2 sat1 dik1 gam2 gok3", chinese: "若有所失的感觉" },
+                    { jyutping: "bat1 zi1 bat1 gok3 ji5 bin3 daam3", chinese: "不知不觉已变淡" },
+                    { jyutping: "sam1 leoi5 oi3", chinese: "心里爱" },
+                    { jyutping: "seoi4 ming4 baak6 ngo5", chinese: "谁明白我" },
+                    { jyutping: "jyun4 loeng6 ngo5 ze5 jat1 sang1 bat1 gai1 fong3 zung6 oi3 zi6 jau4", chinese: "原谅我这一生不羁放纵爱自由" },
+                    { jyutping: "jaa5 wui5 paa3 jau5 jat1 tin1 wui5 dit3 dou2", chinese: "也会怕有一天会跌倒" },
+                    { jyutping: "bui3 hei3 liu5 lei5 soeng2 seoi4 jan4 dou1 ho2 ji5", chinese: "背弃了理想谁人都可以" },
+                    { jyutping: "naa5 wui5 paa3 jau5 jat1 tin1 zi2 nei5 gung6 ngo5", chinese: "那会怕有一天只你共我" },
+                    { jyutping: "gam1 tin1 ngo5 hon4 je6 leoi5 hon3 syut3 piu1 gwo3", chinese: "今天我寒夜里看雪飘过" },
+                    { jyutping: "waai4 zoek6 laang5 hei2 liu5 dik1 sam1 wo1 piu1 jyun5 fong1", chinese: "怀着冷却了的心窝漂远方" },
+                    { jyutping: "fung1 jyu5 leoi5 zeoi1 gong2", chinese: "风雨里追赶" },
+                    { jyutping: "mou6 leoi5 fan1 bat1 cing1 jing2 zung1", chinese: "雾里分不清影踪" },
+                    { jyutping: "tin1 hung1 hoi2 fut3 nei5 jyu5 ngo5", chinese: "天空海阔你与我" },
+                    { jyutping: "ho2 wui5 bin3", chinese: "可会变" },
+                    { jyutping: "seoi4 mut6 zoi6 bin3", chinese: "谁没在变" },
+                    { jyutping: "do1 siu3 ci3 jing4 zoek6 laang5 ngaan5 jyu5 ciu3 siu3", chinese: "多少次迎着冷眼与嘲笑" },
+                    { jyutping: "cung4 mou5 jau5 fong3 hei6 gwo3 sam1 zung1 dik1 lei5 soeng2", chinese: "从没有放弃过心中的理想" },
+                    { jyutping: "jat1 saa3 naa5 fu2 fat1", chinese: "一刹那恍惚" },
+                    { jyutping: "joek6 jau5 so2 sat1 dik1 gam2 gok3", chinese: "若有所失的感觉" },
+                    { jyutping: "bat1 zi1 bat1 gok3 ji5 bin3 daam3", chinese: "不知不觉已变淡" },
+                    { jyutping: "sam1 leoi5 oi3", chinese: "心里爱" },
+                    { jyutping: "seoi4 ming4 baak6 ngo5", chinese: "谁明白我" },
+                    { jyutping: "jyun4 loeng6 ngo5 ze5 jat1 sang1 bat1 gai1 fong3 zung6 oi3 zi6 jau4", chinese: "原谅我这一生不羁放纵爱自由" },
+                    { jyutping: "jaa5 wui5 paa3 jau5 jat1 tin1 wui5 dit3 dou2", chinese: "也会怕有一天会跌倒" },
+                    { jyutping: "bui3 hei3 liu5 lei5 soeng2 seoi4 jan4 dou1 ho2 ji5", chinese: "背弃了理想谁人都可以" },
+                    { jyutping: "naa5 wui5 paa3 jau5 jat1 tin1 zi2 nei5 gung6 ngo5", chinese: "那会怕有一天只你共我" },
+                    { jyutping: "jing1 jin4 zi6 jau4 zi6 ngo5", chinese: "仍然自由自我" },
+                    { jyutping: "wing5 jyun5 gou1 coeng3 ngo5 go1", chinese: "永远高唱我歌" },
+                    { jyutping: "zau2 bin3 cin1 lei5", chinese: "走遍千里" },
+                    { jyutping: "jyun4 loeng6 ngo5 ze5 jat1 sang1 bat1 gai1 fong3 zung6 oi3 zi6 jau4", chinese: "原谅我这一生不羁放纵爱自由" },
+                    { jyutping: "jaa5 wui5 paa3 jau5 jat1 tin1 wui5 dit3 dou2", chinese: "也会怕有一天会跌倒" },
+                    { jyutping: "bui3 hei3 liu5 lei5 soeng2 seoi4 jan4 dou1 ho2 ji5", chinese: "背弃了理想谁人都可以" },
+                    { jyutping: "naa5 wui5 paa3 jau5 jat1 tin1 zi2 nei5 gung6 ngo5", chinese: "那会怕有一天只你共我" }
+                ]
+            }]
+        },
+        {
+            id: 3,
+            title: "富士山下",
+            titleJyutping: "fu2 si6 saan1 haa6",
+            artist: "陈奕迅",
+            artistJyutping: "can4 jik6 seon3",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "Christopher Chak",
+            composerJyutping: "—",
+            color: "#43e97b",
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "laan4 lou6 jyu5 pin1 ci5 syut3 faa1", chinese: "拦路雨偏似雪花" },
+                    { jyutping: "jam2 kap1 dik1 nei5 dung3 maa3", chinese: "饮泣的你冻吗" },
+                    { jyutping: "ze5 fung1 lau6 ngo5 kap1 nei5 mo4 dou3 jau5 kam1 faa1", chinese: "这风褛我给你磨到有襟花" },
+                    { jyutping: "lin4 tiu4 liu5 zik1 jat6 m4 paa3", chinese: "连调了职也不怕" },
+                    { jyutping: "zam2 mo1 ci2 zung1 gin1 gwaa3", chinese: "怎么始终牵挂" },
+                    { jyutping: "fu2 sam1 zyun2 zung6 gam1 tin1 soeng2 ce1 nei5 wui1 gaa1", chinese: "苦心选中今天想车你回家" },
+                    { jyutping: "jyun4 loeng6 ngo5 bat1 zoi3 sung3 faa1", chinese: "原谅我不再送花" },
+                    { jyutping: "saang1 hau2 jing1 jiu3 git3 paa4", chinese: "伤口应要结疤" },
+                    { jyutping: "faa1 pin4 pou1 mun5 sam1 leoi5 fan4 coeng4 coi4 haa6", chinese: "花瓣铺满心里坟场才害怕" },
+                    { jyutping: "jyu4 joek6 nei5 fei1 ngo5 bat1 gaa3", chinese: "如若你非我不嫁" },
+                    { jyutping: "bei2 ci2 zung1 bit1 fo2 faa3", chinese: "彼此终必火化" },
+                    { jyutping: "jat1 sang1 jat1 sai3 dang2 jat1 tin1 seoi1 jiu3 dai6 gaa3", chinese: "一生一世等一天需要代价" },
+                    { jyutping: "seoi4 dou1 zi2 dak1 naa5 soeng1 sau2", chinese: "谁都只得那双手" },
+                    { jyutping: "kaau3 jiu5 pou5 jik6 naan4 jam6 nei5 jung2 jau5", chinese: "靠拥抱亦难任你拥有" },
+                    { jyutping: "jiu3 jung2 jau5 bit1 sin1 dung2 sat1 hei2 zem2 sau3", chinese: "要拥有必先懂失去怎接受" },
+                    { jyutping: "cang4 jyun4 zoek6 syut3 lou6 long6 jau4", chinese: "曾沿着雪路浪游" },
+                    { jyutping: "wai6 ho4 wai6 hou3 si6 leoi6 lau4", chinese: "为何为好事泪流" },
+                    { jyutping: "seoi4 nang4 pang4 oi3 ji3 jiu3 fu2 si6 saan1 si1 jau5", chinese: "谁能凭爱意要富士山私有" },
+                    { jyutping: "ho4 bat1 baa2 bei1 oi1 gam2 gok3 gaa3 si6 si6 si6 jyu6 nei5 fau1 kau3", chinese: "何不把悲哀感觉假设是来自你虚构" },
+                    { jyutping: "si3 gun2 leoi5 zaau2 bat1 dou3 taa1 jim5 wu1 ngaan5 mau4", chinese: "试管里找不到它染污眼眸" },
+                    { jyutping: "cin4 can4 jing1 faa3 zoeng6 sek6 tau4", chinese: "前尘硬化像石头" },
+                    { jyutping: "ceoi4 jyun4 dei6 paau1 haa6 bin6 tou4 zau2", chinese: "随缘地抛下便逃走" },
+                    { jyutping: "ngo5 zyut6 bat1 han5 jau5", chinese: "我绝不罕有" },
+                    { jyutping: "wong5 gaai1 leoi5 jiu1 gwo3 jat1 zau1", chinese: "往街里绕过一周" },
+                    { jyutping: "ngo5 bin6 faa3 wu1 jau5", chinese: "我便化乌有" },
+                    { jyutping: "cing4 jit1 jan4 bat1 jiu3 syut3 cyun1", chinese: "情人节不要说穿" },
+                    { jyutping: "zi2 gam2 fu2 nei5 faat3 dyun1", chinese: "只敢抚你发端" },
+                    { jyutping: "ze5 zung1 zi3 taai3 ho2 wui5 ling6 nei5 gang1 sam1 syun1", chinese: "这种姿态可会令你更心酸" },
+                    { jyutping: "lau4 zoi6 hei3 ce1 leoi5 ceoi2 nyun5", chinese: "留在汽车里取暖" },
+                    { jyutping: "jing1 goi1 zam2 mo1 kwai1 syun3", chinese: "应该怎么规劝" },
+                    { jyutping: "zam2 mo1 ho2 ji5 zoeng1 sau2 wun2 jan5 tung3 waak3 syun2", chinese: "怎么可以将手腕忍痛划损" },
+                    { jyutping: "jan4 wut6 dou3 gei2 seoi3 syun3 dyun2", chinese: "人活到几岁算短" },
+                    { jyutping: "sat1 lyun2 zi2 jau5 gang3 dyun2", chinese: "失恋只有更短" },
+                    { jyutping: "gwai1 gaa1 seoi1 jiu3 gei2 lei5 lou6 seoi4 nang4 jyu3 syun3", chinese: "归家需要几里路谁能预算" },
+                    { jyutping: "mong4 diu6 ngo5 kap1 nei5 jan1 jyun3", chinese: "忘掉我跟你恩怨" },
+                    { jyutping: "jing1 faa1 hoi1 liu5 gei2 zyun3", chinese: "樱花开了几转" },
+                    { jyutping: "dung1 ging1 zi1 leoi5 jat1 zou2 bei2 jat1 sai3 jyun5 jyun5", chinese: "东京之旅一早比一世遥远" },
+                    { jyutping: "seoi4 dou1 zi2 dak1 naa5 soeng1 sau2", chinese: "谁都只得那双手" },
+                    { jyutping: "kaau3 jiu5 pou5 jik6 naan4 jam6 nei5 jung2 jau5", chinese: "靠拥抱亦难任你拥有" },
+                    { jyutping: "jiu3 jung2 jau5 bit1 sin1 dung2 sat1 hei2 zem2 sau3", chinese: "要拥有必先懂失去怎接受" },
+                    { jyutping: "cang4 jyun4 zoek6 syut3 lou6 long6 jau4", chinese: "曾沿着雪路浪游" },
+                    { jyutping: "wai6 ho4 wai6 hou3 si6 leoi6 lau4", chinese: "为何为好事泪流" },
+                    { jyutping: "seoi4 nang4 pang4 oi3 ji3 jiu3 fu2 si6 saan1 si1 jau5", chinese: "谁能凭爱意要富士山私有" },
+                    { jyutping: "ho4 bat1 baa2 bei1 oi1 gam2 gok3 gaa3 si6 si6 si6 jyu6 nei5 fau1 kau3", chinese: "何不把悲哀感觉假设是来自你虚构" },
+                    { jyutping: "si3 gun2 leoi5 zaau2 bat1 dou3 taa1 jim5 wu1 ngaan5 mau4", chinese: "试管里找不到它染污眼眸" },
+                    { jyutping: "cin4 can4 jing1 faa3 zoeng6 sek6 tau4", chinese: "前尘硬化像石头" },
+                    { jyutping: "ceoi4 jyun4 dei6 paau1 haa6 bin6 tou4 zau2", chinese: "随缘地抛下便逃走" },
+                    { jyutping: "ngo5 zyut6 bat1 han5 jau5", chinese: "我绝不罕有" },
+                    { jyutping: "wong5 gaai1 leoi5 jiu1 gwo3 jat1 zau1", chinese: "往街里绕过一周" },
+                    { jyutping: "ngo5 bin6 faa3 wu1 jau5", chinese: "我便化乌有" },
+                    { jyutping: "nei5 waa4 jim4 bat1 gau3", chinese: "你还嫌不够" },
+                    { jyutping: "ngo5 baa2 ze5 can4 nin4 fung1 lau6", chinese: "我把这陈年风褛" },
+                    { jyutping: "sung3 zang6 nei5 gaai2 zau3", chinese: "送赠你解咒" }
+                ]
+            }]
+        },
+        {
+            id: 4,
+            title: "十年",
+            titleJyutping: "sap6 nin4",
+            artist: "陈奕迅",
+            artistJyutping: "can4 jik6 seon3",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "陈小霞",
+            composerJyutping: "can4 siu2 haa4",
             color: "#fa709a",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "sei1 waan4 jyu4 hai2 nei5 pang4", chinese: "细雨带风湿透黄昏的街道" },
-                        { jyutping: "m4 jyun4 ji5 nei5 dik1 wun2", chinese: "抹去雨水双眼无故地仰望" },
-                        { jyutping: "tou4 sing1 sap1 faan1 jyun4", chinese: "望向孤单的晚灯" },
-                        { jyutping: "jing4 hai6 jat1 go3 sam1 duk1", chinese: "是那伤感的记忆" }
-                    ]
-                },
-                {
-                    label: "副歌",
-                    lines: [
-                        { jyutping: "hei2 fun1 nei5", chinese: "喜欢你" },
-                        { jyutping: "nei5 dik1 mei5 jat1 cek3 cuk1 dong3", chinese: "那双眼动人" },
-                        { jyutping: "sing1 zok6 mou4 faan3", chinese: "笑声更迷人" },
-                        { jyutping: "wong4 ji5 jat1 cek3 jat1 cek3", chinese: "愿再可轻抚你" },
-                        { jyutping: "nei5 dik1 min6 bun3", chinese: "那可爱面容" },
-                        { jyutping: "zam1 sing1 wun4 zau6", chinese: "挽手说梦话" },
-                        { jyutping: "bat1 jyun4 ji5 nei5", chinese: "像昨天" },
-                        { jyutping: "nei5 gong3 wo3", chinese: "你共我" }
-                    ]
-                }
-            ]
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "jyu4 gwo2 naa5 loeng5 go3 zi6 mut6 jau5 zim1 tau3", chinese: "如果那两个字没有颤抖" },
+                    { jyutping: "ngo5 bat1 wui5 faat3 gok3 ngo5 naan4 sau6", chinese: "我不会发觉我难受" },
+                    { jyutping: "zam2 mo1 syut3 ceot1 hau2", chinese: "怎么说出口" },
+                    { jyutping: "jaa5 bat1 gwo3 si6 fan1 sau2", chinese: "也不过是分手" },
+                    { jyutping: "jyu4 gwo2 deoi3 ming4 tin1 mut6 jau5 jiu1 kau4", chinese: "如果对于明天没有要求" },
+                    { jyutping: "hin1 hin1 sau2 zau6 zoeng6 jau4 laap6", chinese: "牵牵手就像旅游" },
+                    { jyutping: "sing4 cin1 soeng6 maan6 go3 mun4 hau2", chinese: "成千上万个门口" },
+                    { jyutping: "zung2 jau5 jat1 go3 jan4 jiu3 sin1 zau2", chinese: "总有一个人要先走" },
+                    { jyutping: "waai4 pou2 gi3 jin4 bat1 nang4 dau6 lau4", chinese: "怀抱既然不能逗留" },
+                    { jyutping: "ho4 bat1 zoi6 lei4 hoi1 dik1 si4 hau6", chinese: "何不在离开的时候" },
+                    { jyutping: "jat1 bin1 hoeng2 sau6 jat1 bin1 leoi6 lau4", chinese: "一边享受一边泪流" },
+                    { jyutping: "sap6 nin4 zi1 cin4", chinese: "十年之前" },
+                    { jyutping: "ngo5 bat1 jing1 sik1 nei5", chinese: "我不认识你" },
+                    { jyutping: "nei5 bat1 suk6 jyu6 ngo5", chinese: "你不属于我" },
+                    { jyutping: "ngo5 mun4 waa4 si6 jat1 joeng6", chinese: "我们还是一样" },
+                    { jyutping: "pui4 zoi6 jat1 go3 maang1 jan1 jan4 zo2 jau6", chinese: "陪在一个陌生人左右" },
+                    { jyutping: "zau2 gwo3 zan6 zin6 suk1 sik1 dik1 gaai1 tau4", chinese: "走过渐渐熟悉的街头" },
+                    { jyutping: "sap6 nin4 zi1 hau6", chinese: "十年之后" },
+                    { jyutping: "ngo5 mun4 si6 pang4 jau5", chinese: "我们是朋友" },
+                    { jyutping: "waa4 ho2 ji5 man6 hau3", chinese: "还可以问候" },
+                    { jyutping: "zi2 si6 naa5 zung1 wan1 jau4", chinese: "只是那种温柔" },
+                    { jyutping: "zoi3 jaa5 zaau2 bat1 dou3 jiu5 pou5 dik1 lei4 jau5", chinese: "再也找不到拥抱的理由" },
+                    { jyutping: "cing4 jan4 zeoi3 hau6 naan4 min4 leon4 wai4 pang4 jau5", chinese: "情人最后难免沦为朋友" },
+                    { jyutping: "waai4 pou2 gi3 jin4 bat1 nang4 dau6 lau4", chinese: "怀抱既然不能逗留" },
+                    { jyutping: "ho4 bat1 zoi6 lei4 hoi1 dik1 si4 hau6", chinese: "何不在离开的时候" },
+                    { jyutping: "jat1 bin1 hoeng2 sau6 jat1 bin1 leoi6 lau4", chinese: "一边享受一边泪流" },
+                    { jyutping: "sap6 nin4 zi1 cin4", chinese: "十年之前" },
+                    { jyutping: "ngo5 bat1 jing1 sik1 nei5", chinese: "我不认识你" },
+                    { jyutping: "nei5 bat1 suk6 jyu6 ngo5", chinese: "你不属于我" },
+                    { jyutping: "ngo5 mun4 waa4 si6 jat1 joeng6", chinese: "我们还是一样" },
+                    { jyutping: "pui4 zoi6 jat1 go3 maang1 jan1 jan4 zo2 jau6", chinese: "陪在一个陌生人左右" },
+                    { jyutping: "zau2 gwo3 zan6 zin6 suk1 sik1 dik1 gaai1 tau4", chinese: "走过渐渐熟悉的街头" },
+                    { jyutping: "sap6 nin4 zi1 hau6", chinese: "十年之后" },
+                    { jyutping: "ngo5 mun4 si6 pang4 jau5", chinese: "我们是朋友" },
+                    { jyutping: "waa4 ho2 ji5 man6 hau3", chinese: "还可以问候" },
+                    { jyutping: "zi2 si6 naa5 zung1 wan1 jau4", chinese: "只是那种温柔" },
+                    { jyutping: "zoi3 jaa5 zaau2 bat1 dou3 jiu5 pou5 dik1 lei4 jau5", chinese: "再也找不到拥抱的理由" },
+                    { jyutping: "cing4 jan4 zeoi3 hau6 naan4 min4 leon4 wai4 pang4 jau5", chinese: "情人最后难免沦为朋友" },
+                    { jyutping: "zik6 dou3 wo4 nei5 zou6 liu5 do1 nin4 pang4 jau5", chinese: "直到和你做了多年朋友" },
+                    { jyutping: "coi4 ming4 baak6 ngo5 dik1 ngaan5 leoi6", chinese: "才明白我的眼泪" },
+                    { jyutping: "bat1 si6 wai6 nei5 ji4 lau4", chinese: "不是为你而流" },
+                    { jyutping: "jaa5 wai6 ta1 jan4 ji4 lau4", chinese: "也为别人而流" }
+                ]
+            }]
         },
         {
             id: 5,
@@ -603,79 +629,91 @@
             composer: "Makaino Koji",
             composerJyutping: "—",
             color: "#a18cd1",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "aat3 haa6 jat1 go3 gwo3 haak3", chinese: "刹那一个过客" },
-                        { jyutping: "zoi6 mou5 cyu4 lau4 haa6", chinese: "在某处留下" },
-                        { jyutping: "gwong1 fai1 dik1 zung1 zik1", chinese: "光辉的踪迹" },
-                        { jyutping: "cung4 bat1 zi1 hai6 tung4 bit3", chinese: "从不知是告别" },
-                        { jyutping: "wong4 ji5 hai6 zoi6 soeng1 joek6", chinese: "还以为是在相约" },
-                        { jyutping: "loi4 jat6 zoi3 zuk6 cin4 jyun4", chinese: "来日再续前缘" },
-                        { jyutping: "dou3 ze5 tin1 fong1 zi1 hai6 co3", chinese: "到这天方知是错" }
-                    ]
-                },
-                {
-                    label: "副歌",
-                    lines: [
-                        { jyutping: "daan6 cin1 cin1 maan5 sing1", chinese: "但千千晚星" },
-                        { jyutping: "loeng6 gwo3 cin1 cin1 maan5 sing1", chinese: "亮过千千晚星" },
-                        { jyutping: "dou1 bat1 hei2 ci2 saam1 siu1", chinese: "都比不起这宵美丽" },
-                        { jyutping: "mei5 lai6 jik6 zyut6 bat1 ho2", chinese: "亦绝不可使我更欣赏" },
-                        { jyutping: "si2 ngo5 gam1 maan5 gung6 nei5 coeng3", chinese: "因你今晚共我唱" },
-                        { jyutping: "aa3 ~ lam4 hang4 cin4 wui4 tau4 mong6", chinese: "啊～临行前回头望" },
-                        { jyutping: "zoeng1 hak1 kuk1 dik1 sang1 jam1", chinese: "将哭泣的声音" },
-                        { jyutping: "lau4 zoi6 gam1 je6 fung1 zung1", chinese: "留在今夜风中" }
-                    ]
-                }
-            ]
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "ceoi4 ceoi4 wui4 mong6 cang4 suk6 jyu6 bei2 ci2 dik1 maan5 soeng6", chinese: "徐徐回望曾属于彼此的晚上" },
+                    { jyutping: "hung4 hung4 jing4 si6 nei5 zang6 ngo5 sam1 zung1 jim6 joeng4", chinese: "红红仍是你赠我的心中艳阳" },
+                    { jyutping: "jyu4 lau4 so4 leoi6 kei4 mong6 ho2 tai2 seot1 gim1 gin3 loeng6", chinese: "如流傻泪祈望可体恤兼见谅" },
+                    { jyutping: "ming4 san4 lei4 bit6 nei5 lou6 jaa5 heoi2 gu1 daan1 dak1 maan6 coeng4", chinese: "明晨离别你路也许孤单得漫长" },
+                    { jyutping: "jat1 saan3 haa6 do1 si6 dung1 sai1 jiu3 gong2", chinese: "一瞬间太多东西要讲" },
+                    { jyutping: "ho2 sik1 zik1 zoeng1 zoi6 gok3 jat1 fong1", chinese: "可惜即将在各一方" },
+                    { jyutping: "zi2 hou2 sam1 sam1 baa2 ze5 hak1 zan6 jing4 mong6", chinese: "只好深深把这刻尽凝望" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 kyut3 go1", chinese: "来日纵是千千阙歌" },
+                    { jyutping: "piu1 jyu1 jyun5 fong1 ngo5 lou6 soeng6", chinese: "飘于远方我路上" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 maan5 sing1", chinese: "来日纵是千千晚星" },
+                    { jyutping: "loeng6 gwo3 gam1 maan5 jyut6 loeng4", chinese: "亮过今晚月亮" },
+                    { jyutping: "dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "aa3 jan1 nei5 gam1 maan5 gung6 ngo5 coeng3", chinese: "Ah因你今晚共我唱" },
+                    { jyutping: "lam4 hang4 lam4 bit6 coi4 deon6 gam2 oi1 soeng1 dik1 piu3 loeng6", chinese: "临行临别才顿感哀伤的漂亮" },
+                    { jyutping: "jyun4 loi4 cyun4 si6 nei5 ling6 ngo5 dik1 si1 jik1 maan6 coeng4", chinese: "原来全是你令我的思忆漫长" },
+                    { jyutping: "ho4 nin4 ho4 jyut6 coi4 jau6 ho2 gam1 siu1 jat1 joeng6", chinese: "何年何月才又可今宵一样" },
+                    { jyutping: "ting4 lau4 jing4 mong6 leoi5 joeng6 ngaan5 ging1 gong2 bei2 ci2 laap6 hong4", chinese: "停留凝望里让眼睛讲彼此立场" },
+                    { jyutping: "dong1 mau5 tin1 jyu5 dim2 hing1 haau1 nei5 coeng1", chinese: "当某天雨点轻敲你窗" },
+                    { jyutping: "dong1 fung1 sing1 ceoi1 lyun6 nei5 gau3 soeng2", chinese: "当风声吹乱你构想" },
+                    { jyutping: "ho2 fau2 cau1 hung1 soeng2 ze5 zoeng1 gau6 mou6 joeng6", chinese: "可否抽空想这张旧模样" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 kyut3 go1", chinese: "来日纵是千千阙歌" },
+                    { jyutping: "piu1 jyu1 jyun5 fong1 ngo5 lou6 soeng6", chinese: "飘于远方我路上" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 maan5 sing1", chinese: "来日纵是千千晚星" },
+                    { jyutping: "loeng6 gwo3 gam1 maan5 jyut6 loeng4", chinese: "亮过今晚月亮" },
+                    { jyutping: "dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "aa3 jan1 nei5 gam1 maan5 gung6 ngo5 coeng3", chinese: "Ah因你今晚共我唱" },
+                    { jyutping: "aa3 zam2 dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "Ah怎都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "jan1 gam1 siu1 dik1 ngo5 ho2 gung6 nei5 coeng3 coeng3", chinese: "因今宵的我可共你畅唱" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 kyut3 go1", chinese: "来日纵是千千阙歌" },
+                    { jyutping: "piu1 jyu1 jyun5 fong1 ngo5 lou6 soeng6", chinese: "飘于远方我路上" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 maan5 sing1", chinese: "来日纵是千千晚星" },
+                    { jyutping: "loeng6 gwo3 gam1 maan5 jyut6 loeng4", chinese: "亮过今晚月亮" },
+                    { jyutping: "dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "aa3 jan1 nei5 gam1 maan5 gung6 ngo5 coeng3", chinese: "Ah因你今晚共我唱" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 kyut3 go1", chinese: "来日纵是千千阙歌" },
+                    { jyutping: "piu1 jyu1 jyun5 fong1 ngo5 lou6 soeng6", chinese: "飘于远方我路上" },
+                    { jyutping: "loi4 jat6 zung6 si6 cin1 cin1 maan5 sing1", chinese: "来日纵是千千晚星" },
+                    { jyutping: "loeng6 gwo3 gam1 maan5 jyut6 loeng4", chinese: "亮过今晚月亮" },
+                    { jyutping: "dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "aa3 jan1 nei5 gam1 maan5 gung6 ngo5 coeng3", chinese: "Ah因你今晚共我唱" },
+                    { jyutping: "aa3 zam2 dou1 bat1 hei2 ci2 ze5 siu1 mei5 lai6", chinese: "Ah怎都比不起这宵美丽" },
+                    { jyutping: "jik6 zyut6 bat1 ho2 si2 ngo5 gang1 hoeng1", chinese: "亦绝不可使我更欣赏" },
+                    { jyutping: "jan1 gam1 siu1 dik1 ngo5 ho2 gung6 nei5 coeng3 coeng3", chinese: "因今宵的我可共你畅唱" }
+                ]
+            }]
         },
         {
             id: 6,
-            title: "海阔天空",
-            titleJyutping: "hoi2 fut3 tin1 hung1",
-            artist: "Beyond",
-            artistJyutping: "Beyond",
-            lyricist: "黄家驹",
-            lyricistJyutping: "wong4 gaa1 keoi1",
-            composer: "黄家驹",
-            composerJyutping: "wong4 gaa1 keoi1",
+            title: "重复犯错",
+            titleJyutping: "cung4 fuk1 faan6 co3",
+            artist: "古巨基",
+            artistJyutping: "gu2 geoi6 gei1",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "陈辉阳",
+            composerJyutping: "can4 fai1 joeng4",
             color: "#fccb90",
-            sections: [
-                {
-                    label: "主歌",
-                    lines: [
-                        { jyutping: "sam1 zung1 zung2 jau5 jat1 di1 ham6", chinese: "心中总有一些憾" },
-                        { jyutping: "zoi6 fung1 zung1 piu1 saan3", chinese: "在风中飘散" },
-                        { jyutping: "bat1 heoi3 gun2 taa1 zau6 syun3", chinese: "不去管它就算它多难" },
-                        { jyutping: "do1 siu3 ci3", chinese: "多少次" },
-                        { jyutping: "jing4 zoek6 laang5 ngaan5 jyu5 ciu3 siu3", chinese: "迎着冷眼与嘲笑" },
-                        { jyutping: "cung4 mou5 jau5 fong3 hei6 gwo3", chinese: "从没有放弃过" },
-                        { jyutping: "sam1 zung1 dik1 leoi5 soeng2", chinese: "心中的理想" }
-                    ]
-                },
-                {
-                    label: "副歌",
-                    lines: [
-                        { jyutping: "jyun4 loeng6 ngo5 ze5 jat1 sang1", chinese: "原谅我这一生" },
-                        { jyutping: "bat1 gai1 fong3 zung6 oi3 zi6 jau4", chinese: "不羁放纵爱自由" },
-                        { jyutping: "jaa5 wui5 paa3 jat1 tin1", chinese: "也会怕有一天" },
-                        { jyutping: "wui5 dit3 dou2", chinese: "会跌倒" },
-                        { jyutping: "bui3 hei3 liu5 leoi5 soeng2", chinese: "背弃了理想" },
-                        { jyutping: "seoi4 jan4 dou1 ho2 ji5", chinese: "谁人都可以" },
-                        { jyutping: "naa5 wui5 paa3 jat1 tin1", chinese: "那会怕有一天" },
-                        { jyutping: "zi2 nei5 gung6 ngo5", chinese: "只你共我" },
-                        { jyutping: "jing1 jin4 zi6 jau4 zi6 ngo5", chinese: "仍然自由自我" },
-                        { jyutping: "wing5 jyun5 gou1 coeng3 ngo5 go1", chinese: "永远高唱我歌" },
-                        { jyutping: "zau2 dim3 pin4 gong1 waa4", chinese: "走遍千里" }
-                    ]
-                }
-            ]
+            sections: [{
+                label: "歌词",
+                lines: [
+                    { jyutping: "bat1 zi1 nei5 naan4 gwo3 zik6 mok6", chinese: "不知你难过寂寞" },
+                    { jyutping: "ting1 dou3 nei5 syut3 wui5 gei3 nei5 han5 gau1 m4 hoi1 sam1", chinese: "听到你说会记你很久不开心" },
+                    { jyutping: "giu3 bat1 giu3 nei5 dou1 dak1 hei2 nei5", chinese: "叫不叫你都得起你" },
+                    { jyutping: "m4 wui5 cung4 si3 jau6 zoi6 nei5 min6 cin4", chinese: "唔会重试又在你面前" },
+                    { jyutping: "cung4 fuk1 faan6 co3", chinese: "重复犯错" },
+                    { jyutping: "ze5 ci3 ngo5 faan6 liu5 co3", chinese: "这次我犯了错" },
+                    { jyutping: "cing2 nei5 jyun4 loeng6 ngo5", chinese: "请你原谅我" },
+                    { jyutping: "bat1 zi1 nei5 naan4 gwo3 zik6 mok6", chinese: "不知你难过寂寞" },
+                    { jyutping: "ting1 dou3 nei5 syut3 wui5 gei3 nei5 han5 gau1 m4 hoi1 sam1", chinese: "听到你说会记你很久不开心" },
+                    { jyutping: "giu3 bat1 giu3 nei5 dou1 dak1 hei2 nei5", chinese: "叫不叫你都得起你" },
+                    { jyutping: "m4 wui5 cung4 si3 jau6 zoi6 nei5 min6 cin4", chinese: "唔会重试又在你面前" },
+                    { jyutping: "cung4 fuk1 faan6 co3", chinese: "重复犯错" }
+                ]
+            }]
         }
     ];
 
-    // Get unique artists
     const artists = [...new Set(songs.map(s => s.artist))];
     const artistColors = ['#f5576c', '#4facfe', '#43e97b', '#fa709a', '#a18cd1', '#fccb90', '#667eea', '#764ba2'];
 
@@ -689,75 +727,46 @@
         { jyutping: 17, chinese: 26 }
     ];
 
-    // Initialize filter tabs
     function initFilterTabs() {
         const tabsContainer = document.getElementById('filterTabs');
         let tabsHTML = '<div class="filter-tab active" data-filter="all" onclick="setFilter(\'all\')">全部</div>';
-        
-        artists.forEach((artist, index) => {
+        artists.forEach((artist) => {
             tabsHTML += `<div class="filter-tab" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</div>`;
         });
-        
         tabsContainer.innerHTML = tabsHTML;
     }
 
     function setFilter(artist) {
         currentFilter = artist;
-        
-        // Update tab styles
         document.querySelectorAll('.filter-tab').forEach(tab => {
-            if (tab.dataset.filter === artist) {
-                tab.classList.add('active');
-            } else {
-                tab.classList.remove('active');
-            }
+            tab.classList.toggle('active', tab.dataset.filter === artist);
         });
-        
         renderSongList();
     }
 
     function renderSongList(filter = '') {
         const list = document.getElementById('songList');
         let filtered = songs;
-        
-        // Apply artist filter
         if (currentFilter !== 'all') {
             filtered = filtered.filter(s => s.artist === currentFilter);
         }
-        
-        // Apply search filter
         if (filter) {
             filtered = filtered.filter(s => s.title.includes(filter));
         }
-
         if (filtered.length === 0) {
             list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><div class="text">没有找到匹配的歌曲</div></div>';
             return;
         }
-
-        // Group by artist
         const grouped = {};
         filtered.forEach(song => {
-            if (!grouped[song.artist]) {
-                grouped[song.artist] = [];
-            }
+            if (!grouped[song.artist]) grouped[song.artist] = [];
             grouped[song.artist].push(song);
         });
-
         let html = '';
         Object.entries(grouped).forEach(([artist, artistSongs]) => {
             const artistIndex = artists.indexOf(artist);
             const color = artistColors[artistIndex % artistColors.length];
-            
-            html += `
-                <div class="artist-section">
-                    <div class="artist-header">
-                        <div class="artist-dot" style="background: ${color}"></div>
-                        <div class="artist-name">${artist}</div>
-                        <div class="artist-count">${artistSongs.length}首</div>
-                    </div>
-            `;
-            
+            html += `<div class="artist-section"><div class="artist-header"><div class="artist-dot" style="background: ${color}"></div><div class="artist-name">${artist}</div><div class="artist-count">${artistSongs.length}首</div></div>`;
             html += artistSongs.map(song => `
                 <div class="song-card" onclick="openSong(${song.id})">
                     <div class="song-card-info">
@@ -767,16 +776,13 @@
                     <div class="song-card-arrow">›</div>
                 </div>
             `).join('');
-            
             html += '</div>';
         });
-
         list.innerHTML = html;
     }
 
     function filterSongs() {
-        const query = document.getElementById('searchInput').value.trim();
-        renderSongList(query);
+        renderSongList(document.getElementById('searchInput').value.trim());
     }
 
     function openSong(id) {
@@ -787,7 +793,6 @@
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').textContent = currentSong.title;
         updateFavIcon();
-
         document.getElementById('songInfo').innerHTML = `
             <div class="song-info-jyutping">${currentSong.titleJyutping}</div>
             <div class="song-info-title">${currentSong.title}</div>
@@ -859,17 +864,13 @@
     function toggleFontSize() {
         fontLevel = (fontLevel + 1) % fontSizes.length;
         renderLyrics();
-        const labels = ['标准', '大', '特大'];
-        showToast('字号：' + labels[fontLevel]);
+        showToast('字号：' + ['标准', '大', '特大'][fontLevel]);
     }
 
     function shareSong() {
         if (!currentSong) return;
         const text = `🎵 ${currentSong.title} - ${currentSong.artist}\n\n` +
-            currentSong.sections.map(s =>
-                `【${s.label}】\n` +
-                s.lines.map(l => `${l.jyutping}\n${l.chinese}`).join('\n')
-            ).join('\n\n');
+            currentSong.sections.map(s => `【${s.label}】\n` + s.lines.map(l => `${l.jyutping}\n${l.chinese}`).join('\n')).join('\n\n');
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => showToast('歌词已复制到剪贴板 📋'));
         } else {
@@ -887,7 +888,6 @@
         setTimeout(() => toast.remove(), 2000);
     }
 
-    // Initialize
     initFilterTabs();
     renderSongList();
     </script>
