@@ -50,7 +50,7 @@
             { chars: ["（","背","弃","了","理","想"," ","谁","人","都","可","以","）"," ","whoa-oh"], jp: ["","bui3","hei3","liu5","lei5","soeng2","","seoi4","jan4","dou1","ho2","ji5","","","whoa-oh"] },
             { chars: ["（","哪","会","怕","有","一","天","只","你","共","我","）"], jp: ["","naa5","wui5","paa3","jau5","jat1","tin1","zi2","nei5","gung6","ngo5",""] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }

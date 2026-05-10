@@ -64,7 +64,7 @@
             { paragraphBreak: true },
             { chars: ["你","还","嫌","不","够"," ","我","把","这","陈","年","风","褛","送","赠","你","解","咒"], jp: ["nei5","waan4","jim4","bat1","gau3","","ngo5","baa2","ze5","can4","nin4","fung1","lau6","sung3","zang6","nei5","gaai2","zau3"] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }

@@ -66,7 +66,7 @@
             { chars: ["都","洗","不","清","今","晚","我","所","想"], jp: ["dou1","sai2","bat1","cing1","gam1","maan5","ngo5","so2","soeng2"] },
             { chars: ["因","不","知","哪","天","再","共","你","唱"], jp: ["jan1","bat1","zi1","naa5","tin1","zoi3","gung6","nei5","coeng3"] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }

@@ -73,7 +73,7 @@
             { chars: ["于","嘴","边","掠","过"], jp: ["jyu1","zeoi2","bin1","loek6","gwo3"] },
             { chars: ["你","的","内","心","竟","在","避","我"], jp: ["nei5","dik1","noi6","sam1","ging2","zoi6","bei6","ngo5"] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }

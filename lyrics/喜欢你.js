@@ -44,7 +44,7 @@
             { chars: ["愿","再","可"," ","轻","抚","你"," ","那","可","爱","面","容"], jp: ["jyun6","zoi3","ho2","","hing1","fu2","nei5","","naa5","ho2","oi3","min6","jung4"] },
             { chars: ["挽","手","说","梦","话"," ","像","昨","天"," ","你","共","我"], jp: ["waan5","sau2","syut3","mung6","waa6","","zoeng6","zok3","tin1","","nei5","gung6","ngo5"] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }

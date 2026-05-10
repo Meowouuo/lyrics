@@ -55,7 +55,7 @@
             { chars: ["到","这","日","才","发","现"], jp: ["dou3","ze5","jat6","coi4","faat3","jin6"] },
             { chars: ["曾","呼","吸","过","空","气"], jp: ["cang4","fu1","kap1","gwo3","hung1","hei3"] }
         ]
-;
+    };
     if (typeof window !== 'undefined' && window.__songs) {
         window.__songs.push(song);
     }
