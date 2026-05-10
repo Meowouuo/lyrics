@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>粤拼歌词 | Cantonese Lyrics with Jyutping</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                border-radius: 16px;
+                min-height: calc(100vh - 40px);
+                overflow: hidden;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title { font-size: 17px; font-weight: 600; color: #000; }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #333;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        /* Song List */
+        .song-list-page { padding: 12px 16px; padding-bottom: 80px; }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
+            padding-top: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 16px;
+        }
+
+        .search-bar { margin-bottom: 16px; position: relative; }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #fafafa;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #ddd;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .song-card {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: #fafafa;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .song-card:hover { background: #f0f0f0; border-color: #e0e0e0; }
+        .song-card:active { transform: scale(0.98); }
+
+        .song-card-cover {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 24px;
+        }
+
+        .song-card-cover.c0 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .song-card-cover.c1 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .song-card-cover.c2 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .song-card-cover.c3 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .song-card-cover.c4 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+        .song-card-cover.c5 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+
+        .song-card-info { margin-left: 14px; flex: 1; min-width: 0; }
+
+        .song-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-card-artist { font-size: 13px; color: #999; }
+        .song-card-arrow { color: #ccc; font-size: 20px; flex-shrink: 0; margin-left: 8px; }
+
+        /* Lyrics Page */
+        .lyrics-page { display: none; padding-bottom: 80px; }
+        .lyrics-page.active { display: block; }
+        .song-list-page.hidden { display: none; }
+
+        /* Song Info */
+        .song-info {
+            padding: 28px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .song-info-jyutping {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+        }
+
+        .song-info-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 14px;
+        }
+
+        .song-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .song-meta-item { text-align: center; }
+
+        .song-meta-jyutping {
+            font-size: 11px;
+            color: #ccc;
+            margin-bottom: 2px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+        }
+
+        .song-meta-text { font-size: 13px; color: #666; }
+
+        /* Lyrics Body */
+        .lyrics-body { padding: 16px 20px; }
+
+        .lyric-section { margin-bottom: 24px; }
+
+        .lyric-section-label {
+            font-size: 11px;
+            color: #ccc;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            padding-left: 2px;
+            font-weight: 500;
+        }
+
+        .lyric-line {
+            display: flex;
+            align-items: flex-start;
+            padding: 9px 0;
+            border-bottom: 1px solid #fafafa;
+            animation: fadeIn 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .lyric-line:last-child { border-bottom: none; }
+
+        .lyric-line:nth-child(1) { animation-delay: 0.02s; }
+        .lyric-line:nth-child(2) { animation-delay: 0.04s; }
+        .lyric-line:nth-child(3) { animation-delay: 0.06s; }
+        .lyric-line:nth-child(4) { animation-delay: 0.08s; }
+        .lyric-line:nth-child(5) { animation-delay: 0.10s; }
+        .lyric-line:nth-child(6) { animation-delay: 0.12s; }
+        .lyric-line:nth-child(7) { animation-delay: 0.14s; }
+        .lyric-line:nth-child(8) { animation-delay: 0.16s; }
+        .lyric-line:nth-child(9) { animation-delay: 0.18s; }
+        .lyric-line:nth-child(10) { animation-delay: 0.20s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lyric-speaker {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            margin-top: 6px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .lyric-content { flex: 1; min-width: 0; }
+
+        .lyric-jyutping {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 2px;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            word-break: break-all;
+        }
+
+        .lyric-chinese {
+            font-size: 20px;
+            font-weight: 500;
+            color: #000;
+            line-height: 1.6;
+            letter-spacing: 1px;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        @media (min-width: 768px) {
+            .bottom-bar { border-radius: 0 0 16px 16px; }
+        }
+
+        .bottom-actions { display: flex; gap: 20px; }
+
+        .bottom-action-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: color 0.2s;
+        }
+
+        .bottom-action-btn:hover { color: #666; }
+        .bottom-action-btn .icon { font-size: 20px; }
+
+        .share-btn {
+            background: #07C160;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .share-btn:hover { background: #06ad56; }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state .text { font-size: 14px; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+            pointer-events: none;
+        }
+
+        ::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header" id="header">
+            <button class="back-btn" id="backBtn" style="display:none;" onclick="goBack()">←</button>
+            <span class="header-title" id="headerTitle">粤拼歌词</span>
+        </div>
+
+        <div class="song-list-page" id="songListPage">
+            <div class="page-title">🎵 粤拼歌词</div>
+            <div class="page-subtitle">粤语歌词 · 粤拼对照 · 学唱粤语歌</div>
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲名或歌手..." oninput="filterSongs()">
+            </div>
+            <div id="songList"></div>
+        </div>
+
+        <div class="lyrics-page" id="lyricsPage">
+            <div class="song-info" id="songInfo"></div>
+            <div class="lyrics-body" id="lyricsBody"></div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="bottom-actions">
+                <button class="bottom-action-btn" onclick="toggleFavorite()">
+                    <span class="icon" id="favIcon">☆</span>
+                    <span>收藏</span>
+                </button>
+                <button class="bottom-action-btn" onclick="toggleFontSize()">
+                    <span class="icon">Aa</span>
+                    <span>字号</span>
+                </button>
+            </div>
+            <button class="share-btn" onclick="shareSong()">
+                <span>💬</span>
+                <span>分享给好友</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    const songs = [
+        {
+            id: 1,
+            title: "重复犯错",
+            titleJyutping: "cung4 fuk1 faan6 co3",
+            artist: "古巨基",
+            artistJyutping: "gu2 geoi6 gei1",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "陈辉阳",
+            composerJyutping: "can4 fai1 joeng4",
+            coverClass: "c0",
+            emoji: "🎤",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "bat1 zi1 nei5 naan4 gwo3 zik6 mok6", chinese: "不知你难过寂寞" },
+                        { jyutping: "ting1 dou3 nei5 syut3 wui5 ji5 nei5", chinese: "听到你说会记你" },
+                        { jyutping: "hou2 noi6 m4 hoi1 sam1", chinese: "很久不开心" },
+                        { jyutping: "jiu3 m4 giu3 nei5 dou1 dak1 nei5", chinese: "叫不叫你都得起" },
+                        { jyutping: "m4 wui5 jek6 zung6 ji3 jau6 hai2", chinese: "唔会重试又在" },
+                        { jyutping: "nei5 bun3 min6 cung4 fuk1 faan6 co3", chinese: "你面前重复犯错" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 2,
+            title: "富士山下",
+            titleJyutping: "fu2 si6 saan1 haa6",
+            artist: "陈奕迅",
+            artistJyutping: "can4 jik6 seon3",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "Christopher Chak",
+            composerJyutping: "—",
+            coverClass: "c1",
+            emoji: "🏔️",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "laan4 lou6 jyu5 pin1 ci5 syut3 faa1", chinese: "拦路雨偏似雪花" },
+                        { jyutping: "jam2 kap1 dik1 nei5 dung3 maa3", chinese: "饮泣的你冻吗" },
+                        { jyutping: "ze5 fung1 lau6 ngo5 kap1 nei5", chinese: "这风褛我给你" },
+                        { jyutping: "mo4 dou3 jau5 kam1 faa1", chinese: "磨到有襟花" },
+                        { jyutping: "lin4 tiu4 liu5 zik1 jat6 m4 paa3", chinese: "连调了职也不怕" },
+                        { jyutping: "zem2 mo1 ci2 zung1 gin1 gyun1 waa4", chinese: "怎么始终牵挂" },
+                        { jyutping: "fu2 sam1 zyun2 zung6 gam1 tin1", chinese: "苦心选中今天" },
+                        { jyutping: "soeng2 ce1 nei5 wui1 gaa1", chinese: "想车你回家" },
+                        { jyutping: "jyun4 loeng6 ngo5 bat1 zoi3 sung3 faa1", chinese: "原谅我不再送花" },
+                        { jyutping: "saang1 hong2 jing1 jiu3 git3 paa4", chinese: "伤口应要结疤" },
+                        { jyutping: "faa1 pin4 pou1 mun5 sam1 leoi5", chinese: "花瓣铺满心里" },
+                        { jyutping: "fan4 coeng4 coi4 haa6", chinese: "坟场才害怕" }
+                    ]
+                },
+                {
+                    label: "副歌",
+                    lines: [
+                        { jyutping: "jyu4 joek6 nei5 fei1 ngo5 bat1 gaa3", chinese: "如若你非我不嫁" },
+                        { jyutping: "bei2 ci2 zung1 bit1 fo2 faa3", chinese: "彼此终必火化" },
+                        { jyutping: "jat1 sang1 jat1 sai3 dang2 jat1 tin1", chinese: "一生一世等一天" },
+                        { jyutping: "seoi1 jiu3 dai6 gaa3", chinese: "需要代价" },
+                        { jyutping: "seoi4 dou1 zi2 dak1 naa5 soeng1 sau2", chinese: "谁都只得那双手" },
+                        { jyutping: "kaau3 jiu5 pou5 jik6 naan4 jam6 nei5", chinese: "靠拥抱亦难任你" },
+                        { jyutping: "jung2 jau5 jiu3 jung1 dung3 sik1 tau1", chinese: "拥有要懂失去" },
+                        { jyutping: "zem2 sou3", chinese: "怎接受" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 3,
+            title: "十年",
+            titleJyutping: "sap6 nin4",
+            artist: "陈奕迅",
+            artistJyutping: "can4 jik6 seon3",
+            lyricist: "林夕",
+            lyricistJyutping: "lam4 sik1",
+            composer: "陈小霞",
+            composerJyutping: "can4 siu2 haa4",
+            coverClass: "c2",
+            emoji: "🕰️",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "jat1 ci3 jat1 cek3 coeng4 hei2 tau4", chinese: "如果那两个字没有颤抖" },
+                        { jyutping: "ngo5 hui2 bat1 wui5 faan6 sau2", chinese: "我不会发觉我难受" },
+                        { jyutping: "sei3 hoi1 sam1 laap6 zuk6 hou2 sau1", chinese: "怎么说出口" },
+                        { jyutping: "bat1 wui5 dei3 tau4", chinese: "也不过是分手" },
+                        { jyutping: "jat1 ci3 ceot1 tau4 hai2 jat1 sai3 hou2", chinese: "如果对于明天没有要求" },
+                        { jyutping: "cip3 baan3 ding3 hai2 ci3 ging1 jau5", chinese: "牵牵手就像旅游" },
+                        { jyutping: "bat1 zi6 jat1 cek3 heoi3 zau6 siu3", chinese: "不识一个去处" },
+                        { jyutping: "bat1 zi6 jat1 go3 tau4 dou3", chinese: "不识一个尽头" }
+                    ]
+                },
+                {
+                    label: "副歌",
+                    lines: [
+                        { jyutping: "jiu4 jat1 cek3 jat1 cek3 jat1 cek3", chinese: "就一个一个一个" },
+                        { jyutping: "gwo3 sai3 jat1 cek3 jat1 cek3 jat1 cek3", chinese: "过十年一个一个" },
+                        { jyutping: "ngo5 dei6 dou1 wui5 zung6 jyu4 jat1 cek3", chinese: "我们都会重聚于一个" },
+                        { jyutping: "jat1 cek3 jat1 cek3 jat1 cek3", chinese: "一个一个一个" },
+                        { jyutping: "jat1 cek3 jat1 cek3 jat1 cek3", chinese: "一个一个一个" },
+                        { jyutping: "zau6 hai2 nei5 wui5 tau4 dou3", chinese: "就在你回头处" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 4,
+            title: "喜欢你",
+            titleJyutping: "hei2 fun1 nei5",
+            artist: "Beyond",
+            artistJyutping: "Beyond",
+            lyricist: "黄家驹",
+            lyricistJyutping: "wong4 gaa1 keoi1",
+            composer: "黄家驹",
+            composerJyutping: "wong4 gaa1 keoi1",
+            coverClass: "c3",
+            emoji: "❤️",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "sei1 waan4 jyu4 hai2 nei5 pang4", chinese: "细雨带风湿透黄昏的街道" },
+                        { jyutping: "m4 jyun4 ji5 nei5 dik1 wun2", chinese: "抹去雨水双眼无故地仰望" },
+                        { jyutping: "tou4 sing1 sap1 faan1 jyun4", chinese: "望向孤单的晚灯" },
+                        { jyutping: "jing4 hai6 jat1 go3 sam1 duk1", chinese: "是那伤感的记忆" }
+                    ]
+                },
+                {
+                    label: "副歌",
+                    lines: [
+                        { jyutping: "hei2 fun1 nei5", chinese: "喜欢你" },
+                        { jyutping: "nei5 dik1 mei5 jat1 cek3 cuk1 dong3", chinese: "那双眼动人" },
+                        { jyutping: "sing1 zok6 mou4 faan3", chinese: "笑声更迷人" },
+                        { jyutping: "wong4 ji5 jat1 cek3 jat1 cek3", chinese: "愿再可轻抚你" },
+                        { jyutping: "nei5 dik1 min6 bun3", chinese: "那可爱面容" },
+                        { jyutping: "zam1 sing1 wun4 zau6", chinese: "挽手说梦话" },
+                        { jyutping: "bat1 jyun4 ji5 nei5", chinese: "像昨天" },
+                        { jyutping: "nei5 gong3 wo3", chinese: "你共我" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 5,
+            title: "千千阙歌",
+            titleJyutping: "cin1 cin1 kyut3 go1",
+            artist: "陈慧娴",
+            artistJyutping: "can4 wai6 jin4",
+            lyricist: "林振强",
+            lyricistJyutping: "lam4 zan3 koeng4",
+            composer: "Makaino Koji",
+            composerJyutping: "—",
+            coverClass: "c4",
+            emoji: "🎶",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "aat3 haa6 jat1 go3 gwo3 haak3", chinese: "刹那一个过客" },
+                        { jyutping: "zoi6 mou5 cyu4 lau4 haa6", chinese: "在某处留下" },
+                        { jyutping: "gwong1 fai1 dik1 zung1 zik1", chinese: "光辉的踪迹" },
+                        { jyutping: "cung4 bat1 zi1 hai6 tung4 bit3", chinese: "从不知是告别" },
+                        { jyutping: "wong4 ji5 hai6 zoi6 soeng1 joek6", chinese: "还以为是在相约" },
+                        { jyutping: "loi4 jat6 zoi3 zuk6 cin4 jyun4", chinese: "来日再续前缘" },
+                        { jyutping: "dou3 ze5 tin1 fong1 zi1 hai6 co3", chinese: "到这天方知是错" }
+                    ]
+                },
+                {
+                    label: "副歌",
+                    lines: [
+                        { jyutping: "daan6 cin1 cin1 maan5 sing1", chinese: "但千千晚星" },
+                        { jyutping: "loeng6 gwo3 cin1 cin1 maan5 sing1", chinese: "亮过千千晚星" },
+                        { jyutping: "dou1 bat1 hei2 ci2 saam1 siu1", chinese: "都比不起这宵美丽" },
+                        { jyutping: "mei5 lai6 jik6 zyut6 bat1 ho2", chinese: "亦绝不可使我更欣赏" },
+                        { jyutping: "si2 ngo5 gam1 maan5 gung6 nei5 coeng3", chinese: "因你今晚共我唱" },
+                        { jyutping: "aa3 ~ lam4 hang4 cin4 wui4 tau4 mong6", chinese: "啊～临行前回头望" },
+                        { jyutping: "zoeng1 hak1 kuk1 dik1 sang1 jam1", chinese: "将哭泣的声音" },
+                        { jyutping: "lau4 zoi6 gam1 je6 fung1 zung1", chinese: "留在今夜风中" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: 6,
+            title: "海阔天空",
+            titleJyutping: "hoi2 fut3 tin1 hung1",
+            artist: "Beyond",
+            artistJyutping: "Beyond",
+            lyricist: "黄家驹",
+            lyricistJyutping: "wong4 gaa1 keoi1",
+            composer: "黄家驹",
+            composerJyutping: "wong4 gaa1 keoi1",
+            coverClass: "c5",
+            emoji: "🌊",
+            sections: [
+                {
+                    label: "主歌",
+                    lines: [
+                        { jyutping: "sam1 zung1 zung2 jau5 jat1 di1 ham6", chinese: "心中总有一些憾" },
+                        { jyutping: "zoi6 fung1 zung1 piu1 saan3", chinese: "在风中飘散" },
+                        { jyutping: "bat1 heoi3 gun2 taa1 zau6 syun3", chinese: "不去管它就算它多难" },
+                        { jyutping: "do1 siu3 ci3", chinese: "多少次" },
+                        { jyutping: "jing4 zoek6 laang5 ngaan5 jyu5 ciu3 siu3", chinese: "迎着冷眼与嘲笑" },
+                        { jyutping: "cung4 mou5 jau5 fong3 hei6 gwo3", chinese: "从没有放弃过" },
+                        { jyutping: "sam1 zung1 dik1 leoi5 soeng2", chinese: "心中的理想" }
+                    ]
+                },
+                {
+                    label: "副歌",
+                    lines: [
+                        { jyutping: "jyun4 loeng6 ngo5 ze5 jat1 sang1", chinese: "原谅我这一生" },
+                        { jyutping: "bat1 gai1 fong3 zung6 oi3 zi6 jau4", chinese: "不羁放纵爱自由" },
+                        { jyutping: "jaa5 wui5 paa3 jat1 tin1", chinese: "也会怕有一天" },
+                        { jyutping: "wui5 dit3 dou2", chinese: "会跌倒" },
+                        { jyutping: "bui3 hei3 liu5 leoi5 soeng2", chinese: "背弃了理想" },
+                        { jyutping: "seoi4 jan4 dou1 ho2 ji5", chinese: "谁人都可以" },
+                        { jyutping: "naa5 wui5 paa3 jat1 tin1", chinese: "那会怕有一天" },
+                        { jyutping: "zi2 nei5 gung6 ngo5", chinese: "只你共我" },
+                        { jyutping: "jing1 jin4 zi6 jau4 zi6 ngo5", chinese: "仍然自由自我" },
+                        { jyutping: "wing5 jyun5 gou1 coeng3 ngo5 go1", chinese: "永远高唱我歌" },
+                        { jyutping: "zau2 dim3 pin4 gong1 waa4", chinese: "走遍千里" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    let currentSong = null;
+    let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
+    let fontLevel = 0;
+    const fontSizes = [
+        { jyutping: 13, chinese: 20 },
+        { jyutping: 15, chinese: 23 },
+        { jyutping: 17, chinese: 26 }
+    ];
+
+    function renderSongList(filter = '') {
+        const list = document.getElementById('songList');
+        const filtered = songs.filter(s =>
+            s.title.includes(filter) || s.artist.includes(filter) ||
+            s.titleJyutping.toLowerCase().includes(filter.toLowerCase())
+        );
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><div class="text">没有找到匹配的歌曲</div></div>';
+            return;
+        }
+        list.innerHTML = filtered.map(song => `
+            <div class="song-card" onclick="openSong(${song.id})">
+                <div class="song-card-cover ${song.coverClass}">${song.emoji}</div>
+                <div class="song-card-info">
+                    <div class="song-card-title">${song.title}</div>
+                    <div class="song-card-artist">${song.artist}</div>
+                </div>
+                <div class="song-card-arrow">›</div>
+            </div>
+        `).join('');
+    }
+
+    function filterSongs() {
+        renderSongList(document.getElementById('searchInput').value.trim());
+    }
+
+    function openSong(id) {
+        currentSong = songs.find(s => s.id === id);
+        if (!currentSong) return;
+        document.getElementById('songListPage').classList.add('hidden');
+        document.getElementById('lyricsPage').classList.add('active');
+        document.getElementById('backBtn').style.display = 'flex';
+        document.getElementById('headerTitle').textContent = currentSong.title;
+        updateFavIcon();
+
+        document.getElementById('songInfo').innerHTML = `
+            <div class="song-info-jyutping">${currentSong.titleJyutping}</div>
+            <div class="song-info-title">${currentSong.title}</div>
+            <div class="song-meta">
+                <div class="song-meta-item">
+                    <div class="song-meta-jyutping">${currentSong.artistJyutping}</div>
+                    <div class="song-meta-text">歌手：${currentSong.artist}</div>
+                </div>
+                <div class="song-meta-item">
+                    <div class="song-meta-jyutping">${currentSong.lyricistJyutping}</div>
+                    <div class="song-meta-text">填词：${currentSong.lyricist}</div>
+                </div>
+                <div class="song-meta-item">
+                    <div class="song-meta-jyutping">${currentSong.composerJyutping}</div>
+                    <div class="song-meta-text">作曲：${currentSong.composer}</div>
+                </div>
+            </div>
+        `;
+        renderLyrics();
+        window.scrollTo(0, 0);
+    }
+
+    function renderLyrics() {
+        if (!currentSong) return;
+        const size = fontSizes[fontLevel];
+        document.getElementById('lyricsBody').innerHTML = currentSong.sections.map(section => `
+            <div class="lyric-section">
+                <div class="lyric-section-label">${section.label}</div>
+                ${section.lines.map(line => `
+                    <div class="lyric-line">
+                        <div class="lyric-speaker">🔊</div>
+                        <div class="lyric-content">
+                            <div class="lyric-jyutping" style="font-size:${size.jyutping}px">${line.jyutping}</div>
+                            <div class="lyric-chinese" style="font-size:${size.chinese}px">${line.chinese}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `).join('');
+    }
+
+    function goBack() {
+        document.getElementById('lyricsPage').classList.remove('active');
+        document.getElementById('songListPage').classList.remove('hidden');
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('headerTitle').textContent = '粤拼歌词';
+        currentSong = null;
+        window.scrollTo(0, 0);
+    }
+
+    function toggleFavorite() {
+        if (!currentSong) return;
+        const idx = favorites.indexOf(currentSong.id);
+        if (idx > -1) favorites.splice(idx, 1);
+        else favorites.push(currentSong.id);
+        localStorage.setItem('jyutping_favs', JSON.stringify(favorites));
+        updateFavIcon();
+        showToast(favorites.includes(currentSong.id) ? '已收藏 ⭐' : '已取消收藏');
+    }
+
+    function updateFavIcon() {
+        if (!currentSong) return;
+        const icon = document.getElementById('favIcon');
+        const isFav = favorites.includes(currentSong.id);
+        icon.textContent = isFav ? '★' : '☆';
+        icon.style.color = isFav ? '#FFD700' : '';
+    }
+
+    function toggleFontSize() {
+        fontLevel = (fontLevel + 1) % fontSizes.length;
+        renderLyrics();
+        const labels = ['标准', '大', '特大'];
+        showToast('字号：' + labels[fontLevel]);
+    }
+
+    function shareSong() {
+        if (!currentSong) return;
+        const text = `🎵 ${currentSong.title} - ${currentSong.artist}\n\n` +
+            currentSong.sections.map(s =>
+                `【${s.label}】\n` +
+                s.lines.map(l => `${l.jyutping}\n${l.chinese}`).join('\n')
+            ).join('\n\n');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => showToast('歌词已复制到剪贴板 📋'));
+        } else {
+            showToast('浏览器不支持复制');
+        }
+    }
+
+    function showToast(msg) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    renderSongList();
+    </script>
+</body>
+</html>
