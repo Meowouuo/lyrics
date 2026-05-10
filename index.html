@@ -644,8 +644,35 @@
         </main>
     </div>
 
-    <!-- 引入歌曲清单（动态加载歌词文件） -->
-    <script src="lyrics/index.js?v=3"></script>
+    <!-- 歌曲清单（内联，避免缓存问题。新增歌曲时在此数组添加一行） -->
+    <script>
+    const songFiles = [
+        'lyrics/重复犯错.js',
+        'lyrics/喜欢你.js',
+        'lyrics/海阔天空.js',
+        'lyrics/富士山下.js',
+        'lyrics/明年今日.js',
+        'lyrics/千千阙歌.js',
+    ];
+
+    async function loadAllSongs() {
+        window.__songs = [];
+        const loadPromises = songFiles.map(file => {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = file;
+                script.onload = resolve;
+                script.onerror = () => {
+                    console.warn('加载歌曲文件失败:', file);
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        });
+        await Promise.all(loadPromises);
+        return window.__songs;
+    }
+    </script>
     <script>
     // 应用状态
     let songs = [];
