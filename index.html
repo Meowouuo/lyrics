@@ -647,23 +647,20 @@
     <!-- 歌曲清单（内联，避免缓存问题。新增歌曲时在此数组添加一行） -->
     <script>
     const songFiles = [
-        'lyrics/重复犯错-v2.js',
-        'lyrics/喜欢你-v2.js',
-        'lyrics/海阔天空-v2.js',
-        'lyrics/富士山下-v2.js',
-        'lyrics/明年今日-v2.js',
-        'lyrics/千千阙歌-v2.js',
+        'lyrics/重复犯错.js',
+        'lyrics/喜欢你.js',
+        'lyrics/海阔天空.js',
+        'lyrics/富士山下.js',
+        'lyrics/明年今日.js',
+        'lyrics/千千阙歌.js',
     ];
-
-    // 版本号，每次更新歌曲内容后递增，用于破除 CDN 缓存
-    const SONGS_VERSION = 'v2';
 
     async function loadAllSongs() {
         window.__songs = [];
         const loadPromises = songFiles.map(file => {
             return new Promise((resolve) => {
                 const script = document.createElement('script');
-                script.src = file + '?' + SONGS_VERSION;
+                script.src = file;
                 script.onload = resolve;
                 script.onerror = () => {
                     console.warn('加载歌曲文件失败:', file);
