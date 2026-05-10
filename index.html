@@ -627,6 +627,14 @@
                         <button class="toolbar-btn" onclick="adjustFontSize(1)">
                             <span class="icon">A+</span>
                         </button>
+                        <button class="toolbar-btn" onclick="submitFeedback()">
+                            <span class="icon">✏️</span>
+                            <span>纠错</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="submitNewSong()">
+                            <span class="icon">➕</span>
+                            <span>投稿</span>
+                        </button>
                     </div>
                     <button class="toolbar-btn primary" onclick="shareSong()">
                         <span>分享</span>
@@ -1194,6 +1202,21 @@
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
         }
+    }
+
+    // 纠错：跳转到 GitHub Issues
+    function submitFeedback() {
+        const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
+        const title = encodeURIComponent(`[粤拼纠错] ${song}`);
+        const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n\n**错误描述：**\n请描述哪一行的粤拼有误，以及正确的粤拼是什么。\n\n**错误行：**\n> 在这里粘贴歌词行\n\n**正确粤拼：**\n> 在这里提供正确的粤拼\n\n---\n\n请尽量提供完整信息，方便快速修正，谢谢！`);
+        window.open(`https://github.com/Meowouuo/jyutping-lyrics/issues/new?title=${title}&body=${body}&labels=纠错`, '_blank');
+    }
+
+    // 投稿：跳转到 GitHub Issues
+    function submitNewSong() {
+        const title = encodeURIComponent('[新歌投稿]');
+        const body = encodeURIComponent(`## 投稿新歌\n\n**歌曲名称：**\n\n**歌手：**\n\n**填词：**\n\n**作曲：**\n\n**完整歌词：**\n```\n请在这里粘贴完整歌词\n```\n\n---\n\n请尽量提供完整歌词，粤拼会由我们添加，谢谢投稿！`);
+        window.open(`https://github.com/Meowouuo/jyutping-lyrics/issues/new?title=${title}&body=${body}&labels=投稿`, '_blank');
     }
 
     // Init
