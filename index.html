@@ -960,6 +960,25 @@
         document.getElementById('mobileHeader').style.display = 'none';
     }
 
+    // 渲染侧边栏歌手名字（简化版粤拼）
+    function renderCompactArtistWithJyutping(name, jyutpingArray) {
+        if (!jyutpingArray || jyutpingArray.length === 0) {
+            return `<span class="song-artist-hanzi">${name}</span>`;
+        }
+        let html = '';
+        for (let i = 0; i < name.length; i++) {
+            const char = name[i];
+            const jp = jyutpingArray[i] || '';
+            html += `
+                <span class="song-artist-char-group">
+                    <span class="song-artist-jyutping">${jp}</span>
+                    <span class="song-artist-hanzi">${char}</span>
+                </span>
+            `;
+        }
+        return html;
+    }
+
     // 渲染带粤拼的名字（歌手、作词、作曲）
     function renderNameWithJyutping(name, jyutpingArray) {
         if (!jyutpingArray || jyutpingArray.length === 0) {
