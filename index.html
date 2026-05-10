@@ -1104,7 +1104,8 @@
                 const char = line.chars[i];
                 const jp = line.jp[i] || '';
                 if (char === ' ') {
-                    html += '<span style="display:inline-block;width:12px;"></span>';
+                    // 空格处直接换行
+                    html += '</div><div class="lyric-line">';
                 } else {
                     html += `
                         <span class="char-group">
