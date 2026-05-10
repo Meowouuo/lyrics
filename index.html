@@ -8,43 +8,50 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-            background: #f5f5f5;
+            background: #f0f0f0;
             color: #333;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
+
+        /* ===== Container ===== */
         .app-container {
-            max-width: 480px;
+            max-width: 960px;
             margin: 0 auto;
             background: #fff;
             min-height: 100vh;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.08);
         }
         @media (min-width: 768px) {
+            body { background: #e8e8e8; }
             .app-container {
-                margin-top: 20px;
-                margin-bottom: 20px;
+                margin: 24px auto;
                 border-radius: 16px;
-                min-height: calc(100vh - 40px);
+                min-height: calc(100vh - 48px);
+                box-shadow: 0 4px 24px rgba(0,0,0,0.10);
                 overflow: hidden;
             }
         }
+
+        /* ===== Header ===== */
         .header {
             position: sticky;
             top: 0;
             z-index: 100;
             background: #fff;
             border-bottom: 1px solid #eee;
-            padding: 14px 16px;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .header-title { font-size: 17px; font-weight: 600; color: #000; }
+        @media (min-width: 768px) {
+            .header { padding: 18px 32px; border-bottom: 1px solid #e8e8e8; }
+        }
+        .header-title { font-size: 18px; font-weight: 600; color: #000; }
         .back-btn {
             position: absolute;
-            left: 16px;
+            left: 24px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -52,35 +59,46 @@
             font-size: 22px;
             color: #333;
             cursor: pointer;
-            padding: 4px;
+            padding: 4px 8px;
             display: flex;
             align-items: center;
             line-height: 1;
+            border-radius: 8px;
+            transition: background 0.2s;
         }
-        .song-list-page { padding: 12px 16px; padding-bottom: 80px; }
+        .back-btn:hover { background: #f5f5f5; }
+
+        /* ===== Song List ===== */
+        .song-list-page { padding: 20px 24px; padding-bottom: 80px; }
+        @media (min-width: 768px) {
+            .song-list-page { padding: 28px 40px; padding-bottom: 80px; }
+        }
         .page-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             color: #000;
             margin-bottom: 4px;
-            padding-top: 8px;
+            padding-top: 4px;
+        }
+        @media (min-width: 768px) {
+            .page-title { font-size: 32px; }
         }
         .page-subtitle {
-            font-size: 13px;
+            font-size: 14px;
             color: #aaa;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
         .filter-tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             overflow-x: auto;
             padding-bottom: 4px;
             -webkit-overflow-scrolling: touch;
         }
         .filter-tabs::-webkit-scrollbar { display: none; }
         .filter-tab {
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
             font-size: 14px;
             cursor: pointer;
@@ -96,13 +114,13 @@
             color: #fff;
             border-color: #000;
         }
-        .search-bar { margin-bottom: 16px; position: relative; }
+        .search-bar { margin-bottom: 20px; position: relative; }
         .search-input {
             width: 100%;
-            padding: 10px 16px 10px 40px;
+            padding: 12px 16px 12px 42px;
             border: 1px solid #eee;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             background: #fafafa;
             outline: none;
             transition: all 0.2s;
@@ -110,21 +128,23 @@
         .search-input:focus {
             border-color: #ddd;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
         }
         .search-icon {
             position: absolute;
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 14px;
+            font-size: 15px;
             color: #ccc;
         }
-        .artist-section { margin-bottom: 20px; }
+
+        /* ===== Artist Section ===== */
+        .artist-section { margin-bottom: 24px; }
         .artist-header {
             display: flex;
             align-items: center;
-            padding: 12px 4px;
+            padding: 10px 4px;
             margin-bottom: 8px;
         }
         .artist-dot {
@@ -147,7 +167,7 @@
         .song-card {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
+            padding: 16px 20px;
             background: #fafafa;
             border-radius: 12px;
             margin-bottom: 8px;
@@ -156,7 +176,7 @@
             border: 1px solid transparent;
         }
         .song-card:hover { background: #f0f0f0; border-color: #e0e0e0; }
-        .song-card:active { transform: scale(0.98); }
+        .song-card:active { transform: scale(0.99); }
         .song-card-info { flex: 1; min-width: 0; }
         .song-card-title {
             font-size: 16px;
@@ -168,33 +188,37 @@
             text-overflow: ellipsis;
         }
         .song-card-artist { font-size: 13px; color: #999; }
-        .song-card-arrow { color: #ccc; font-size: 20px; flex-shrink: 0; margin-left: 8px; }
+        .song-card-arrow { color: #ccc; font-size: 20px; flex-shrink: 0; margin-left: 12px; }
+
+        /* ===== Lyrics Page ===== */
         .lyrics-page { display: none; padding-bottom: 80px; }
         .lyrics-page.active { display: block; }
         .song-list-page.hidden { display: none; }
-        
-        /* Song Info with character-by-character jyutping */
+
+        /* Song Info */
         .song-info {
-            padding: 28px 20px 20px;
+            padding: 32px 24px 24px;
             text-align: center;
             border-bottom: 1px solid #f0f0f0;
         }
-        .song-title-block {
-            margin-bottom: 20px;
+        @media (min-width: 768px) {
+            .song-info { padding: 40px 48px 32px; }
         }
+        .song-title-block { margin-bottom: 24px; }
         .song-meta-block {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 16px 32px;
+            justify-content: center;
         }
-        
-        /* Character-Jyutping Pair Styling */
+
+        /* Character-Jyutping Pair */
         .char-line {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 4px 8px;
+            gap: 4px 10px;
             margin-bottom: 16px;
         }
         .char-pair {
@@ -209,19 +233,16 @@
             margin-bottom: 2px;
             height: 14px;
         }
-        .char-jyutping:empty::before {
-            content: "\00a0";
-        }
+        .char-jyutping:empty::before { content: "\00a0"; }
         .char-chinese {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 600;
             color: #000;
         }
-        .meta-line {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 2px 6px;
+        @media (min-width: 768px) {
+            .char-chinese { font-size: 40px; }
+            .char-jyutping { font-size: 12px; height: 16px; }
+            .char-line { gap: 6px 14px; }
         }
         .meta-pair .char-jyutping {
             font-size: 9px;
@@ -233,13 +254,16 @@
             color: #666;
             font-weight: 400;
         }
-        
+
         /* Lyrics Body */
-        .lyrics-body { padding: 20px 16px; }
+        .lyrics-body { padding: 24px 24px; }
+        @media (min-width: 768px) {
+            .lyrics-body { padding: 32px 48px; }
+        }
         .lyric-line {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             animation: fadeIn 0.3s ease forwards;
             opacity: 0;
         }
@@ -264,7 +288,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 8px;
+            margin-right: 10px;
             margin-top: 2px;
             color: #ddd;
             font-size: 16px;
@@ -274,6 +298,9 @@
             display: flex;
             flex-wrap: wrap;
             gap: 4px 6px;
+        }
+        @media (min-width: 768px) {
+            .lyric-content { gap: 6px 10px; }
         }
         .lyric-pair {
             display: flex;
@@ -287,34 +314,40 @@
             margin-bottom: 1px;
             height: 13px;
         }
-        .lyric-pair .jp:empty::before {
-            content: "\00a0";
-        }
+        .lyric-pair .jp:empty::before { content: "\00a0"; }
         .lyric-pair .ch {
             font-size: 20px;
             font-weight: 500;
             color: #000;
         }
-        
+        @media (min-width: 768px) {
+            .lyric-pair .jp { font-size: 12px; height: 15px; }
+            .lyric-pair .ch { font-size: 26px; }
+        }
+
+        /* ===== Bottom Bar ===== */
         .bottom-bar {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 480px;
+            max-width: 960px;
             background: #fff;
             border-top: 1px solid #eee;
-            padding: 10px 20px;
+            padding: 10px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             z-index: 100;
         }
         @media (min-width: 768px) {
-            .bottom-bar { border-radius: 0 0 16px 16px; }
+            .bottom-bar {
+                border-radius: 0 0 16px 16px;
+                padding: 12px 40px;
+            }
         }
-        .bottom-actions { display: flex; gap: 20px; }
+        .bottom-actions { display: flex; gap: 24px; }
         .bottom-action-btn {
             background: none;
             border: none;
@@ -333,7 +366,7 @@
             background: #07C160;
             color: #fff;
             border: none;
-            padding: 8px 18px;
+            padding: 8px 20px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
@@ -361,7 +394,10 @@
             animation: fadeIn 0.3s ease;
             pointer-events: none;
         }
-        ::-webkit-scrollbar { width: 0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ccc; }
     </style>
 </head>
 <body>
