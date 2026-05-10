@@ -325,12 +325,31 @@
 
         .song-meta-item {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: 6px;
         }
 
         .song-meta-label {
             color: #999;
+            margin-bottom: 2px;
+        }
+
+        .meta-name-group {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meta-name-jyutping {
+            font-size: 9px;
+            color: #bbb;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            height: 11px;
+        }
+
+        .meta-name-hanzi {
+            font-size: 14px;
+            color: #666;
         }
 
         /* Lyrics Content */
@@ -598,8 +617,11 @@
             title: "重复犯错",
             titleJyutping: ["cung4","fuk1","faan6","co3"],
             artist: "古巨基",
+            artistJyutping: ["gu2","geoi6","gei1"],
             lyricist: "林夕",
+            lyricistJyutping: ["lam4","zik6"],
             composer: "陈辉阳",
+            composerJyutping: ["can4","fai1","joeng4"],
             lyrics: [
                 { chars: ["不","知","你"," ","难","过","寂","寞"], jp: ["bat1","zi1","nei5","","naan4","gwo3","zik6","mok6"] },
                 { chars: ["听","到","你","说"," ","毫","不","快","乐"], jp: ["ting1","dou3","nei5","syut3","","hou4","bat1","faai3","lok6"] },
@@ -635,8 +657,11 @@
             title: "喜欢你",
             titleJyutping: ["hei2","fun1","nei5"],
             artist: "Beyond",
+            artistJyutping: ["b","i","j","o","n","d"],
             lyricist: "黄家驹",
+            lyricistJyutping: ["wong4","gaa1","keoi1"],
             composer: "黄家驹",
+            composerJyutping: ["wong4","gaa1","keoi1"],
             lyrics: [
                 { chars: ["细","雨","带","风","湿","透","黄","昏","的","街","道"], jp: ["sai3","jyu5","daai3","fung1","sap1","tau3","wong4","fan1","dik1","gaai1","dou6"] },
                 { chars: ["抹","去","雨","水","双","眼","无","故","地","仰","望"], jp: ["maat3","heoi3","jyu5","seoi2","soeng1","ngaan5","mou4","gu3","dei6","joeng5","mong6"] },
@@ -656,8 +681,11 @@
             title: "海阔天空",
             titleJyutping: ["hoi2","fut3","tin1","hung1"],
             artist: "Beyond",
+            artistJyutping: ["b","i","j","o","n","d"],
             lyricist: "黄家驹",
+            lyricistJyutping: ["wong4","gaa1","keoi1"],
             composer: "黄家驹",
+            composerJyutping: ["wong4","gaa1","keoi1"],
             lyrics: [
                 { chars: ["今","天","我","寒","夜","里","看","雪","飘","过"], jp: ["gam1","tin1","ngo5","hon4","je6","leoi5","hon3","syut3","piu1","gwo3"] },
                 { chars: ["怀","着","冷","却","了","的","心","窝","漂","远","方"], jp: ["waai4","zoek6","laang5","koek3","liu5","dik1","sam1","wo1","piu1","jyun5","fong1"] },
@@ -671,8 +699,11 @@
             title: "富士山下",
             titleJyutping: ["fu2","si6","saan1","haa6"],
             artist: "陈奕迅",
+            artistJyutping: ["can4","jan6","hin3"],
             lyricist: "林夕",
+            lyricistJyutping: ["lam4","zik6"],
             composer: "Christopher Chak",
+            composerJyutping: ["c","h","r","i","s","t","o","p","h","e","r","","c","h","a","k"],
             lyrics: [
                 { chars: ["拦","路","雨","偏","似","雪","花"], jp: ["laan4","lou6","jyu5","pin1","ci5","syut3","faa1"] },
                 { chars: ["饮","泣","的","你","冻","吗"], jp: ["jam2","kap1","dik1","nei5","dung3","maa3"] },
@@ -686,8 +717,11 @@
             title: "十年",
             titleJyutping: ["sap6","nin4"],
             artist: "陈奕迅",
+            artistJyutping: ["can4","jan6","hin3"],
             lyricist: "林夕",
+            lyricistJyutping: ["lam4","zik6"],
             composer: "陈小霞",
+            composerJyutping: ["can4","siu2","haa4"],
             lyrics: [
                 { chars: ["如","果","那","两","个","字","没","有","颤","抖"], jp: ["jyu4","gwo2","naa5","loeng5","go3","zi6","mut6","jau5","zin3","tau3"] },
                 { chars: ["我","不","会","发","觉","我","难","受"], jp: ["ngo5","bat1","wui5","faat3","gok3","ngo5","naan4","sau6"] },
@@ -700,8 +734,11 @@
             title: "千千阙歌",
             titleJyutping: ["cin1","cin1","kyut3","go1"],
             artist: "陈慧娴",
+            artistJyutping: ["can4","wai6","haan4"],
             lyricist: "林振强",
+            lyricistJyutping: ["lam4","zan3","koeng4"],
             composer: "Makaino Koji",
+            composerJyutping: ["m","a","k","a","i","n","o","","k","o","j","i"],
             lyrics: [
                 { chars: ["徐","徐","回","望","曾","属","于","彼","此","的","晚","上"], jp: ["ceoi4","ceoi4","wui4","mong6","cang4","suk6","jyu1","bei2","ci2","dik1","maan5","soeng6"] },
                 { chars: ["来","日","纵","是","千","千","阙","歌"], jp: ["loi4","jat6","zung3","si6","cin1","cin1","kyut3","go1"] },
@@ -795,9 +832,11 @@
             `;
         }
         titleContainer.innerHTML = titleHtml;
-        document.getElementById('songArtist').textContent = currentSong.artist;
-        document.getElementById('songLyricist').textContent = currentSong.lyricist;
-        document.getElementById('songComposer').textContent = currentSong.composer;
+
+        // 歌手、作词、作曲也使用逐字粤拼显示
+        document.getElementById('songArtist').innerHTML = renderNameWithJyutping(currentSong.artist, currentSong.artistJyutping);
+        document.getElementById('songLyricist').innerHTML = renderNameWithJyutping(currentSong.lyricist, currentSong.lyricistJyutping);
+        document.getElementById('songComposer').innerHTML = renderNameWithJyutping(currentSong.composer, currentSong.composerJyutping);
 
         // Render lyrics
         renderLyrics();
@@ -833,6 +872,29 @@
     function showSongList() {
         document.getElementById('appContainer').classList.remove('view-lyrics');
         document.getElementById('mobileHeader').style.display = 'none';
+    }
+
+    // 渲染带粤拼的名字（歌手、作词、作曲）
+    function renderNameWithJyutping(name, jyutpingArray) {
+        if (!jyutpingArray || jyutpingArray.length === 0) {
+            return `<span class="meta-name-hanzi">${name}</span>`;
+        }
+        let html = '';
+        for (let i = 0; i < name.length; i++) {
+            const char = name[i];
+            const jp = jyutpingArray[i] || '';
+            if (char === ' ') {
+                html += '<span style="display:inline-block;width:4px;"></span>';
+            } else {
+                html += `
+                    <span class="meta-name-group">
+                        <span class="meta-name-jyutping">${jp}</span>
+                        <span class="meta-name-hanzi">${char}</span>
+                    </span>
+                `;
+            }
+        }
+        return html;
     }
 
     function adjustFontSize(delta) {
