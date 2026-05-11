@@ -1609,8 +1609,8 @@
             btn.textContent = '🗑️ 管理';
             btn.classList.remove('active');
             bar.style.display = 'none';
-            // 清除选中样式
-            document.querySelectorAll('.song-item.delete-selected').forEach(el => el.classList.remove('delete-selected'));
+            // 重新渲染列表，恢复正常的 selectSong 点击
+            renderSongList();
         }
     }
 
