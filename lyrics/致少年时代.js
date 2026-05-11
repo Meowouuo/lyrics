@@ -1,20 +1,18 @@
-// 致少年时代 - 古巨基
-// 自动生成于粤拼歌词网站
+// 歌曲：致少年时代
 
-window.__songs.push({
-    id: 1778517119067,
-    title: "致少年时代",
-    titleJyutping: ["zi3","siu2","nin4","si4","doi6"],
-    artist: "古巨基",
-    artistJyutping: ["gu2","geoi6","gei1"],
-    lyricist: "林夕",
-    lyricistJyutping: ["lam4","zik6"],
-    composer: "方皓玟",
-    composerJyutping: ["fong1","hou6","man4"],
-    lyrics: [
-    {
-        "chars": [
-            "爱",
+(function() {
+    const song = {
+        id: 1778517119067,
+        title: "致少年时代",
+        titleJyutping: ["zi3","siu2","nin4","si4","doi6"],
+        artist: "古巨基",
+        artistJyutping: ["gu2","geoi6","gei1"],
+        lyricist: "林夕",
+        lyricistJyutping: ["lam4","zik6"],
+        composer: "方皓玟",
+        composerJyutping: ["fong1","hou6","man4"],
+        lyrics: [
+            { chars: ["爱",
             "少",
             "年",
             "时",
@@ -24,10 +22,7 @@ window.__songs.push({
             "肆",
             "而",
             "无",
-            "害"
-        ],
-        "jp": [
-            "oi3",
+            "害"], jp: ["oi3",
             "siu2",
             "nin4",
             "si4",
@@ -37,12 +32,8 @@ window.__songs.push({
             "si3",
             "ji4",
             "mou4",
-            "hoi6"
-        ]
-    },
-    {
-        "chars": [
-            "最",
+            "hoi6"] },
+            { chars: ["最",
             "爱",
             "着",
             "拖",
@@ -53,10 +44,7 @@ window.__songs.push({
             "似",
             "障",
             "碍",
-            "赛"
-        ],
-        "jp": [
-            "zeoi3",
+            "赛"], jp: ["zeoi3",
             "oi3",
             "zoek6",
             "to1",
@@ -67,12 +55,8 @@ window.__songs.push({
             "ci5",
             "zoeng3",
             "ngoi6",
-            "coi3"
-        ]
-    },
-    {
-        "chars": [
-            "然",
+            "coi3"] },
+            { chars: ["然",
             "后",
             "最",
             "怕",
@@ -85,10 +69,7 @@ window.__songs.push({
             "懂",
             "的",
             "感",
-            "慨"
-        ],
-        "jp": [
-            "jin4",
+            "慨"], jp: ["jin4",
             "hau6",
             "zeoi3",
             "paa3",
@@ -101,12 +82,8 @@ window.__songs.push({
             "dung2",
             "dik1",
             "gam2",
-            "koi3"
-        ]
-    },
-    {
-        "chars": [
-            "未",
+            "koi3"] },
+            { chars: ["未",
             "料",
             "到",
             "将",
@@ -122,10 +99,7 @@ window.__songs.push({
             "情",
             "怀",
             "不",
-            "再"
-        ],
-        "jp": [
-            "mei6",
+            "再"], jp: ["mei6",
             "liu6",
             "dou3",
             "zoeng1",
@@ -141,15 +115,9 @@ window.__songs.push({
             "cing4",
             "waai4",
             "bat1",
-            "zoi3"
-        ]
-    },
-    {
-        "paragraphBreak": true
-    },
-    {
-        "chars": [
-            "羡",
+            "zoi3"] },
+            { paragraphBreak: true },
+            { chars: ["羡",
             "慕",
             "你",
             "想",
@@ -163,10 +131,7 @@ window.__songs.push({
             "永",
             "未",
             "顾",
-            "忌"
-        ],
-        "jp": [
-            "sin6",
+            "忌"], jp: ["sin6",
             "mou6",
             "nei5",
             "soeng2",
@@ -180,12 +145,8 @@ window.__songs.push({
             "wing5",
             "mei6",
             "gu3",
-            "gei6"
-        ]
-    },
-    {
-        "chars": [
-            "烦",
+            "gei6"] },
+            { chars: ["烦",
             "人",
             "烦",
             "事",
@@ -200,10 +161,7 @@ window.__songs.push({
             "自",
             "闭",
             "天",
-            "地"
-        ],
-        "jp": [
-            "faan4",
+            "地"], jp: ["faan4",
             "jan4",
             "faan4",
             "si6",
@@ -218,12 +176,8 @@ window.__songs.push({
             "zi6",
             "bai3",
             "tin1",
-            "dei6"
-        ]
-    },
-    {
-        "chars": [
-            "冥",
+            "dei6"] },
+            { chars: ["冥",
             "顽",
             "无",
             "知",
@@ -236,10 +190,7 @@ window.__songs.push({
             "做",
             "你",
             "自",
-            "己"
-        ],
-        "jp": [
-            "ming4",
+            "己"], jp: ["ming4",
             "waan4",
             "mou4",
             "zi1",
@@ -252,12 +203,8 @@ window.__songs.push({
             "zou6",
             "nei5",
             "zi6",
-            "gei2"
-        ]
-    },
-    {
-        "chars": [
-            "只",
+            "gei2"] },
+            { chars: ["只",
             "要",
             "想",
             "逃",
@@ -270,10 +217,7 @@ window.__songs.push({
             "以",
             "抱",
             "紧",
-            "你"
-        ],
-        "jp": [
-            "zi2",
+            "你"], jp: ["zi2",
             "jiu3",
             "soeng2",
             "tou4",
@@ -286,15 +230,9 @@ window.__songs.push({
             "ji5",
             "pou5",
             "gan2",
-            "nei5"
-        ]
-    },
-    {
-        "paragraphBreak": true
-    },
-    {
-        "chars": [
-            "爱",
+            "nei5"] },
+            { paragraphBreak: true },
+            { chars: ["爱",
             "偶",
             "像",
             "年",
@@ -304,10 +242,7 @@ window.__songs.push({
             "疯",
             "狂",
             "期",
-            "待"
-        ],
-        "jp": [
-            "oi3",
+            "待"], jp: ["oi3",
             "ngau5",
             "zoeng6",
             "nin4",
@@ -317,12 +252,8 @@ window.__songs.push({
             "fung1",
             "kong4",
             "kei4",
-            "doi6"
-        ]
-    },
-    {
-        "chars": [
-            "最",
+            "doi6"] },
+            { chars: ["最",
             "爱",
             "看",
             "颁",
@@ -334,10 +265,7 @@ window.__songs.push({
             "角",
             "逐",
             "比",
-            "赛"
-        ],
-        "jp": [
-            "zeoi3",
+            "赛"], jp: ["zeoi3",
             "oi3",
             "hon3",
             "baan1",
@@ -349,12 +277,8 @@ window.__songs.push({
             "gok3",
             "zuk6",
             "bei2",
-            "coi3"
-        ]
-    },
-    {
-        "chars": [
-            "还",
+            "coi3"] },
+            { chars: ["还",
             "道",
             "最",
             "痛",
@@ -367,10 +291,7 @@ window.__songs.push({
             "摔",
             "伤",
             "膝",
-            "盖"
-        ],
-        "jp": [
-            "waan4",
+            "盖"], jp: ["waan4",
             "dou6",
             "zeoi3",
             "tung3",
@@ -383,12 +304,8 @@ window.__songs.push({
             "seot1",
             "soeng1",
             "sat1",
-            "goi3"
-        ]
-    },
-    {
-        "chars": [
-            "痛",
+            "goi3"] },
+            { chars: ["痛",
             "那",
             "么",
             "单",
@@ -404,10 +321,7 @@ window.__songs.push({
             "稚",
             "而",
             "可",
-            "爱"
-        ],
-        "jp": [
-            "tung3",
+            "爱"], jp: ["tung3",
             "naa5",
             "maa1",
             "daan1",
@@ -423,15 +337,9 @@ window.__songs.push({
             "zi6",
             "ji4",
             "ho2",
-            "oi3"
-        ]
-    },
-    {
-        "paragraphBreak": true
-    },
-    {
-        "chars": [
-            "羡",
+            "oi3"] },
+            { paragraphBreak: true },
+            { chars: ["羡",
             "慕",
             "你",
             "想",
@@ -445,10 +353,7 @@ window.__songs.push({
             "永",
             "未",
             "顾",
-            "忌"
-        ],
-        "jp": [
-            "sin6",
+            "忌"], jp: ["sin6",
             "mou6",
             "nei5",
             "soeng2",
@@ -462,12 +367,8 @@ window.__songs.push({
             "wing5",
             "mei6",
             "gu3",
-            "gei6"
-        ]
-    },
-    {
-        "chars": [
-            "烦",
+            "gei6"] },
+            { chars: ["烦",
             "人",
             "烦",
             "事",
@@ -482,10 +383,7 @@ window.__songs.push({
             "自",
             "闭",
             "天",
-            "地"
-        ],
-        "jp": [
-            "faan4",
+            "地"], jp: ["faan4",
             "jan4",
             "faan4",
             "si6",
@@ -500,12 +398,8 @@ window.__songs.push({
             "zi6",
             "bai3",
             "tin1",
-            "dei6"
-        ]
-    },
-    {
-        "chars": [
-            "冥",
+            "dei6"] },
+            { chars: ["冥",
             "顽",
             "无",
             "知",
@@ -518,10 +412,7 @@ window.__songs.push({
             "做",
             "你",
             "自",
-            "己"
-        ],
-        "jp": [
-            "ming4",
+            "己"], jp: ["ming4",
             "waan4",
             "mou4",
             "zi1",
@@ -534,12 +425,8 @@ window.__songs.push({
             "zou6",
             "nei5",
             "zi6",
-            "gei2"
-        ]
-    },
-    {
-        "chars": [
-            "只",
+            "gei2"] },
+            { chars: ["只",
             "要",
             "想",
             "逃",
@@ -552,10 +439,7 @@ window.__songs.push({
             "以",
             "抱",
             "紧",
-            "你"
-        ],
-        "jp": [
-            "zi2",
+            "你"], jp: ["zi2",
             "jiu3",
             "soeng2",
             "tou4",
@@ -568,15 +452,9 @@ window.__songs.push({
             "ji5",
             "pou5",
             "gan2",
-            "nei5"
-        ]
-    },
-    {
-        "paragraphBreak": true
-    },
-    {
-        "chars": [
-            "从",
+            "nei5"] },
+            { paragraphBreak: true },
+            { chars: ["从",
             "前",
             "全",
             "为",
@@ -587,10 +465,7 @@ window.__songs.push({
             "望",
             "能",
             "大",
-            "个"
-        ],
-        "jp": [
-            "cung4",
+            "个"], jp: ["cung4",
             "cin4",
             "cyun4",
             "wai4",
@@ -601,12 +476,8 @@ window.__songs.push({
             "mong6",
             "nang4",
             "daai6",
-            "go3"
-        ]
-    },
-    {
-        "chars": [
-            "今",
+            "go3"] },
+            { chars: ["今",
             "日",
             "我",
             " ",
@@ -616,10 +487,7 @@ window.__songs.push({
             "更",
             "深",
             "功",
-            "课"
-        ],
-        "jp": [
-            "gam1",
+            "课"], jp: ["gam1",
             "jat6",
             "ngo5",
             "",
@@ -629,12 +497,8 @@ window.__songs.push({
             "gang1",
             "sam1",
             "gung1",
-            "fo3"
-        ]
-    },
-    {
-        "chars": [
-            "嫌",
+            "fo3"] },
+            { chars: ["嫌",
             "从",
             "前",
             "未",
@@ -646,10 +510,7 @@ window.__songs.push({
             "无",
             "悔",
             "当",
-            "初"
-        ],
-        "jp": [
-            "jim4",
+            "初"], jp: ["jim4",
             "cung4",
             "cin4",
             "mei6",
@@ -661,12 +522,8 @@ window.__songs.push({
             "mou4",
             "fui3",
             "dong1",
-            "co1"
-        ]
-    },
-    {
-        "chars": [
-            "成",
+            "co1"] },
+            { chars: ["成",
             "熟",
             "催",
             "促",
@@ -679,10 +536,7 @@ window.__songs.push({
             "懂",
             "得",
             "太",
-            "多"
-        ],
-        "jp": [
-            "sing4",
+            "多"], jp: ["sing4",
             "suk6",
             "ceoi1",
             "cuk1",
@@ -695,15 +549,9 @@ window.__songs.push({
             "dung2",
             "dak1",
             "taai3",
-            "do1"
-        ]
-    },
-    {
-        "paragraphBreak": true
-    },
-    {
-        "chars": [
-            "妒",
+            "do1"] },
+            { paragraphBreak: true },
+            { chars: ["妒",
             "忌",
             "你",
             "能",
@@ -717,10 +565,7 @@ window.__songs.push({
             "拒",
             "绝",
             "皱",
-            "眉"
-        ],
-        "jp": [
-            "dou3",
+            "眉"], jp: ["dou3",
             "gei6",
             "nei5",
             "nang4",
@@ -734,12 +579,8 @@ window.__songs.push({
             "keoi5",
             "zyut6",
             "zau3",
-            "mei4"
-        ]
-    },
-    {
-        "chars": [
-            "明",
+            "mei4"] },
+            { chars: ["明",
             "明",
             "还",
             "未",
@@ -753,10 +594,7 @@ window.__songs.push({
             "无",
             "数",
             "滋",
-            "味"
-        ],
-        "jp": [
-            "ming4",
+            "味"], jp: ["ming4",
             "ming4",
             "waan4",
             "mei6",
@@ -770,12 +608,8 @@ window.__songs.push({
             "mou4",
             "sou3",
             "zi1",
-            "mei6"
-        ]
-    },
-    {
-        "chars": [
-            "明",
+            "mei6"] },
+            { chars: ["明",
             "明",
             "无",
             "知",
@@ -788,10 +622,7 @@ window.__songs.push({
             "谅",
             "你",
             "自",
-            "欺"
-        ],
-        "jp": [
-            "ming4",
+            "欺"], jp: ["ming4",
             "ming4",
             "mou4",
             "zi1",
@@ -804,12 +635,8 @@ window.__songs.push({
             "loeng6",
             "nei5",
             "zi6",
-            "hei1"
-        ]
-    },
-    {
-        "chars": [
-            "转",
+            "hei1"] },
+            { chars: ["转",
             "眼",
             "天",
             "和",
@@ -822,10 +649,7 @@ window.__songs.push({
             "眼",
             "约",
             "束",
-            "你"
-        ],
-        "jp": [
-            "zyun2",
+            "你"], jp: ["zyun2",
             "ngaan5",
             "tin1",
             "wo4",
@@ -838,12 +662,8 @@ window.__songs.push({
             "ngaan5",
             "joek3",
             "cuk1",
-            "nei5"
-        ]
-    },
-    {
-        "chars": [
-            "假",
+            "nei5"] },
+            { chars: ["假",
             "设",
             "可",
             "重",
@@ -856,10 +676,7 @@ window.__songs.push({
             "我",
             "轻",
             "抚",
-            "你"
-        ],
-        "jp": [
-            "gaa2",
+            "你"], jp: ["gaa2",
             "cit3",
             "ho2",
             "cung5",
@@ -872,8 +689,8 @@ window.__songs.push({
             "ngo5",
             "hing1",
             "fu2",
-            "nei5"
+            "nei5"] }
         ]
-    }
-]
-});
+    };
+    window.__songs.push(song);
+})();

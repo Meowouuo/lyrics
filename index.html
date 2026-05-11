@@ -956,6 +956,7 @@
         'lyrics/许愿.js',
         'lyrics/其实我…我…我.js',
         'lyrics/忘了时间的钟.js',
+        'lyrics/致少年时代.js',
     ];
 
     async function loadAllSongs() {
@@ -1554,22 +1555,34 @@
         const lyricistJyutping = lyricist ? matchJyutping(lyricist).map(m => m.jp) : [];
         const composerJyutping = composer ? matchJyutping(composer).map(m => m.jp) : [];
 
-        // 生成JS文件内容
-        const jsContent = `// ${title} - ${artist}
-// 自动生成于粤拼歌词网站
+        // 生成JS文件内容（格式与现有歌曲文件一致）
+        const lyricsStr = importedLyricsData.map(line => {
+            if (line.paragraphBreak) return '            { paragraphBreak: true }';
+            return '            { chars: ' + JSON.stringify(line.chars) + ', jp: ' + JSON.stringify(line.jp) + ' }';
+        }).join(',\n');
 
-window.__songs.push({
-    id: ${songId},
-    title: "${title}",
-    titleJyutping: ${JSON.stringify(titleJyutping)},
-    artist: "${artist}",
-    artistJyutping: ${JSON.stringify(artistJyutping)},
-    lyricist: "${lyricist}",
-    lyricistJyutping: ${JSON.stringify(lyricistJyutping)},
-    composer: "${composer}",
-    composerJyutping: ${JSON.stringify(composerJyutping)},
-    lyrics: ${JSON.stringify(importedLyricsData, null, 4)}
-});
+        const jsContent = `// 歌曲：${title}
+
+(function() {
+    const song = {
+        id: ${songId},
+        title: "${title}",
+        titleJyutping: ${JSON.stringify(titleJyutping)},
+        artist: "${artist}",
+        artistJyutping: ${JSON.stringify(artistJyutping)},
+        lyricist: "${lyricist}",
+        lyricistJyutping: ${JSON.stringify(lyricistJyutping)},
+        composer: "${composer}",
+        composerJyutping: ${JSON.stringify(composerJyutping)},
+        lyrics: [
+${lyricsStr}
+        ]
+    };
+    window.__songs.push(song);
+}());
+
+// ⚠️ 重要：请在 index.html 的 songFiles 数组中添加以下一行：
+// 'lyrics/${title}.js',
 `;
 
         // 直接添加到当前页面
