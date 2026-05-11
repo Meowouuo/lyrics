@@ -4,13 +4,13 @@
     const song = {
         id: 13,
         title: "初初",
-        titleJyutping: [],
+        titleJyutping: ["co1","co1"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "林若宁",
-        lyricistJyutping: [],
+        lyricistJyutping: ["lam4","joek6","ning4"],
         composer: "曲世聪",
-        composerJyutping: [],
+        composerJyutping: ["kuk1","sai3","cung1"],
         lyrics: [
     {
         "chars": [

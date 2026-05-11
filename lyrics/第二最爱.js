@@ -4,13 +4,13 @@
     const song = {
         id: 18,
         title: "第二最爱",
-        titleJyutping: [],
+        titleJyutping: ["dai6","ji6","zeoi3","ngoi3"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "黄伟文",
-        lyricistJyutping: [],
+        lyricistJyutping: ["wong4","wai5","man4"],
         composer: "张佳添",
-        composerJyutping: [],
+        composerJyutping: ["zoeng1","gaai1","tim1"],
         lyrics: [
     {
         "chars": [

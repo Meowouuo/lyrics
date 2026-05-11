@@ -4,13 +4,13 @@
     const song = {
         id: 17,
         title: "心跳回忆",
-        titleJyutping: [],
+        titleJyutping: ["sam1","tiu3","wui4","jik1"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "林夕",
-        lyricistJyutping: [],
+        lyricistJyutping: ["lam4","zik6"],
         composer: "陈辉阳",
-        composerJyutping: [],
+        composerJyutping: ["can4","fai1","joeng4"],
         lyrics: [
     {
         "chars": [

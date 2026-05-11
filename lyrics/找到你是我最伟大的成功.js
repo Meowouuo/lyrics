@@ -4,13 +4,13 @@
     const song = {
         id: 20,
         title: "找到你是我最伟大的成功",
-        titleJyutping: [],
+        titleJyutping: ["zaau2","dou3","nei5","si6","ngo5","zeoi3","wai5","daai6","dik1","sing4","gung1"],
         artist: "古巨基",
         artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "黄婷",
-        lyricistJyutping: [],
+        lyricistJyutping: ["wong4","ting4"],
         composer: "PAN",
-        composerJyutping: [],
+        composerJyutping: ["","",""],
         note: "国语歌曲",
         lyrics: [
             { chars: ["虽","然","没","能"," ","穿","上","披","风"], jp: [] },

@@ -4,13 +4,13 @@
     const song = {
         id: 16,
         title: "任天堂流泪",
-        titleJyutping: [],
+        titleJyutping: ["jam6","tin1","tong4","lau4","leoi6"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "林夕",
-        lyricistJyutping: [],
+        lyricistJyutping: ["lam4","zik6"],
         composer: "李汉文",
-        composerJyutping: [],
+        composerJyutping: ["lei5","hon3","man4"],
         lyrics: [
     {
         "chars": [

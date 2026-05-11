@@ -4,9 +4,9 @@
     const song = {
         id: 19,
         title: "罗马假期",
-        titleJyutping: [],
+        titleJyutping: ["lo4","maa5","gaa2","kei4"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "信息未获取",
         lyricistJyutping: [],
         composer: "信息未获取",

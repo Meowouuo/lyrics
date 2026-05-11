@@ -4,13 +4,13 @@
     const song = {
         id: 23,
         title: "忘了时间的钟",
-        titleJyutping: [],
+        titleJyutping: ["mong4","liu5","si4","gaan1","dik1","zung1"],
         artist: "古巨基",
         artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "李安修",
-        lyricistJyutping: [],
+        lyricistJyutping: ["lei5","on1","sau1"],
         composer: "陈富荣",
-        composerJyutping: [],
+        composerJyutping: ["can4","fu3","wing4"],
         note: "国语歌曲",
         lyrics: [
             { chars: ["还","有","没","有","如","果"," ","还","有","没","有","结","果"], jp: [] },

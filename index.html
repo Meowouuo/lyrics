@@ -1382,6 +1382,7 @@
                 const line = currentSong.lyrics[s.lineIndex];
                 const originalJp = line.jp[s.charIndex];
                 const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
+                const char = line.chars[s.charIndex];
 
                 // Update or add correction
                 const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
@@ -1391,7 +1392,7 @@
                     corrections.push({
                         lineIndex: s.lineIndex,
                         charIndex: s.charIndex,
-                        char: line.chars[s.charIndex],
+                        char: char,
                         originalJp: originalJp,
                         newJp: correctedJp
                     });
@@ -1404,6 +1405,33 @@
                     charEl.classList.add('corrected');
                     charEl.querySelector('.char-jyutping').textContent = correctedJp;
                 }
+
+                // 同步：将同歌曲中所有相同字+相同原粤拼的位置一并修改
+                currentSong.lyrics.forEach((l, li) => {
+                    if (!l.chars || !l.jp) return;
+                    l.chars.forEach((c, ci) => {
+                        if (c === char && l.jp[ci] === originalJp) {
+                            // 跳过已选中的位置
+                            if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === ci)) return;
+                            // 跳过已有相同纠错的位置
+                            if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === ci && ex.newJp === correctedJp)) return;
+                            // 添加同步纠错
+                            corrections.push({
+                                lineIndex: li,
+                                charIndex: ci,
+                                char: c,
+                                originalJp: originalJp,
+                                newJp: correctedJp
+                            });
+                            // 更新DOM
+                            const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${ci}"]`);
+                            if (syncEl) {
+                                syncEl.classList.add('corrected');
+                                syncEl.querySelector('.char-jyutping').textContent = correctedJp;
+                            }
+                        }
+                    });
+                });
             });
         }
 

@@ -4,9 +4,9 @@
     const song = {
         id: 15,
         title: "天才与白痴",
-        titleJyutping: [],
+        titleJyutping: ["tin1","coi4","jyu5","baak6","ci1"],
         artist: "古巨基",
-        artistJyutping: [],
+        artistJyutping: ["gu2","geoi6","gei1"],
         lyricist: "信息未获取",
         lyricistJyutping: [],
         composer: "信息未获取",

@@ -8,9 +8,9 @@
         artist: "古巨基/梁咏琪",
         artistJyutping: ["gu2","geoi6","gei1","loeng4","wing6","gei6"],
         lyricist: "何启弘",
-        lyricistJyutping: [],
+        lyricistJyutping: ["ho4","kai2","wang4"],
         composer: "凌伟文",
-        composerJyutping: [],
+        composerJyutping: ["ling4","wai5","man4"],
         note: "国语歌曲",
         lyrics: [
             { chars: ["我","喜","欢","回","味"], jp: [] },
