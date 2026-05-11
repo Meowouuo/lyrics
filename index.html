@@ -1406,31 +1406,62 @@
                     charEl.querySelector('.char-jyutping').textContent = correctedJp;
                 }
 
-                // 同步：将同歌曲中所有相同字+相同原粤拼的位置一并修改
+                // 同步：识别被修改字所在的词汇，同步相同词汇中同一位置的字的粤拼
+                // 提取词汇：取修改字前后各1个字，组成2-3字的词
+                const line_chars = line.chars;
+                const line_jp = line.jp;
+                const ci = s.charIndex;
+                // 构建词汇（前后各扩展1字）
+                let wordChars = [char];
+                let wordStart = ci;
+                let wordEnd = ci;
+                if (ci > 0 && line_chars[ci - 1] && line_chars[ci - 1] !== ' ') {
+                    wordChars.unshift(line_chars[ci - 1]);
+                    wordStart = ci - 1;
+                }
+                if (ci < line_chars.length - 1 && line_chars[ci + 1] && line_chars[ci + 1] !== ' ') {
+                    wordChars.push(line_chars[ci + 1]);
+                    wordEnd = ci + 1;
+                }
+                // 被修改字在词汇中的偏移位置
+                const charOffsetInWord = ci - wordStart;
+                // 词汇对应的粤拼序列
+                const wordJp = line_jp.slice(wordStart, wordEnd + 1);
+
+                // 在全歌中查找相同词汇（相同字序列+相同粤拼序列），同步修改
                 currentSong.lyrics.forEach((l, li) => {
                     if (!l.chars || !l.jp) return;
-                    l.chars.forEach((c, ci) => {
-                        if (c === char && l.jp[ci] === originalJp) {
-                            // 跳过已选中的位置
-                            if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === ci)) return;
-                            // 跳过已有相同纠错的位置
-                            if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === ci && ex.newJp === correctedJp)) return;
-                            // 添加同步纠错
-                            corrections.push({
-                                lineIndex: li,
-                                charIndex: ci,
-                                char: c,
-                                originalJp: originalJp,
-                                newJp: correctedJp
-                            });
-                            // 更新DOM
-                            const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${ci}"]`);
-                            if (syncEl) {
-                                syncEl.classList.add('corrected');
-                                syncEl.querySelector('.char-jyutping').textContent = correctedJp;
+                    for (let wi = 0; wi <= l.chars.length - wordChars.length; wi++) {
+                        // 检查从wi开始的字是否匹配词汇
+                        let match = true;
+                        for (let k = 0; k < wordChars.length; k++) {
+                            if (l.chars[wi + k] !== wordChars[k] || l.jp[wi + k] !== wordJp[k]) {
+                                match = false;
+                                break;
                             }
                         }
-                    });
+                        if (!match) continue;
+                        // 找到匹配词汇，同步修改对应位置的字
+                        const syncCi = wi + charOffsetInWord;
+                        // 跳过已选中的位置
+                        if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === syncCi)) continue;
+                        // 跳过已有相同纠错的位置
+                        if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
+                        // 添加同步纠错
+                        corrections.push({
+                            lineIndex: li,
+                            charIndex: syncCi,
+                            char: l.chars[syncCi],
+                            originalJp: l.jp[syncCi],
+                            newJp: correctedJp
+                        });
+                        // 更新DOM
+                        const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${syncCi}"]`);
+                        if (syncEl) {
+                            syncEl.classList.add('corrected');
+                            syncEl.querySelector('.char-jyutping').textContent = correctedJp;
+                        }
+                    }
                 });
             });
         }
