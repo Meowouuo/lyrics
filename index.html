@@ -859,7 +859,15 @@
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
-        artists = [...new Set(songs.map(s => s.artist))];
+        // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
+        const artistSet = new Set();
+        songs.forEach(s => {
+            s.artist.split(/[\/、,，&]/).forEach(a => {
+                const trimmed = a.trim();
+                if (trimmed) artistSet.add(trimmed);
+            });
+        });
+        artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
     }
@@ -885,7 +893,11 @@
         const container = document.getElementById('songList');
         let filtered = songs;
         if (currentFilter !== 'all') {
-            filtered = filtered.filter(s => s.artist === currentFilter);
+            // 合唱歌曲：歌手字段包含筛选的歌手名即可匹配
+            filtered = filtered.filter(s => {
+                const songArtists = s.artist.split(/[\/、,，&]/).map(a => a.trim());
+                return songArtists.includes(currentFilter);
+            });
         }
         const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
         if (searchQuery) {
