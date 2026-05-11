@@ -968,11 +968,14 @@
         'lyrics/时代.js',
         'lyrics/初初.js',
         'lyrics/告别我的恋人们.js',
+        'lyrics/天才与白痴.js',
+        'lyrics/任天堂流泪.js',
         'lyrics/心跳回忆.js',
         'lyrics/第二最爱.js',
         'lyrics/罗马假期.js',
         'lyrics/找到你是我最伟大的成功.js',
         'lyrics/许愿.js',
+        'lyrics/其实我…我…我.js',
         'lyrics/忘了时间的钟.js',
         'lyrics/致少年时代.js',
     ];
@@ -1012,13 +1015,6 @@
         const importedSongs = JSON.parse(localStorage.getItem('jyutping_imported') || '[]');
         if (importedSongs.length > 0) {
             importedSongs.forEach(s => window.__songs.push(s));
-            songs = window.__songs;
-        }
-
-        // 过滤掉用户已删除的歌曲
-        const deletedIds = JSON.parse(localStorage.getItem('jyutping_deleted') || '[]');
-        if (deletedIds.length > 0) {
-            window.__songs = window.__songs.filter(s => !deletedIds.includes(s.id));
             songs = window.__songs;
         }
 
@@ -1543,7 +1539,6 @@
 
     // ===== 删除歌曲功能 =====
     let deleteMode = false;
-    const deletedSongIds = JSON.parse(localStorage.getItem('jyutping_deleted') || '[]');
 
     function toggleDeleteMode() {
         deleteMode = !deleteMode;
@@ -1565,29 +1560,15 @@
     function deleteSong(id) {
         const song = songs.find(s => s.id === id);
         if (!song) return;
-        if (!confirm(`确定删除「${song.title} - ${song.artist}」吗？`)) return;
+        if (!confirm(`确定删除「${song.title} - ${song.artist}」吗？\n\n删除请求将提交到 GitHub Issues，由管理员处理后生效。`)) return;
 
-        // 从歌曲列表移除
-        songs = songs.filter(s => s.id !== id);
-        window.__songs = window.__songs.filter(s => s.id !== id);
+        // 提交删除请求到 GitHub Issues
+        const title = encodeURIComponent(`[删除歌曲] ${song.title} - ${song.artist}`);
+        const body = encodeURIComponent(`## 删除歌曲请求\n\n**歌曲名称：** ${song.title}\n**歌手：** ${song.artist}\n**歌曲ID：** ${song.id}\n**填词：** ${song.lyricist || '未知'}\n**作曲：** ${song.composer || '未知'}\n\n---\n\n请确认后删除该歌曲的 JS 文件，并从 index.html 的 songFiles 数组中移除对应条目。`);
+        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=删除`, '_blank');
 
-        // 记录已删除的ID
-        deletedSongIds.push(id);
-        localStorage.setItem('jyutping_deleted', JSON.stringify(deletedSongIds));
-
-        // 如果当前查看的就是这首歌，返回列表
-        if (currentSong && currentSong.id === id) {
-            currentSong = null;
-            document.getElementById('lyricsView').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'flex';
-            if (window.innerWidth < 1024) {
-                showSongList();
-            }
-        }
-
-        // 重新渲染
-        renderArtistFilter();
-        renderSongList();
+        // 退出管理模式
+        toggleDeleteMode();
     }
 
     // ===== 导入歌词功能 =====
