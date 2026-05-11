@@ -79,9 +79,35 @@
         .search-box {
             padding: 16px 24px;
             border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         @media (min-width: 1024px) {
             .search-box { padding: 16px 28px; }
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .manage-btn {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border: 1px solid #dc2626;
+            background: transparent;
+            color: #dc2626;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .manage-btn:hover { background: #fef2f2; }
+        .manage-btn.active {
+            background: #dc2626;
+            color: #fff;
         }
 
         .search-input {
@@ -852,11 +878,11 @@
                     <span class="search-icon">🔍</span>
                     <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
+                <button class="manage-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ 管理</button>
             </div>
 
             <div class="artist-filter" id="artistFilter">
                 <span class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</span>
-                <span class="filter-btn" id="deleteModeBtn" onclick="toggleDeleteMode()" style="margin-left:auto; color:#dc2626; border-color:#dc2626;">🗑️ 管理</span>
             </div>
 
             <div class="song-list" id="songList"></div>
@@ -1547,13 +1573,11 @@
         if (deleteMode) {
             list.classList.add('delete-mode');
             btn.textContent = '✅ 完成';
-            btn.style.background = '#dc2626';
-            btn.style.color = '#fff';
+            btn.classList.add('active');
         } else {
             list.classList.remove('delete-mode');
             btn.textContent = '🗑️ 管理';
-            btn.style.background = '';
-            btn.style.color = '#dc2626';
+            btn.classList.remove('active');
         }
     }
 
