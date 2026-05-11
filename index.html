@@ -177,6 +177,26 @@
             border-left-color: #000;
         }
 
+        .song-delete-btn {
+            display: none;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-left: 8px;
+            transition: background 0.15s;
+            line-height: 28px;
+            text-align: center;
+        }
+        .song-delete-btn:hover { background: #fecaca; }
+        .delete-mode .song-item .song-delete-btn { display: block; }
+        .delete-mode .song-item { cursor: default; }
+
         .song-number {
             width: 28px;
             font-size: 13px;
@@ -836,6 +856,7 @@
 
             <div class="artist-filter" id="artistFilter">
                 <span class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</span>
+                <span class="filter-btn" id="deleteModeBtn" onclick="toggleDeleteMode()" style="margin-left:auto; color:#dc2626; border-color:#dc2626;">🗑️ 管理</span>
             </div>
 
             <div class="song-list" id="songList"></div>
@@ -994,6 +1015,13 @@
             songs = window.__songs;
         }
 
+        // 过滤掉用户已删除的歌曲
+        const deletedIds = JSON.parse(localStorage.getItem('jyutping_deleted') || '[]');
+        if (deletedIds.length > 0) {
+            window.__songs = window.__songs.filter(s => !deletedIds.includes(s.id));
+            songs = window.__songs;
+        }
+
         // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
         const artistSet = new Set();
         songs.forEach(s => {
@@ -1062,6 +1090,7 @@
                         <div class="song-title-compact">${song.title}</div>
                         <div class="song-artist-compact">${song.artist}</div>
                     </div>
+                    <button class="song-delete-btn" onclick="event.stopPropagation(); deleteSong(${song.id})" title="删除">✕</button>
                 </div>
             `;
         });
@@ -1510,6 +1539,55 @@
         const title = encodeURIComponent('[新歌投稿]');
         const body = encodeURIComponent(`## 投稿新歌\n\n**歌曲名称：**\n\n**歌手：**\n\n**填词：**\n\n**作曲：**\n\n**完整歌词：**\n\`\`\`\n请在这里粘贴完整歌词\n\`\`\`\n\n---\n\n请尽量提供完整歌词，粤拼会由我们添加，谢谢投稿！`);
         window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=投稿`, '_blank');
+    }
+
+    // ===== 删除歌曲功能 =====
+    let deleteMode = false;
+    const deletedSongIds = JSON.parse(localStorage.getItem('jyutping_deleted') || '[]');
+
+    function toggleDeleteMode() {
+        deleteMode = !deleteMode;
+        const list = document.getElementById('songList');
+        const btn = document.getElementById('deleteModeBtn');
+        if (deleteMode) {
+            list.classList.add('delete-mode');
+            btn.textContent = '✅ 完成';
+            btn.style.background = '#dc2626';
+            btn.style.color = '#fff';
+        } else {
+            list.classList.remove('delete-mode');
+            btn.textContent = '🗑️ 管理';
+            btn.style.background = '';
+            btn.style.color = '#dc2626';
+        }
+    }
+
+    function deleteSong(id) {
+        const song = songs.find(s => s.id === id);
+        if (!song) return;
+        if (!confirm(`确定删除「${song.title} - ${song.artist}」吗？`)) return;
+
+        // 从歌曲列表移除
+        songs = songs.filter(s => s.id !== id);
+        window.__songs = window.__songs.filter(s => s.id !== id);
+
+        // 记录已删除的ID
+        deletedSongIds.push(id);
+        localStorage.setItem('jyutping_deleted', JSON.stringify(deletedSongIds));
+
+        // 如果当前查看的就是这首歌，返回列表
+        if (currentSong && currentSong.id === id) {
+            currentSong = null;
+            document.getElementById('lyricsView').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'flex';
+            if (window.innerWidth < 1024) {
+                showSongList();
+            }
+        }
+
+        // 重新渲染
+        renderArtistFilter();
+        renderSongList();
     }
 
     // ===== 导入歌词功能 =====
