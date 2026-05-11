@@ -1546,8 +1546,9 @@
             }
         }
 
-        // 生成歌曲ID（基于时间戳）
-        const songId = Date.now();
+        // 生成歌曲ID（基于现有最大ID+1）
+        const maxId = songs.reduce((max, s) => Math.max(max, s.id || 0), 0);
+        const songId = maxId + 1;
 
         // 匹配标题、歌手、填词、作曲的粤拼
         const titleJyutping = matchJyutping(title).map(m => m.jp);

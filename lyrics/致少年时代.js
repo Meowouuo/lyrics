@@ -2,7 +2,7 @@
 
 (function() {
     const song = {
-        id: 1778517119067,
+        id: 25,
         title: "致少年时代",
         titleJyutping: ["zi3","siu2","nin4","si4","doi6"],
         artist: "古巨基",
