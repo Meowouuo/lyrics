@@ -988,6 +988,14 @@
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
+
+        // 恢复用户导入的歌曲（localStorage）
+        const importedSongs = JSON.parse(localStorage.getItem('jyutping_imported') || '[]');
+        if (importedSongs.length > 0) {
+            importedSongs.forEach(s => window.__songs.push(s));
+            songs = window.__songs;
+        }
+
         // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
         const artistSet = new Set();
         songs.forEach(s => {
@@ -1564,9 +1572,48 @@ window.__songs.push({
 });
 `;
 
-        // 显示生成的代码
+        // 直接添加到当前页面
+        const song = {
+            id: songId,
+            title: title,
+            titleJyutping: titleJyutping,
+            artist: artist,
+            artistJyutping: artistJyutping,
+            lyricist: lyricist,
+            lyricistJyutping: lyricistJyutping,
+            composer: composer,
+            composerJyutping: composerJyutping,
+            lyrics: importedLyricsData
+        };
+        window.__songs.push(song);
+        songs = window.__songs;
+
+        // 更新歌手筛选
+        const artistSet = new Set();
+        songs.forEach(s => {
+            s.artist.split(/[\/、,，&]/).forEach(a => {
+                const trimmed = a.trim();
+                if (trimmed) artistSet.add(trimmed);
+            });
+        });
+        artists = [...artistSet];
+        renderArtistFilter();
+        renderSongList();
+
+        // 保存到 localStorage 以便下次访问时恢复
+        const importedSongs = JSON.parse(localStorage.getItem('jyutping_imported') || '[]');
+        importedSongs.push(song);
+        localStorage.setItem('jyutping_imported', JSON.stringify(importedSongs));
+
+        // 同时生成代码供部署
         document.getElementById('generatedCode').value = jsContent;
         document.getElementById('codeModal').style.display = 'flex';
+
+        // 关闭导入模态框
+        hideImportModal();
+
+        // 选中新导入的歌曲
+        selectSong(songId);
     }
 
     function hideCodeModal() {
