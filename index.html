@@ -1114,7 +1114,7 @@
                     <span class="search-icon">🔍</span>
                     <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
-                <button class="manage-btn" id="deleteModeBtn" onclick="toggleDeleteMode()">🗑️ 管理</button>
+                <button class="manage-btn" id="deleteModeBtn" onclick="DeleteModule.toggle()">🗑️ 管理</button>
             </div>
 
             <div class="artist-filter" id="artistFilter">
@@ -1126,7 +1126,7 @@
             <!-- 删除操作栏 -->
             <div class="delete-bar" id="deleteBar" style="display:none;">
                 <span id="deleteCount">请选择要删除的歌曲</span>
-                <button class="delete-submit-btn" id="deleteSubmitBtn" onclick="submitDeleteRequest()" disabled>🗑️ 提交删除</button>
+                <button class="delete-submit-btn" id="deleteSubmitBtn" onclick="DeleteModule.submit()" disabled>🗑️ 提交删除</button>
             </div>
         </aside>
 
@@ -1204,15 +1204,15 @@
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
-                        <button class="toolbar-btn" onclick="submitFeedback()">
+                        <button class="toolbar-btn" onclick="CorrectionModule.submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
                         </button>
-                        <button class="toolbar-btn" onclick="toggleEditLyricsMode()">
+                        <button class="toolbar-btn" onclick="EditLyricsModule.toggle()">
                             <span class="icon">📝</span>
                             <span>改歌词</span>
                         </button>
-                        <button class="toolbar-btn" onclick="submitNewSong()">
+                        <button class="toolbar-btn" onclick="EditLyricsModule.submitNewSong()">
                             <span class="icon">➕</span>
                             <span>投稿</span>
                         </button>
@@ -1244,6 +1244,15 @@
     
     <!-- 导入歌词模块 -->
     <script src="js/import.js"></script>
+    
+    <!-- 纠错模式模块 -->
+    <script src="js/correction.js"></script>
+    
+    <!-- 修改歌词模式模块 -->
+    <script src="js/edit-lyrics.js"></script>
+    
+    <!-- 删除歌曲功能模块 -->
+    <script src="js/delete.js"></script>
 
     <script>
     async function loadAllSongs() {
@@ -1344,7 +1353,7 @@
         let html = '';
         filtered.forEach((song, index) => {
             const isActive = currentSong && currentSong.id === song.id;
-            const clickAction = deleteMode ? `toggleDeleteSelect(${song.id}, event)` : `selectSong(${song.id})`;
+            const clickAction = DeleteModule.isActive() ? `DeleteModule.toggleSelect(${song.id}, event)` : `selectSong(${song.id})`;
             html += `
                 <div class="song-item ${isActive ? 'active' : ''}" onclick="${clickAction}">
                     <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
@@ -1364,8 +1373,8 @@
 
     function selectSong(id) {
         // Exit correction mode if active
-        if (correctionMode) {
-            toggleCorrectionMode();
+        if (CorrectionModule.isActive()) {
+            CorrectionModule.toggle();
         }
         currentSong = songs.find(s => s.id === id);
         renderSongList();
@@ -1542,641 +1551,6 @@
         } else {
             showToast('链接: ' + url);
         }
-    }
-
-    // ===== 纠错模式 =====
-    let correctionMode = false;
-    let corrections = []; // { lineIndex, charIndex, originalJp, newJp, char }
-    let selectedChars = []; // [{ lineIndex, charIndex }]
-
-    function toggleCorrectionMode() {
-        correctionMode = !correctionMode;
-        const lyricsContent = document.getElementById('lyricsContent');
-        const toolbar = document.querySelector('.toolbar');
-
-        if (correctionMode) {
-            lyricsContent.classList.add('correction-mode');
-            corrections = [];
-            selectedChars = [];
-            showCorrectionBanner();
-            updateCorrectionBtn();
-        } else {
-            lyricsContent.classList.remove('correction-mode');
-            hideCorrectionBanner();
-            clearSelection();
-            clearCorrections();
-            updateCorrectionBtn();
-        }
-    }
-
-    function updateCorrectionBtn() {
-        const btn = document.querySelector('.toolbar-btn[onclick="submitFeedback()"]');
-        if (!btn) return;
-        if (correctionMode) {
-            btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
-            btn.style.color = '#d48806';
-        } else {
-            btn.innerHTML = '<span class="icon">✏️</span><span>纠错</span>';
-            btn.style.color = '';
-        }
-    }
-
-    function showCorrectionBanner() {
-        // Remove existing banner
-        hideCorrectionBanner();
-        const banner = document.createElement('div');
-        banner.className = 'correction-banner';
-        banner.id = 'correctionBanner';
-        banner.innerHTML = `
-            <span>✏️ 纠错模式：点击字即可修改粤拼</span>
-            <span id="correctionCountText" style="font-weight:600;"></span>
-            <button class="correction-banner-btn submit" id="submitCorrectionsBtn" onclick="submitCorrections()" disabled>提交反馈</button>
-            <button class="correction-banner-btn cancel" onclick="toggleCorrectionMode()">退出</button>
-        `;
-        document.body.appendChild(banner);
-    }
-
-    function hideCorrectionBanner() {
-        const existing = document.getElementById('correctionBanner');
-        if (existing) existing.remove();
-    }
-
-    function updateCorrectionCount() {
-        const text = document.getElementById('correctionCountText');
-        const btn = document.getElementById('submitCorrectionsBtn');
-        if (!text || !btn) return;
-        if (corrections.length > 0) {
-            text.innerHTML = `<span class="correction-count">${corrections.length}</span> 处修改`;
-            btn.disabled = false;
-        } else {
-            text.textContent = '';
-            btn.disabled = true;
-        }
-    }
-
-    function onCharClick(event, lineIndex, charIndex) {
-        // 播放模式下，点击单字播放语音
-        if (TTSModule.isModeActive()) {
-            event.stopPropagation();
-            const charGroup = event.currentTarget;
-            const jp = charGroup.dataset.originalJp;
-            TTSModule.playChar(jp, charGroup);
-            return;
-        }
-
-        if (!correctionMode) return;
-        event.stopPropagation();
-
-        const charGroup = event.currentTarget;
-
-        // If already corrected, allow re-edit
-        if (charGroup.classList.contains('corrected')) {
-            showEditPopup(charGroup, lineIndex, charIndex);
-            return;
-        }
-
-        // Toggle selection
-        const idx = selectedChars.findIndex(s => s.lineIndex === lineIndex && s.charIndex === charIndex);
-        if (idx > -1) {
-            selectedChars.splice(idx, 1);
-            charGroup.classList.remove('selected');
-        } else {
-            selectedChars.push({ lineIndex, charIndex });
-            charGroup.classList.add('selected');
-        }
-
-        // If we have selection, show edit popup
-        if (selectedChars.length > 0) {
-            // Use the last clicked char's position for popup
-            showEditPopup(charGroup, lineIndex, charIndex);
-        }
-    }
-
-    function showEditPopup(charGroup, lineIndex, charIndex) {
-        closeEditPopup();
-
-        const overlay = document.createElement('div');
-        overlay.className = 'edit-overlay';
-        overlay.id = 'editOverlay';
-        overlay.onclick = () => { clearSelection(); closeEditPopup(); };
-        document.body.appendChild(overlay);
-
-        const popup = document.createElement('div');
-        popup.className = 'edit-popup';
-        popup.id = 'editPopup';
-
-        // Gather selected chars info
-        let charsInfo = [];
-        let currentJp = '';
-
-        if (selectedChars.length > 0) {
-            // Sort by position
-            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
-            charsInfo = sorted.map(s => {
-                const line = currentSong.lyrics[s.lineIndex];
-                return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], lineIndex: s.lineIndex, charIndex: s.charIndex };
-            });
-            currentJp = charsInfo.map(c => c.jp).join(' ');
-        } else {
-            // Single char re-edit (already corrected)
-            const line = currentSong.lyrics[lineIndex];
-            const existingCorrection = corrections.find(c => c.lineIndex === lineIndex && c.charIndex === charIndex);
-            charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], lineIndex, charIndex }];
-            currentJp = charsInfo[0].jp;
-        }
-
-        const charsText = charsInfo.map(c => c.char).join('');
-        const title = charsInfo.length === 1 ? '修改粤拼' : `修改 ${charsInfo.length} 个字的粤拼`;
-
-        popup.innerHTML = `
-            <div class="edit-popup-title">${title}</div>
-            <div class="edit-popup-chars">${charsText}</div>
-            <input class="edit-popup-input" id="editJpInput" type="text" value="${currentJp}" placeholder="输入粤拼，多字用空格分隔"
-                   onkeydown="if(event.key==='Enter')confirmEdit();if(event.key==='Escape'){clearSelection();closeEditPopup();}">
-            <div class="edit-popup-actions">
-                <button class="edit-popup-btn dismiss" onclick="clearSelection();closeEditPopup();">取消</button>
-                <button class="edit-popup-btn confirm" onclick="confirmEdit()">确认</button>
-            </div>
-        `;
-
-        document.body.appendChild(popup);
-
-        // Position popup near the clicked element
-        const rect = charGroup.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        let top = rect.bottom + 8;
-        let left = rect.left + rect.width / 2 - popupRect.width / 2;
-
-        // Keep within viewport
-        if (top + popupRect.height > window.innerHeight - 60) {
-            top = rect.top - popupRect.height - 8;
-        }
-        if (left < 8) left = 8;
-        if (left + popupRect.width > window.innerWidth - 8) {
-            left = window.innerWidth - popupRect.width - 8;
-        }
-
-        popup.style.top = top + 'px';
-        popup.style.left = left + 'px';
-
-        // Focus input
-        setTimeout(() => {
-            const input = document.getElementById('editJpInput');
-            if (input) { input.focus(); input.select(); }
-        }, 50);
-    }
-
-    function closeEditPopup() {
-        const popup = document.getElementById('editPopup');
-        const overlay = document.getElementById('editOverlay');
-        if (popup) popup.remove();
-        if (overlay) overlay.remove();
-    }
-
-    function confirmEdit() {
-        const input = document.getElementById('editJpInput');
-        if (!input) return;
-        const newJp = input.value.trim();
-        if (!newJp) return;
-
-        if (selectedChars.length > 0) {
-            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
-            const newJpArr = newJp.split(/\s+/);
-
-            sorted.forEach((s, i) => {
-                const line = currentSong.lyrics[s.lineIndex];
-                const originalJp = line.jp[s.charIndex];
-                const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
-                const char = line.chars[s.charIndex];
-
-                // Update or add correction
-                const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
-                if (existingIdx > -1) {
-                    corrections[existingIdx].newJp = correctedJp;
-                } else {
-                    corrections.push({
-                        lineIndex: s.lineIndex,
-                        charIndex: s.charIndex,
-                        char: char,
-                        originalJp: originalJp,
-                        newJp: correctedJp
-                    });
-                }
-
-                // Update DOM
-                const charEl = document.querySelector(`.char-group[data-line="${s.lineIndex}"][data-char="${s.charIndex}"]`);
-                if (charEl) {
-                    charEl.classList.remove('selected');
-                    charEl.classList.add('corrected');
-                    charEl.querySelector('.char-jyutping').textContent = correctedJp;
-                }
-
-                // 同步：识别被修改字所在的词汇，同步相同词汇中同一位置的字的粤拼
-                // 提取词汇：取修改字前后各1个字，组成2-3字的词
-                const line_chars = line.chars;
-                const line_jp = line.jp;
-                const ci = s.charIndex;
-                // 构建词汇（前后各扩展1字）
-                let wordChars = [char];
-                let wordStart = ci;
-                let wordEnd = ci;
-                if (ci > 0 && line_chars[ci - 1] && line_chars[ci - 1] !== ' ') {
-                    wordChars.unshift(line_chars[ci - 1]);
-                    wordStart = ci - 1;
-                }
-                if (ci < line_chars.length - 1 && line_chars[ci + 1] && line_chars[ci + 1] !== ' ') {
-                    wordChars.push(line_chars[ci + 1]);
-                    wordEnd = ci + 1;
-                }
-                // 被修改字在词汇中的偏移位置
-                const charOffsetInWord = ci - wordStart;
-                // 词汇对应的粤拼序列
-                const wordJp = line_jp.slice(wordStart, wordEnd + 1);
-
-                // 在全歌中查找相同词汇（相同字序列+相同粤拼序列），同步修改
-                currentSong.lyrics.forEach((l, li) => {
-                    if (!l.chars || !l.jp) return;
-                    for (let wi = 0; wi <= l.chars.length - wordChars.length; wi++) {
-                        // 检查从wi开始的字是否匹配词汇
-                        let match = true;
-                        for (let k = 0; k < wordChars.length; k++) {
-                            if (l.chars[wi + k] !== wordChars[k] || l.jp[wi + k] !== wordJp[k]) {
-                                match = false;
-                                break;
-                            }
-                        }
-                        if (!match) continue;
-                        // 找到匹配词汇，同步修改对应位置的字
-                        const syncCi = wi + charOffsetInWord;
-                        // 跳过已选中的位置
-                        if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === syncCi)) continue;
-                        // 跳过已有相同纠错的位置
-                        if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
-                        // 添加同步纠错
-                        corrections.push({
-                            lineIndex: li,
-                            charIndex: syncCi,
-                            char: l.chars[syncCi],
-                            originalJp: l.jp[syncCi],
-                            newJp: correctedJp
-                        });
-                        // 更新DOM
-                        const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${syncCi}"]`);
-                        if (syncEl) {
-                            syncEl.classList.add('corrected');
-                            syncEl.querySelector('.char-jyutping').textContent = correctedJp;
-                        }
-                    }
-                });
-            });
-        }
-
-        selectedChars = [];
-        closeEditPopup();
-        updateCorrectionCount();
-    }
-
-    function clearSelection() {
-        selectedChars = [];
-        document.querySelectorAll('.char-group.selected').forEach(el => el.classList.remove('selected'));
-    }
-
-    function clearCorrections() {
-        corrections = [];
-        document.querySelectorAll('.char-group.corrected').forEach(el => {
-            el.classList.remove('corrected');
-            const originalJp = el.dataset.originalJp;
-            el.querySelector('.char-jyutping').textContent = originalJp;
-        });
-    }
-
-    function submitCorrections() {
-        if (corrections.length === 0) return;
-
-        const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
-
-        // Build correction details
-        let correctionDetails = corrections.map(c => {
-            const line = currentSong.lyrics[c.lineIndex];
-            const lineText = line.chars.join('');
-            return `| 第${c.lineIndex + 1}行 | ${c.char} | ${c.originalJp} | ${c.newJp} | ${lineText} |`;
-        }).join('\n');
-
-        const title = encodeURIComponent(`[粤拼纠错] ${song}（${corrections.length}处）`);
-        const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n**修改数量：** ${corrections.length} 处\n\n| 行 | 字 | 原粤拼 | 正确粤拼 | 所在行 |\n|---|---|---|---|---|\n${correctionDetails}\n\n---\n*由网页纠错模式提交*`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=纠错`, '_blank');
-    }
-
-    // 纠错：进入纠错模式（替换原跳转逻辑）
-    function submitFeedback() {
-        if (!currentSong) return;
-        // 如果正在修改歌词模式，先退出
-        if (editLyricsMode) {
-            toggleEditLyricsMode();
-        }
-        toggleCorrectionMode();
-    }
-
-    // ===== 修改歌词模式 =====
-    let editLyricsMode = false;
-    let editedLyrics = []; // { lineIndex, originalText, newText }
-
-    function toggleEditLyricsMode() {
-        editLyricsMode = !editLyricsMode;
-        const lyricsContent = document.getElementById('lyricsContent');
-
-        if (editLyricsMode) {
-            // 如果正在纠错模式，先退出
-            if (correctionMode) {
-                toggleCorrectionMode();
-            }
-            lyricsContent.classList.add('edit-lyrics-mode');
-            editedLyrics = [];
-            showEditLyricsBanner();
-            updateEditLyricsBtn();
-        } else {
-            lyricsContent.classList.remove('edit-lyrics-mode');
-            hideEditLyricsBanner();
-            clearEditLyricsSelection();
-            updateEditLyricsBtn();
-        }
-    }
-
-    function updateEditLyricsBtn() {
-        const btn = document.querySelector('.toolbar-btn[onclick="toggleEditLyricsMode()"]');
-        if (!btn) return;
-        if (editLyricsMode) {
-            btn.innerHTML = '<span class="icon">📝</span><span>退出改歌词</span>';
-            btn.style.color = '#28a745';
-        } else {
-            btn.innerHTML = '<span class="icon">📝</span><span>改歌词</span>';
-            btn.style.color = '';
-        }
-    }
-
-    function showEditLyricsBanner() {
-        hideEditLyricsBanner();
-        const banner = document.createElement('div');
-        banner.className = 'correction-banner';
-        banner.id = 'editLyricsBanner';
-        banner.style.background = '#d4edda';
-        banner.style.borderBottomColor = '#28a745';
-        banner.style.color = '#155724';
-        banner.innerHTML = `
-            <span>📝 修改歌词模式：点击行即可编辑整句歌词</span>
-            <span id="editLyricsCountText" style="font-weight:600;"></span>
-            <button class="correction-banner-btn submit" id="submitEditLyricsBtn" onclick="submitEditLyrics()" disabled>提交反馈</button>
-            <button class="correction-banner-btn cancel" onclick="toggleEditLyricsMode()">退出</button>
-        `;
-        // 修改提交按钮颜色为绿色
-        banner.querySelector('#submitEditLyricsBtn').style.background = '#28a745';
-        document.body.appendChild(banner);
-    }
-
-    function hideEditLyricsBanner() {
-        const existing = document.getElementById('editLyricsBanner');
-        if (existing) existing.remove();
-    }
-
-    function updateEditLyricsCount() {
-        const text = document.getElementById('editLyricsCountText');
-        const btn = document.getElementById('submitEditLyricsBtn');
-        if (!text || !btn) return;
-        if (editedLyrics.length > 0) {
-            text.innerHTML = `<span class="correction-count">${editedLyrics.length}</span> 处修改`;
-            btn.disabled = false;
-        } else {
-            text.textContent = '';
-            btn.disabled = true;
-        }
-    }
-
-    function onLyricLineClick(event, lineIndex) {
-        if (!editLyricsMode) return;
-        event.stopPropagation();
-
-        // 清除其他选中状态
-        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
-
-        // 标记当前行为选中
-        const lineEl = event.currentTarget;
-        lineEl.classList.add('selected');
-
-        // 显示编辑弹窗
-        showEditLyricsPopup(lineEl, lineIndex);
-    }
-
-    function showEditLyricsPopup(lineEl, lineIndex) {
-        closeEditLyricsPopup();
-
-        const overlay = document.createElement('div');
-        overlay.className = 'edit-overlay';
-        overlay.id = 'editLyricsOverlay';
-        overlay.onclick = () => { closeEditLyricsPopup(); };
-        document.body.appendChild(overlay);
-
-        const popup = document.createElement('div');
-        popup.className = 'edit-lyrics-popup';
-        popup.id = 'editLyricsPopup';
-
-        // 获取原歌词
-        const line = currentSong.lyrics[lineIndex];
-        const originalText = line.chars ? line.chars.join('') : '';
-
-        // 检查是否已有修改
-        const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
-        const currentText = existingEdit ? existingEdit.newText : originalText;
-
-        popup.innerHTML = `
-            <div class="edit-lyrics-popup-title">修改歌词</div>
-            <div class="edit-lyrics-popup-line-num">第 ${lineIndex + 1} 行</div>
-            <div class="edit-lyrics-popup-original">原歌词：${originalText}</div>
-            <input class="edit-lyrics-popup-input" id="editLyricsInput" type="text" value="${currentText}" placeholder="输入修改后的歌词"
-                   onkeydown="if(event.key==='Enter')confirmEditLyrics(${lineIndex}, '${originalText.replace(/'/g, "\\'")}');if(event.key==='Escape'){closeEditLyricsPopup();}">
-            <div class="edit-lyrics-popup-actions">
-                <button class="edit-lyrics-popup-btn dismiss" onclick="closeEditLyricsPopup()">取消</button>
-                <button class="edit-lyrics-popup-btn confirm" onclick="confirmEditLyrics(${lineIndex}, '${originalText.replace(/'/g, "\\'")}')">确认</button>
-            </div>
-        `;
-
-        document.body.appendChild(popup);
-
-        // 定位弹窗
-        const rect = lineEl.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        let top = rect.bottom + 8;
-        let left = rect.left;
-
-        // 保持在视口内
-        if (top + 200 > window.innerHeight - 60) {
-            top = rect.top - 200 - 8;
-        }
-        if (left + 320 > window.innerWidth - 8) {
-            left = window.innerWidth - 320 - 8;
-        }
-        if (left < 8) left = 8;
-
-        popup.style.top = top + 'px';
-        popup.style.left = left + 'px';
-
-        // 聚焦输入框
-        setTimeout(() => {
-            const input = document.getElementById('editLyricsInput');
-            if (input) { input.focus(); input.select(); }
-        }, 50);
-    }
-
-    function closeEditLyricsPopup() {
-        const popup = document.getElementById('editLyricsPopup');
-        const overlay = document.getElementById('editLyricsOverlay');
-        if (popup) popup.remove();
-        if (overlay) overlay.remove();
-        // 清除选中状态
-        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
-    }
-
-    function confirmEditLyrics(lineIndex, originalText) {
-        const input = document.getElementById('editLyricsInput');
-        if (!input) return;
-        const newText = input.value.trim();
-
-        // 如果内容没有变化，不记录
-        if (newText === originalText) {
-            // 移除已有的修改记录
-            const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
-            if (existingIdx > -1) {
-                editedLyrics.splice(existingIdx, 1);
-            }
-            closeEditLyricsPopup();
-            updateEditLyricsCount();
-            return;
-        }
-
-        if (!newText) {
-            alert('歌词不能为空');
-            return;
-        }
-
-        // 更新或添加修改记录
-        const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
-        if (existingIdx > -1) {
-            editedLyrics[existingIdx].newText = newText;
-        } else {
-            editedLyrics.push({
-                lineIndex: lineIndex,
-                originalText: originalText,
-                newText: newText
-            });
-        }
-
-        closeEditLyricsPopup();
-        updateEditLyricsCount();
-    }
-
-    function clearEditLyricsSelection() {
-        editedLyrics = [];
-        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
-    }
-
-    function submitEditLyrics() {
-        if (editedLyrics.length === 0) return;
-
-        const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
-
-        // 构建修改详情
-        let editDetails = editedLyrics.map(e => {
-            return `| 第${e.lineIndex + 1}行 | ${e.originalText} | ${e.newText} |`;
-        }).join('\n');
-
-        const title = encodeURIComponent(`[歌词纠错] ${song}`);
-        const body = encodeURIComponent(`## 歌词纠错
-
-**歌曲：** ${song}
-**修改数量：** ${editedLyrics.length} 处
-
-| 行号 | 原歌词 | 修改后歌词 |
-|---|---|---|
-${editDetails}
-
----
-*由网页修改歌词模式提交*`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=歌词纠错`, '_blank');
-    }
-
-    // 投稿：跳转到 GitHub Issues
-    function submitNewSong() {
-        const title = encodeURIComponent('[新歌投稿]');
-        const body = encodeURIComponent(`## 投稿新歌\n\n**歌曲名称：**\n\n**歌手：**\n\n**填词：**\n\n**作曲：**\n\n**完整歌词：**\n\`\`\`\n请在这里粘贴完整歌词\n\`\`\`\n\n---\n\n请尽量提供完整歌词，粤拼会由我们添加，谢谢投稿！`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=投稿`, '_blank');
-    }
-
-    // ===== 删除歌曲功能 =====
-    let deleteMode = false;
-    let selectedForDelete = [];
-
-    function toggleDeleteMode() {
-        deleteMode = !deleteMode;
-        selectedForDelete = [];
-        const list = document.getElementById('songList');
-        const btn = document.getElementById('deleteModeBtn');
-        const bar = document.getElementById('deleteBar');
-        if (deleteMode) {
-            list.classList.add('delete-mode');
-            btn.textContent = '✅ 完成';
-            btn.classList.add('active');
-            bar.style.display = 'flex';
-            updateDeleteBar();
-        } else {
-            list.classList.remove('delete-mode');
-            btn.textContent = '🗑️ 管理';
-            btn.classList.remove('active');
-            bar.style.display = 'none';
-            // 重新渲染列表，恢复正常的 selectSong 点击
-            renderSongList();
-        }
-    }
-
-    function toggleDeleteSelect(id, event) {
-        event.stopPropagation();
-        const idx = selectedForDelete.indexOf(id);
-        if (idx > -1) {
-            selectedForDelete.splice(idx, 1);
-        } else {
-            selectedForDelete.push(id);
-        }
-        // 更新样式
-        const items = document.querySelectorAll('.song-item');
-        items.forEach(item => {
-            const onclick = item.getAttribute('onclick');
-            if (onclick && onclick.includes(`selectSong(${id})`)) {
-                item.classList.toggle('delete-selected', selectedForDelete.includes(id));
-            }
-        });
-        updateDeleteBar();
-    }
-
-    function updateDeleteBar() {
-        const count = selectedForDelete.length;
-        document.getElementById('deleteCount').textContent = count > 0 ? `已选 ${count} 首` : '请选择要删除的歌曲';
-        document.getElementById('deleteSubmitBtn').disabled = count === 0;
-    }
-
-    function submitDeleteRequest() {
-        if (selectedForDelete.length === 0) return;
-        const songsToDelete = selectedForDelete.map(id => songs.find(s => s.id === id)).filter(Boolean);
-        if (!confirm(`确定删除以下 ${songsToDelete.length} 首歌曲吗？\n\n${songsToDelete.map(s => `· ${s.title} - ${s.artist}`).join('\n')}\n\n删除请求将提交到 GitHub Issues。`)) return;
-
-        // 构建 Issue 内容
-        const songList = songsToDelete.map((s, i) =>
-            `${i + 1}. **${s.title}** - ${s.artist}（ID: ${s.id}）`
-        ).join('\n');
-
-        const title = encodeURIComponent(`[删除歌曲] ${songsToDelete.length}首歌曲`);
-        const body = encodeURIComponent(`## 删除歌曲请求\n\n**删除数量：** ${songsToDelete.length} 首\n\n${songList}\n\n---\n\n请确认后删除对应歌曲的 JS 文件，并从 index.html 的 songFiles 数组中移除。`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=删除`, '_blank');
-
-        // 退出管理模式
-        toggleDeleteMode();
     }
 
     </script>
