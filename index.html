@@ -2458,6 +2458,8 @@ ${editDetails}
         let lyricsText = document.getElementById('importLyrics').value.trim();
         // 自动将繁体转为简体
         lyricsText = convertText(lyricsText, false);
+        // 更新输入框显示为简体
+        document.getElementById('importLyrics').value = lyricsText;
         if (!lyricsText) {
             document.getElementById('importPreview').style.display = 'none';
             importedLyricsData = null;
@@ -2518,6 +2520,12 @@ ${editDetails}
         const artist = convertText(document.getElementById('importArtist').value.trim(), false);
         const lyricist = convertText(document.getElementById('importLyricist').value.trim(), false);
         const composer = convertText(document.getElementById('importComposer').value.trim(), false);
+
+        // 更新输入框显示为简体
+        document.getElementById('importTitle').value = title;
+        document.getElementById('importArtist').value = artist;
+        document.getElementById('importLyricist').value = lyricist;
+        document.getElementById('importComposer').value = composer;
 
         if (!title || !artist) {
             alert('请填写歌曲名称和歌手');
