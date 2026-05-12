@@ -2,7 +2,7 @@
 
 (function() {
     const song = {
-        id: 28,
+        id: 20,
         title: "一生何求(live)",
         titleJyutping: ["jat1","sang1","ho4","kau4","","","","","",""],
         artist: "古巨基",
