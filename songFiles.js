@@ -25,4 +25,5 @@ const songFiles = [
     'lyrics/圆.js',
     'lyrics/还.js',
     'lyrics/借.js',
+    'lyrics/粤语残片.js',
 ];
