@@ -1237,6 +1237,11 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-wrapper')) closeDropdowns();
+        });
     }
 
     function renderArtistFilter() {
@@ -1406,6 +1411,7 @@
     function toggleDropdown(id, event) {
         if (event) event.stopPropagation();
         const menu = document.getElementById(id);
+        if (!menu) return;
         const wasOpen = menu.classList.contains('show');
         closeDropdowns();
         if (!wasOpen) menu.classList.add('show');
@@ -1413,9 +1419,6 @@
     function closeDropdowns() {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     }
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown-wrapper')) closeDropdowns();
-    });
 
     function adjustFontSize(delta) {
         const newSize = fontSize + delta;
