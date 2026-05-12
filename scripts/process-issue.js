@@ -40,7 +40,8 @@ function main() {
         console.log('Done!');
     } catch (error) {
         console.error('Error:', error.message);
-        addComment(issue.number, `❌ 自动处理失败：\n\n\`\`\`\n${error.message}\n\`\`\`\n\n请手动处理。`);
+        console.error('Stack:', error.stack);
+        addComment(issue.number, `❌ 自动处理失败：\n\n\`\`\`\n${error.message}\n\n${error.stack}\n\`\`\`\n\n请手动处理。`);
     }
 }
 

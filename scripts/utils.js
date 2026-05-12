@@ -4,13 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// 从 GitHub 环境变量读取信息
+// 从文件读取 Issue 信息（避免环境变量多行内容丢失）
 function getIssueInfo() {
     return {
-        title: process.env.ISSUE_TITLE || '',
-        body: process.env.ISSUE_BODY || '',
-        number: process.env.ISSUE_NUMBER || '',
-        labels: (process.env.ISSUE_LABELS || '').split(',').map(l => l.trim()),
+        title: fs.readFileSync('/tmp/issue_title.txt', 'utf8').trim(),
+        body: fs.readFileSync('/tmp/issue_body.txt', 'utf8').trim(),
+        number: fs.readFileSync('/tmp/issue_number.txt', 'utf8').trim(),
+        labels: fs.readFileSync('/tmp/issue_labels.txt', 'utf8').trim().split(',').map(l => l.trim()).filter(l => l),
     };
 }
 
@@ -125,18 +125,20 @@ function commitAndPush(branchName, message) {
 
 // 创建 Pull Request
 function createPR(title, body, branchName) {
-    const bodyEscaped = body.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    const tmpFile = '/tmp/pr_body.md';
+    fs.writeFileSync(tmpFile, body, 'utf8');
     execSync(
-        `gh pr create --title "${title}" --body "${bodyEscaped}" --base main --head ${branchName}`,
+        `gh pr create --title "${title}" --body-file "${tmpFile}" --base main --head ${branchName}`,
         { stdio: 'pipe' }
     );
 }
 
 // 在 Issue 中添加评论
 function addComment(issueNumber, body) {
-    const bodyEscaped = body.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    const tmpFile = '/tmp/comment_body.md';
+    fs.writeFileSync(tmpFile, body, 'utf8');
     execSync(
-        `gh issue comment ${issueNumber} --body "${bodyEscaped}"`,
+        `gh issue comment ${issueNumber} --body-file "${tmpFile}"`,
         { stdio: 'pipe' }
     );
 }
