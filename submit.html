@@ -455,6 +455,20 @@
         // 初始化：各添加一行空行
         addJpRow();
         addLcRow();
+
+        // 读取 URL 参数，自动切换 Tab 并填入歌曲名称
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type');
+        const song = params.get('song');
+        if (song) {
+            if (type === 'jyutping') {
+                switchTab('jyutping');
+                document.getElementById('jp-song').value = song;
+            } else if (type === 'lyrics') {
+                switchTab('lyrics');
+                document.getElementById('lc-song').value = song;
+            }
+        }
     </script>
 </body>
 </html>
