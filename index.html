@@ -1553,6 +1553,28 @@
         }
     }
 
+    function onCharClick(event, lineIndex, charIndex) {
+        // 播放模式下，点击单字播放语音
+        if (TTSModule.isModeActive()) {
+            event.stopPropagation();
+            const charGroup = event.currentTarget;
+            const jp = charGroup.dataset.originalJp;
+            TTSModule.playChar(jp, charGroup);
+            return;
+        }
+
+        // 纠错模式下，处理字点击
+        if (CorrectionModule.handleCharClick(event, lineIndex, charIndex)) {
+            return;
+        }
+    }
+
+    function onLyricLineClick(event, lineIndex) {
+        if (EditLyricsModule.handleLineClick(event, lineIndex)) {
+            return;
+        }
+    }
+
     </script>
 
     <!-- 导入歌词模态框 -->
