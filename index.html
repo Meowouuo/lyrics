@@ -1185,9 +1185,9 @@
 
                 <div class="toolbar" id="toolbar">
                     <div class="toolbar-left" id="toolbarLeft">
-                        <button class="toolbar-btn" onclick="toggleFavorite()">
-                            <span class="icon" id="favIcon">☆</span>
-                            <span>收藏</span>
+                        <button class="toolbar-btn" id="ttsModeBtn" onclick="toggleTTSMode()">
+                            <span class="icon">🔊</span>
+                            <span>播放</span>
                         </button>
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
                             <option value="">A</option>
@@ -1219,10 +1219,6 @@
                         <button class="toolbar-btn" onclick="showImportModal()">
                             <span class="icon">📥</span>
                             <span>导入</span>
-                        </button>
-                        <button class="toolbar-btn" id="ttsModeBtn" onclick="toggleTTSMode()">
-                            <span class="icon">🔊</span>
-                            <span>播放</span>
                         </button>
                     </div>
                     <button class="toolbar-btn" onclick="shareSong()">
@@ -1265,7 +1261,6 @@
     let artists = [];
     let currentSong = null;
     let currentFilter = 'all';
-    let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
     let fontSize = 20;
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
     let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
@@ -1653,8 +1648,6 @@
             });
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
-
-        updateFavIcon();
     }
 
     function renderMetaName(name, jyutpingArr) {
@@ -1772,22 +1765,6 @@
     function convertText(text, toTraditional) {
         const map = toTraditional ? s2tMap : t2sMap;
         return text.split('').map(c => map[c] || c).join('');
-    }
-
-    function toggleFavorite() {
-        if (!currentSong) return;
-        const idx = favorites.indexOf(currentSong.id);
-        if (idx > -1) favorites.splice(idx, 1);
-        else favorites.push(currentSong.id);
-        localStorage.setItem('jyutping_favs', JSON.stringify(favorites));
-        updateFavIcon();
-    }
-
-    function updateFavIcon() {
-        if (!currentSong) return;
-        const icon = document.getElementById('favIcon');
-        const isFav = favorites.includes(currentSong.id);
-        icon.textContent = isFav ? '★' : '☆';
     }
 
     function shareSong() {
