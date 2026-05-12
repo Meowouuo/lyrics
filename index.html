@@ -1142,6 +1142,9 @@
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
+                        <button class="toolbar-btn" onclick="toggleTraditional()">
+                            <span class="icon" id="traditionalIcon">繁</span>
+                        </button>
                         <button class="toolbar-btn" onclick="submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
@@ -1218,6 +1221,7 @@
     let currentSong = null;
     let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
+    let useTraditional = localStorage.getItem('jyutping_traditional') === 'true';
     let fontSize = 20;
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
     let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
@@ -1246,6 +1250,9 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
+
+        // 初始化繁简切换按钮状态
+        document.getElementById('traditionalIcon').textContent = useTraditional ? '简' : '繁';
     }
 
     function renderArtistFilter() {
@@ -1340,10 +1347,11 @@
 
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('lyricsView').style.display = 'block';
-        document.getElementById('mobileTitle').textContent = currentSong.title;
+        const displayTitle = useTraditional ? convertText(currentSong.title, true) : currentSong.title;
+        document.getElementById('mobileTitle').textContent = displayTitle;
 
         // Render title with jyutping
-        const titleHtml = currentSong.title.split('').map((char, i) => {
+        const titleHtml = displayTitle.split('').map((char, i) => {
             const jp = currentSong.titleJyutping[i] || '';
             return `
                 <span class="title-char-group">
@@ -1355,9 +1363,12 @@
         document.getElementById('songTitle').innerHTML = titleHtml;
 
         // Render metadata with jyutping
-        document.getElementById('songArtist').innerHTML = renderMetaName(currentSong.artist, currentSong.artistJyutping);
-        document.getElementById('songLyricist').innerHTML = renderMetaName(currentSong.lyricist, currentSong.lyricistJyutping);
-        document.getElementById('songComposer').innerHTML = renderMetaName(currentSong.composer, currentSong.composerJyutping);
+        const displayArtist = useTraditional ? convertText(currentSong.artist, true) : currentSong.artist;
+        const displayLyricist = useTraditional ? convertText(currentSong.lyricist, true) : currentSong.lyricist;
+        const displayComposer = useTraditional ? convertText(currentSong.composer, true) : currentSong.composer;
+        document.getElementById('songArtist').innerHTML = renderMetaName(displayArtist, currentSong.artistJyutping);
+        document.getElementById('songLyricist').innerHTML = renderMetaName(displayLyricist, currentSong.lyricistJyutping);
+        document.getElementById('songComposer').innerHTML = renderMetaName(displayComposer, currentSong.composerJyutping);
 
         // Render lyrics with font size, letter spacing and line height
         let lyricsHtml = '';
@@ -1384,12 +1395,14 @@
             }
             // 渲染每个分段为一个独立的 lyric-line
             segments.forEach((segment, segIdx) => {
-                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => `
+                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
+                    const displayChar = useTraditional ? convertText(char, true) : char;
+                    return `
                     <span class="char-group" data-line="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
-                        <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
+                        <span class="char-hanzi" style="font-size:${fontSize}px">${displayChar}</span>
                     </span>
-                `).join('');
+                `}).join('');
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${segmentHtml}</div>`;
             });
         });
@@ -1483,6 +1496,46 @@
         const toggle = document.getElementById('toolbarToggle');
         toolbar.classList.toggle('expanded');
         toggle.textContent = toolbar.classList.contains('expanded') ? '▼' : '▲';
+    }
+
+    // 简繁转换对照表
+    const s2tMap = {
+        '简': '簡', '繁': '繁', '体': '體', '个': '個', '来': '來', '说': '說', '时': '時', '会': '會', '对': '對', '开': '開',
+        '过': '過', '为': '為', '这': '這', '们': '們', '国': '國', '发': '發', '长': '長', '现': '現', '还': '還', '当': '當',
+        '经': '經', '见': '見', '从': '從', '问': '問', '很': '很', '只': '只', '最': '最', '把': '把', '被': '被', '让': '讓',
+        '给': '給', '向': '向', '和': '和', '与': '與', '在': '在', '的': '的', '了': '了', '是': '是', '我': '我', '你': '你',
+        '他': '他', '她': '她', '它': '它', '们': '們', '得': '得', '地': '地', '着': '著', '到': '到', '上': '上', '下': '下',
+        '中': '中', '大': '大', '小': '小', '多': '多', '少': '少', '好': '好', '爱': '愛', '情': '情', '心': '心', '想': '想',
+        '知': '知', '道': '道', '看': '看', '听': '聽', '见': '見', '回': '回', '去': '去', '走': '走', '跑': '跑', '跳': '跳',
+        '唱': '唱', '歌': '歌', '笑': '笑', '哭': '哭', '睡': '睡', '醒': '醒', '吃': '吃', '喝': '喝', '玩': '玩', '乐': '樂',
+        '学': '學', '习': '習', '写': '寫', '读': '讀', '书': '書', '画': '畫', '做': '做', '事': '事', '工': '工', '作': '作',
+        '家': '家', '里': '裡', '外': '外', '前': '前', '后': '後', '左': '左', '右': '右', '东': '東', '西': '西', '南': '南',
+        '北': '北', '天': '天', '地': '地', '日': '日', '月': '月', '星': '星', '云': '雲', '风': '風', '雨': '雨', '雪': '雪',
+        '春': '春', '夏': '夏', '秋': '秋', '冬': '冬', '年': '年', '岁': '歲', '花': '花', '草': '草', '树': '樹', '木': '木',
+        '山': '山', '水': '水', '江': '江', '河': '河', '海': '海', '湖': '湖', '路': '路', '街': '街', '城': '城', '市': '市',
+        '门': '門', '窗': '窗', '房': '房', '屋': '屋', '楼': '樓', '梯': '梯', '墙': '牆', '院': '院', '园': '園', '场': '場',
+        '车': '車', '马': '馬', '船': '船', '机': '機', '飞': '飛', '站': '站', '店': '店', '厂': '廠', '银': '銀', '行': '行',
+        '医': '醫', '院': '院', '学': '學', '校': '校', '师': '師', '生': '生', '医': '醫', '护': '護', '士': '士', '警': '警',
+        '察': '察', '军': '軍', '人': '人', '民': '民', '公': '公', '共': '共', '私': '私', '男': '男', '女': '女', '老': '老',
+        '少': '少', '父': '父', '母': '母', '兄': '兄', '弟': '弟', '姐': '姐', '妹': '妹', '夫': '夫', '妻': '妻', '子': '子',
+        '儿': '兒', '孙': '孫', '朋': '朋', '友': '友', '亲': '親', '爱': '愛', '恋': '戀', '婚': '婚', '姻': '姻', '缘': '緣',
+        '梦': '夢', '想': '想', '愿': '願', '望': '望', '希': '希', '望': '望', '期': '期', '待': '待', '等': '等', '待': '待'
+    };
+    const t2sMap = Object.fromEntries(Object.entries(s2tMap).map(([k, v]) => [v, k]));
+
+    function convertText(text, toTraditional) {
+        const map = toTraditional ? s2tMap : t2sMap;
+        return text.split('').map(c => map[c] || c).join('');
+    }
+
+    function toggleTraditional() {
+        useTraditional = !useTraditional;
+        localStorage.setItem('jyutping_traditional', useTraditional);
+        document.getElementById('traditionalIcon').textContent = useTraditional ? '简' : '繁';
+        if (currentSong) {
+            renderLyrics();
+        }
+        showToast(useTraditional ? '已切换为繁体' : '已切换为简体');
     }
 
     function toggleFavorite() {
