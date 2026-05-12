@@ -23,4 +23,5 @@ const songFiles = [
     'lyrics/一生何求(live).js',
     'lyrics/一生何求.js',
     'lyrics/圆.js',
+    'lyrics/还.js',
 ];
