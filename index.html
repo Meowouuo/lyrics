@@ -529,7 +529,11 @@
             display: flex;
             gap: 4px;
             flex: 1;
-            flex-wrap: wrap;
+        }
+        @media (max-width: 1023px) {
+            .toolbar-left {
+                flex-wrap: wrap;
+            }
         }
 
         .toolbar-btn {
@@ -585,6 +589,30 @@
             text-align: center;
         }
         .toolbar-select:focus { outline: none; }
+
+        .toolbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            padding: 8px;
+        }
+        @media (max-width: 1023px) {
+            .toolbar-toggle {
+                display: block;
+            }
+            .toolbar.collapsed {
+                padding: 8px 16px;
+            }
+            .toolbar.collapsed .toolbar-left {
+                display: none;
+            }
+            .toolbar.collapsed .toolbar-btn.primary {
+                display: none;
+            }
+        }
 
         /* Mobile Header (only on mobile) */
         .mobile-header {
@@ -1084,8 +1112,8 @@
 
                 <div class="lyrics-content" id="lyricsContent"></div>
 
-                <div class="toolbar">
-                    <div class="toolbar-left">
+                <div class="toolbar" id="toolbar">
+                    <div class="toolbar-left" id="toolbarLeft">
                         <button class="toolbar-btn" onclick="toggleFavorite()">
                             <span class="icon" id="favIcon">☆</span>
                             <span>收藏</span>
@@ -1122,9 +1150,10 @@
                             <span>导入</span>
                         </button>
                     </div>
-                    <button class="toolbar-btn primary" onclick="shareSong()">
-                        <span>分享</span>
+                    <button class="toolbar-btn" onclick="shareSong()">
+                        <span class="icon">🔗</span>
                     </button>
+                    <button class="toolbar-toggle" id="toolbarToggle" onclick="toggleToolbar()">▼</button>
                 </div>
             </div>
         </main>
@@ -1440,6 +1469,13 @@
         setTimeout(() => toast.remove(), 1500);
     }
 
+    function toggleToolbar() {
+        const toolbar = document.getElementById('toolbar');
+        const toggle = document.getElementById('toolbarToggle');
+        toolbar.classList.toggle('collapsed');
+        toggle.textContent = toolbar.classList.contains('collapsed') ? '▲' : '▼';
+    }
+
     function toggleFavorite() {
         if (!currentSong) return;
         const idx = favorites.indexOf(currentSong.id);
@@ -1458,9 +1494,11 @@
 
     function shareSong() {
         if (!currentSong) return;
-        const text = `🎵 ${currentSong.title} - ${currentSong.artist}`;
+        const url = `${window.location.origin}${window.location.pathname}#${currentSong.id}`;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
+            navigator.clipboard.writeText(url).then(() => showToast('链接已复制'));
+        } else {
+            showToast('链接: ' + url);
         }
     }
 
