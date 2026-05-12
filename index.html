@@ -1171,28 +1171,10 @@
     <!-- 加载粤拼字典 -->
     <script src="jyutping-dict.js?v=2"></script>
 
-    <!-- 歌曲清单（内联，避免缓存问题。新增歌曲时在此数组添加一行） -->
-    <script>
-    const songFiles = [
-        'lyrics/重复犯错.js',
-        'lyrics/喜欢你.js',
-        'lyrics/海阔天空.js',
-        'lyrics/富士山下.js',
-        'lyrics/明年今日.js',
-        'lyrics/千千阙歌.js',
-        'lyrics/必杀技.js',
-        'lyrics/爱与诚.js',
-        'lyrics/爱得太迟.js',
-        'lyrics/友共情.js',
-        'lyrics/欢乐今宵.js',
-        'lyrics/时代.js',
-        'lyrics/告别我的恋人们.js',
-        'lyrics/心跳回忆.js',
-        'lyrics/第二最爱.js',
-        'lyrics/罗马假期.js',
-        'lyrics/致少年时代.js',
-    ];
+    <!-- 歌曲清单（独立文件，方便维护） -->
+    <script src="songFiles.js"></script>
 
+    <script>
     async function loadAllSongs() {
         window.__songs = [];
         const loadPromises = songFiles.map(file => {
