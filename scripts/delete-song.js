@@ -10,7 +10,6 @@ const {
     commitAndPush,
     createPR,
     addComment,
-    addLabel,
 } = require('./utils');
 
 function processDeleteSong() {
@@ -96,7 +95,6 @@ ${notFound.length > 0 ? `\n⚠️ 以下歌曲未找到：${notFound.join(', ')}
 
 请等待管理员审核合并。`);
 
-    addLabel(issue.number, '🤖 已处理');
 }
 
 module.exports = { processDeleteSong };

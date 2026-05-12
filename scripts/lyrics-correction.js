@@ -11,7 +11,6 @@ const {
     commitAndPush,
     createPR,
     addComment,
-    addLabel,
 } = require('./utils');
 
 function processLyricsCorrection() {
@@ -165,7 +164,6 @@ ${rows.filter(r => !failedRows.includes(r)).map(r => `| ${r.join(' | ')} |`).joi
 
 ⚠️ 注意：被修改的歌词行的粤拼已被清空，合并后需要手动补充正确的粤拼。`);
 
-    addLabel(issue.number, '🤖 已处理');
 }
 
 module.exports = { processLyricsCorrection };

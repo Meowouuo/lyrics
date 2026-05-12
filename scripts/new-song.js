@@ -12,7 +12,6 @@ const {
     createPR,
     addComment,
     closeIssue,
-    addLabel,
 } = require('./utils');
 
 // 加载粤拼字典和匹配函数
@@ -157,7 +156,6 @@ ${previewMarkdown}
 
 请等待管理员审核合并。`);
 
-    addLabel(issue.number, '🤖 已处理');
 }
 
 module.exports = { processNewSong };
