@@ -1647,8 +1647,8 @@
                     </span>
                 `).join('');
                 // 每个分段都添加播放按钮（只播放该分段的语音）
-                const segJp = JSON.stringify(segment.map(s => s.jp).filter(j => j));
-                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playSegmentTTS(${segJp}, this)" title="播放语音">▶</button>`;
+                const segJp = segment.map(s => s.jp).filter(j => j).map(j => "'" + j.replace(/'/g, "\\'") + "'").join(',');
+                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playSegmentTTS([${segJp}], this)" title="播放语音">▶</button>`;
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
             });
         });
