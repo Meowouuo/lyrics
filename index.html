@@ -1276,8 +1276,10 @@
     <script>
     // 应用状态
     let songs = [];
+    window.songs = [];
     let artists = [];
     let currentSong = null;
+    window.currentSong = null;
     let currentFilter = 'all';
     let fontSize = 20;
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
@@ -1288,6 +1290,7 @@
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
+        window.songs = songs;
 
         // 加载 TTS manifest
         await TTSModule.init();
@@ -1377,6 +1380,7 @@
             CorrectionModule.toggle();
         }
         currentSong = songs.find(s => s.id === id);
+        window.currentSong = currentSong;
         renderSongList();
         renderLyrics();
 

@@ -24,7 +24,7 @@ function toggleCorrectionMode() {
 }
 
 function updateCorrectionBtn() {
-    const btn = document.querySelector('.toolbar-btn[onclick="submitFeedback()"]');
+    const btn = document.querySelector('.toolbar-btn[onclick="CorrectionModule.submitFeedback()"]');
     if (!btn) return;
     if (correctionMode) {
         btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
