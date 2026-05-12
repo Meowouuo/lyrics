@@ -573,41 +573,18 @@
             background: #333;
         }
 
-        .dropdown-details {
-            position: relative;
-        }
-        .dropdown-details summary {
-            list-style: none;
+        .toolbar-select {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
             cursor: pointer;
+            padding: 8px 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
         }
-        .dropdown-details summary::-webkit-details-marker {
-            display: none;
-        }
-        .dropdown-details .dropdown-menu {
-            display: none;
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            margin-bottom: 4px;
-            background: #fff;
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-            z-index: 1000;
-            min-width: 100px;
-            overflow: hidden;
-        }
-        .dropdown-details[open] .dropdown-menu {
-            display: block;
-        }
-        .dropdown-item {
-            padding: 8px 14px;
-            font-size: 13px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.1s;
-        }
-        .dropdown-item:hover { background: #f5f5f5; }
+        .toolbar-select:focus { outline: none; }
 
         /* Mobile Header (only on mobile) */
         .mobile-header {
@@ -1113,27 +1090,21 @@
                             <span class="icon" id="favIcon">☆</span>
                             <span>收藏</span>
                         </button>
-                        <details class="dropdown-details">
-                            <summary class="toolbar-btn"><span class="icon">A</span></summary>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" onclick="adjustFontSize(1)">A+ 放大</div>
-                                <div class="dropdown-item" onclick="adjustFontSize(-1)">A- 缩小</div>
-                            </div>
-                        </details>
-                        <details class="dropdown-details">
-                            <summary class="toolbar-btn"><span class="icon">↔️</span></summary>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" onclick="adjustLetterSpacing(1)">字距 +</div>
-                                <div class="dropdown-item" onclick="adjustLetterSpacing(-1)">字距 -</div>
-                            </div>
-                        </details>
-                        <details class="dropdown-details">
-                            <summary class="toolbar-btn"><span class="icon">↕️</span></summary>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-item" onclick="adjustLineHeight(0.1)">行距 +</div>
-                                <div class="dropdown-item" onclick="adjustLineHeight(-0.1)">行距 -</div>
-                            </div>
-                        </details>
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">A</option>
+                            <option value="adjustFontSize(1)">A+ 放大</option>
+                            <option value="adjustFontSize(-1)">A- 缩小</option>
+                        </select>
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">↔️</option>
+                            <option value="adjustLetterSpacing(1)">字距 +</option>
+                            <option value="adjustLetterSpacing(-1)">字距 -</option>
+                        </select>
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">↕️</option>
+                            <option value="adjustLineHeight(0.1)">行距 +</option>
+                            <option value="adjustLineHeight(-0.1)">行距 -</option>
+                        </select>
                         <button class="toolbar-btn" onclick="submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
