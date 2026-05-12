@@ -1641,8 +1641,8 @@
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
                 `).join('');
-                // 只在第一个分段添加播放按钮
-                const playBtn = segIdx === 0 ? `<button class="tts-play-btn" onclick="event.stopPropagation(); playLineTTS(${index}, this)" title="播放语音">▶</button>` : '';
+                // 每个分段都添加播放按钮（点击播放整行歌词）
+                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playLineTTS(${index}, this)" title="播放语音">▶</button>`;
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
             });
         });
