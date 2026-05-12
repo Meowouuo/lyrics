@@ -437,13 +437,6 @@
             line-height: 2;
         }
 
-        .lyric-line {
-            margin-bottom: 12px;
-            line-height: 1.6;
-            animation: fadeIn 0.3s ease forwards;
-            opacity: 0;
-        }
-
         .lyric-paragraph-break {
             height: 16px;
         }
@@ -500,6 +493,52 @@
         }
         @media (min-width: 1024px) {
             .char-hanzi { font-size: 24px; }
+        }
+
+        /* TTS Play Button */
+        .tts-play-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+        .tts-play-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .tts-play-btn:active {
+            transform: scale(0.95);
+        }
+        .tts-play-btn.playing {
+            background: #4CAF50;
+            color: #fff;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .lyric-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease forwards;
+            opacity: 0;
+        }
+        .lyric-line-content {
+            flex: 1;
         }
 
         /* Toolbar */
@@ -1206,6 +1245,12 @@
     const MIN_FONT_SIZE = 12;
     const MAX_FONT_SIZE = 24;
 
+    // TTS 语音播报相关
+    let ttsManifest = null;       // 存储 manifest 数据
+    let ttsBaseUrl = '';          // 存储 baseUrl
+    let currentAudio = null;      // 当前播放的音频
+    let currentPlayingBtn = null; // 当前播放按钮
+
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
@@ -1216,6 +1261,9 @@
             importedSongs.forEach(s => window.__songs.push(s));
             songs = window.__songs;
         }
+
+        // 加载 TTS manifest
+        await loadTTSManifest();
 
         // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
         const artistSet = new Set();
@@ -1228,6 +1276,119 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
+    }
+
+    // 加载 TTS manifest 文件
+    async function loadTTSManifest() {
+        try {
+            const response = await fetch('tts/manifest.v1.json');
+            if (response.ok) {
+                const data = await response.json();
+                ttsManifest = data.items;
+                ttsBaseUrl = data.baseUrl;
+                console.log('TTS manifest 加载成功，共', Object.keys(ttsManifest).length, '个语音项');
+            } else {
+                console.warn('TTS manifest 加载失败:', response.status);
+            }
+        } catch (error) {
+            console.warn('TTS manifest 加载出错:', error);
+        }
+    }
+
+    // 播放歌词行的语音
+    async function playLineTTS(lineIndex, btn) {
+        if (!ttsManifest || !currentSong) {
+            showToast('语音数据未加载');
+            return;
+        }
+
+        const line = currentSong.lyrics[lineIndex];
+        if (!line || !line.jp) {
+            showToast('该行没有粤拼数据');
+            return;
+        }
+
+        // 停止当前播放
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        if (currentPlayingBtn) {
+            currentPlayingBtn.classList.remove('playing');
+            currentPlayingBtn = null;
+        }
+
+        // 获取该行的粤拼数组（过滤空值）
+        const jyutpingArr = line.jp.filter(jp => jp);
+        if (jyutpingArr.length === 0) {
+            showToast('该行没有粤拼数据');
+            return;
+        }
+
+        // 设置当前播放按钮
+        currentPlayingBtn = btn;
+        btn.classList.add('playing');
+
+        // 逐词播放
+        await playJyutpingSequence(jyutpingArr, btn);
+    }
+
+    // 逐词播放粤拼序列
+    async function playJyutpingSequence(jyutpingArr, btn) {
+        for (let i = 0; i < jyutpingArr.length; i++) {
+            // 如果用户点击了其他按钮或停止播放，则中断
+            if (!currentPlayingBtn || currentPlayingBtn !== btn) {
+                break;
+            }
+
+            const jp = jyutpingArr[i];
+            const audioPath = ttsManifest[jp];
+            
+            if (!audioPath) {
+                console.log('未找到粤拼:', jp);
+                continue; // 跳过未找到的词，继续播放下一个
+            }
+
+            const audioUrl = `${ttsBaseUrl}/${audioPath}`;
+            
+            try {
+                await playAudio(audioUrl);
+            } catch (err) {
+                console.log('播放失败:', jp, err);
+            }
+        }
+
+        // 播放完成
+        if (currentPlayingBtn === btn) {
+            btn.classList.remove('playing');
+            currentAudio = null;
+            currentPlayingBtn = null;
+        }
+    }
+
+    // 播放单个音频（返回 Promise）
+    function playAudio(url) {
+        return new Promise((resolve, reject) => {
+            const audio = new Audio(url);
+            currentAudio = audio;
+            
+            audio.onended = () => resolve();
+            audio.onerror = (err) => reject(err);
+            
+            audio.play().catch(reject);
+        });
+    }
+
+    // 停止当前播放
+    function stopCurrentTTS() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        if (currentPlayingBtn) {
+            currentPlayingBtn.classList.remove('playing');
+            currentPlayingBtn = null;
+        }
     }
 
     function renderArtistFilter() {
@@ -1372,7 +1533,9 @@
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
                 `).join('');
-                lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${segmentHtml}</div>`;
+                // 只在第一个分段添加播放按钮
+                const playBtn = segIdx === 0 ? `<button class="tts-play-btn" onclick="event.stopPropagation(); playLineTTS(${index}, this)" title="播放语音">▶</button>` : '';
+                lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
             });
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
