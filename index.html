@@ -1108,7 +1108,7 @@
                             <span>收藏</span>
                         </button>
                         <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('fontDropdown')">
+                            <button class="toolbar-btn" onclick="toggleDropdown('fontDropdown', event)">
                                 <span class="icon">A</span>
                             </button>
                             <div class="dropdown-menu" id="fontDropdown">
@@ -1117,7 +1117,7 @@
                             </div>
                         </div>
                         <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('spacingDropdown')">
+                            <button class="toolbar-btn" onclick="toggleDropdown('spacingDropdown', event)">
                                 <span class="icon">↔️</span>
                             </button>
                             <div class="dropdown-menu" id="spacingDropdown">
@@ -1126,7 +1126,7 @@
                             </div>
                         </div>
                         <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('lineDropdown')">
+                            <button class="toolbar-btn" onclick="toggleDropdown('lineDropdown', event)">
                                 <span class="icon">↕️</span>
                             </button>
                             <div class="dropdown-menu" id="lineDropdown">
@@ -1403,7 +1403,8 @@
     }
 
     // ===== 下拉菜单 =====
-    function toggleDropdown(id) {
+    function toggleDropdown(id, event) {
+        if (event) event.stopPropagation();
         const menu = document.getElementById(id);
         const wasOpen = menu.classList.contains('show');
         closeDropdowns();
