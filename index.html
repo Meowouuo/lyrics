@@ -528,7 +528,12 @@
         .toolbar-left {
             display: flex;
             gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex: 1;
         }
+        .toolbar-left::-webkit-scrollbar { display: none; }
 
         .toolbar-btn {
             background: none;
@@ -551,7 +556,15 @@
         }
 
         .toolbar-btn .icon {
-            font-size: 18px;
+            font-size: 16px;
+        }
+        .toolbar-btn span:not(.icon) {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .toolbar-btn span:not(.icon) {
+                display: inline;
+            }
         }
 
         .toolbar-btn.primary {
@@ -576,7 +589,7 @@
             border: 1px solid #e8e8e8;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 100;
+            z-index: 1000;
             min-width: 100px;
             overflow: hidden;
         }
