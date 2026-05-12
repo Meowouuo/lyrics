@@ -1331,14 +1331,7 @@
         }
 
         // 停止当前播放
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
-        if (currentPlayingBtn) {
-            currentPlayingBtn.classList.remove('playing');
-            currentPlayingBtn = null;
-        }
+        stopCurrentTTS();
 
         // 获取该行的粤拼数组（过滤空值）
         const jyutpingArr = line.jp.filter(jp => jp);
@@ -1352,6 +1345,18 @@
         btn.classList.add('playing');
 
         // 逐词播放
+        await playJyutpingSequence(jyutpingArr, btn);
+    }
+
+    // 播放分段的语音（用于空格分割后的子行）
+    async function playSegmentTTS(jyutpingArr, btn) {
+        if (!ttsManifest || !jyutpingArr || jyutpingArr.length === 0) return;
+
+        stopCurrentTTS();
+
+        currentPlayingBtn = btn;
+        btn.classList.add('playing');
+
         await playJyutpingSequence(jyutpingArr, btn);
     }
 
@@ -1641,8 +1646,9 @@
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
                 `).join('');
-                // 每个分段都添加播放按钮（点击播放整行歌词）
-                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playLineTTS(${index}, this)" title="播放语音">▶</button>`;
+                // 每个分段都添加播放按钮（只播放该分段的语音）
+                const segJp = JSON.stringify(segment.map(s => s.jp).filter(j => j));
+                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playSegmentTTS(${segJp}, this)" title="播放语音">▶</button>`;
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
             });
         });
