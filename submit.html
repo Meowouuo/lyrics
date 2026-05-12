@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投稿 - 粤拼歌词</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+        }
+        .header {
+            background: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header a {
+            color: #1890ff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            border-color: #1890ff;
+            color: #1890ff;
+            background: #e6f7ff;
+        }
+        .tab:hover { border-color: #1890ff; }
+        .form-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        .form-group label .required {
+            color: #ff4d4f;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
+        }
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        .form-group .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1890ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover { background: #40a9ff; }
+        .submit-btn:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success {
+            display: block;
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+        .result.error {
+            display: block;
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+        .result a {
+            color: #1890ff;
+            text-decoration: none;
+        }
+        .correction-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .correction-row input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .correction-row input:focus {
+            outline: none;
+            border-color: #1890ff;
+        }
+        .correction-row .remove-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #ff4d4f;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .add-row-btn {
+            padding: 6px 16px;
+            border: 1px dashed #d9d9d9;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            width: 100%;
+        }
+        .add-row-btn:hover { border-color: #1890ff; color: #1890ff; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎵 粤拼歌词投稿</h1>
+        <a href="./">← 返回歌词列表</a>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('new-song')">📝 投稿新歌</div>
+            <div class="tab" onclick="switchTab('jyutping')">✏️ 粤拼纠错</div>
+            <div class="tab" onclick="switchTab('lyrics')">📝 歌词纠错</div>
+        </div>
+
+        <!-- 投稿新歌 -->
+        <div class="panel active" id="panel-new-song">
+            <div class="form-card">
+                <div class="form-group">
+                    <label>歌曲名称 <span class="required">*</span></label>
+                    <input type="text" id="ns-title" placeholder="例如：喜欢你">
+                </div>
+                <div class="form-group">
+                    <label>歌手 <span class="required">*</span></label>
+                    <input type="text" id="ns-artist" placeholder="例如：Beyond（合唱用 / 分隔）">
+                </div>
+                <div class="form-group">
+                    <label>填词</label>
+                    <input type="text" id="ns-lyricist" placeholder="填词人（选填）">
+                </div>
+                <div class="form-group">
+                    <label>作曲</label>
+                    <input type="text" id="ns-composer" placeholder="作曲人（选填）">
+                </div>
+                <div class="form-group">
+                    <label>完整歌词 <span class="required">*</span></label>
+                    <textarea id="ns-lyrics" placeholder="请粘贴完整歌词&#10;&#10;换行 = 新的一句歌词&#10;空一行 = 段落分隔"></textarea>
+                    <div class="hint">换行表示新的一句歌词，空一行表示段落分隔</div>
+                </div>
+                <button class="submit-btn" onclick="submitNewSong()">提交投稿</button>
+                <div class="result" id="ns-result"></div>
+            </div>
+        </div>
+
+        <!-- 粤拼纠错 -->
+        <div class="panel" id="panel-jyutping">
+            <div class="form-card">
+                <div class="form-group">
+                    <label>歌曲名称 <span class="required">*</span></label>
+                    <input type="text" id="jp-song" placeholder="例如：喜欢你">
+                </div>
+                <div class="form-group">
+                    <label>纠错内容 <span class="required">*</span></label>
+                    <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
+                        <input placeholder="行号" style="flex:0.5;">
+                        <input placeholder="字">
+                        <input placeholder="原粤拼">
+                        <input placeholder="正确粤拼">
+                        <div style="width:28px;"></div>
+                    </div>
+                    <div id="jp-rows"></div>
+                    <button class="add-row-btn" onclick="addJpRow()">+ 添加一行</button>
+                    <div class="hint">请先在歌词页面找到需要纠错的行号</div>
+                </div>
+                <button class="submit-btn" onclick="submitJyutpingCorrection()">提交纠错</button>
+                <div class="result" id="jp-result"></div>
+            </div>
+        </div>
+
+        <!-- 歌词纠错 -->
+        <div class="panel" id="panel-lyrics">
+            <div class="form-card">
+                <div class="form-group">
+                    <label>歌曲名称 <span class="required">*</span></label>
+                    <input type="text" id="lc-song" placeholder="例如：喜欢你">
+                </div>
+                <div class="form-group">
+                    <label>纠错内容 <span class="required">*</span></label>
+                    <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
+                        <input placeholder="行号" style="flex:0.5;">
+                        <input placeholder="原歌词" style="flex:1;">
+                        <input placeholder="正确歌词" style="flex:1;">
+                        <div style="width:28px;"></div>
+                    </div>
+                    <div id="lc-rows"></div>
+                    <button class="add-row-btn" onclick="addLcRow()">+ 添加一行</button>
+                    <div class="hint">请先在歌词页面找到需要纠错的行号</div>
+                </div>
+                <button class="submit-btn" onclick="submitLyricsCorrection()">提交纠错</button>
+                <div class="result" id="lc-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Worker URL（部署后替换为实际地址）
+        const WORKER_URL = 'https://lyrics-submit.meowouuo.workers.dev';
+
+        // Tab 切换
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', ['new-song', 'jyutping', 'lyrics'][i] === tab);
+            });
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + tab).classList.add('active');
+        }
+
+        // 显示结果
+        function showResult(id, success, message) {
+            const el = document.getElementById(id);
+            el.className = 'result ' + (success ? 'success' : 'error');
+            el.innerHTML = message;
+        }
+
+        // 投稿新歌
+        async function submitNewSong() {
+            const title = document.getElementById('ns-title').value.trim();
+            const artist = document.getElementById('ns-artist').value.trim();
+            const lyricist = document.getElementById('ns-lyricist').value.trim();
+            const composer = document.getElementById('ns-composer').value.trim();
+            const lyrics = document.getElementById('ns-lyrics').value.trim();
+
+            if (!title || !artist || !lyrics) {
+                showResult('ns-result', false, '请填写歌曲名称、歌手和歌词');
+                return;
+            }
+
+            const btn = document.querySelector('#panel-new-song .submit-btn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'new-song', title, artist, lyricist, composer, lyrics }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showResult('ns-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
+                } else {
+                    showResult('ns-result', false, `❌ 提交失败：${data.error}`);
+                }
+            } catch (e) {
+                showResult('ns-result', false, '❌ 网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '提交投稿';
+            }
+        }
+
+        // 粤拼纠错行管理
+        function addJpRow() {
+            const container = document.getElementById('jp-rows');
+            const row = document.createElement('div');
+            row.className = 'correction-row';
+            row.innerHTML = `
+                <input placeholder="行号" class="jp-line">
+                <input placeholder="字" class="jp-char">
+                <input placeholder="原粤拼" class="jp-original">
+                <input placeholder="正确粤拼" class="jp-new">
+                <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(row);
+        }
+
+        async function submitJyutpingCorrection() {
+            const songName = document.getElementById('jp-song').value.trim();
+            if (!songName) {
+                showResult('jp-result', false, '请填写歌曲名称');
+                return;
+            }
+
+            const rows = document.querySelectorAll('#jp-rows .correction-row');
+            const corrections = [];
+            rows.forEach(row => {
+                const line = row.querySelector('.jp-line')?.value.trim();
+                const char = row.querySelector('.jp-char')?.value.trim();
+                const originalJp = row.querySelector('.jp-original')?.value.trim();
+                const newJp = row.querySelector('.jp-new')?.value.trim();
+                if (line && newJp) {
+                    corrections.push({ line, char, originalJp, newJp });
+                }
+            });
+
+            if (corrections.length === 0) {
+                showResult('jp-result', false, '请至少添加一行纠错');
+                return;
+            }
+
+            const btn = document.querySelector('#panel-jyutping .submit-btn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'jyutping-correction', songName, corrections }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showResult('jp-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
+                } else {
+                    showResult('jp-result', false, `❌ 提交失败：${data.error}`);
+                }
+            } catch (e) {
+                showResult('jp-result', false, '❌ 网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '提交纠错';
+            }
+        }
+
+        // 歌词纠错行管理
+        function addLcRow() {
+            const container = document.getElementById('lc-rows');
+            const row = document.createElement('div');
+            row.className = 'correction-row';
+            row.innerHTML = `
+                <input placeholder="行号" class="lc-line">
+                <input placeholder="原歌词" class="lc-original">
+                <input placeholder="正确歌词" class="lc-new">
+                <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(row);
+        }
+
+        async function submitLyricsCorrection() {
+            const songName = document.getElementById('lc-song').value.trim();
+            if (!songName) {
+                showResult('lc-result', false, '请填写歌曲名称');
+                return;
+            }
+
+            const rows = document.querySelectorAll('#lc-rows .correction-row');
+            const corrections = [];
+            rows.forEach(row => {
+                const line = row.querySelector('.lc-line')?.value.trim();
+                const originalText = row.querySelector('.lc-original')?.value.trim();
+                const newText = row.querySelector('.lc-new')?.value.trim();
+                if (line && newText) {
+                    corrections.push({ line, originalText, newText });
+                }
+            });
+
+            if (corrections.length === 0) {
+                showResult('lc-result', false, '请至少添加一行纠错');
+                return;
+            }
+
+            const btn = document.querySelector('#panel-lyrics .submit-btn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'lyrics-correction', songName, corrections }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showResult('lc-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
+                } else {
+                    showResult('lc-result', false, `❌ 提交失败：${data.error}`);
+                }
+            } catch (e) {
+                showResult('lc-result', false, '❌ 网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '提交纠错';
+            }
+        }
+
+        // 初始化：各添加一行空行
+        addJpRow();
+        addLcRow();
+    </script>
+</body>
+</html>
