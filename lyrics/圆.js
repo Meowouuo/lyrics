@@ -1,0 +1,59 @@
+// 歌曲：圆
+
+(function() {
+    const song = {
+        id: 22,
+        title: "圆",
+        titleJyutping: ["jyun4"],
+        artist: "江海迦/AGA",
+        artistJyutping: ["gong1","hoi2","haai6","","","",""],
+        lyricist: "林若宁",
+        lyricistJyutping: ["lam4","joek6","ning4"],
+        composer: "褚镇东",
+        composerJyutping: ["cyu5","zan3","dung1"],
+        lyrics: [
+            { chars: ["圆","是","美","满"], jp: ["jyun4","si6","mei5","mun5"] },
+            { chars: ["圆","是","那","个","令","人","甜","蜜","笑","脸"], jp: ["jyun4","si6","naa5","go3","ling6","jan4","tim4","mat6","siu3","lim5"] },
+            { chars: ["圆","是","翩","翩","起","舞","转","的","圈","圈"], jp: ["jyun4","si6","pin1","pin1","hei2","mou5","zyun2","dik1","hyun1","hyun1"] },
+            { chars: ["转","出","一","圈","圈","眷","恋"], jp: ["zyun2","ceot1","jat1","hyun1","hyun1","gyun3","lyun2"] },
+            { paragraphBreak: true },
+            { chars: ["完","是","欠","缺"], jp: ["jyun4","si6","him3","kyut3"] },
+            { chars: ["完","是","那","句","令","人","难","受","再","见"], jp: ["jyun4","si6","naa5","geoi3","ling6","jan4","naan4","sau6","zoi3","gin3"] },
+            { chars: ["最","怕","最","爱","已","经","不","会","再","见"], jp: ["zeoi3","paa3","zeoi3","ngoi3","ji5","ging1","bat1","wui6","zoi3","gin3"] },
+            { chars: ["欢","欣","都","只","靠","悼","念"], jp: ["fun1","jan1","dou1","zi2","kaau3","dou6","nim6"] },
+            { paragraphBreak: true },
+            { chars: ["谁","等","，","等","，","等","，","等","不","到","月","圆"], jp: ["seoi4","dang2","","dang2","","dang2","","dang2","bat1","dou3","jyut6","jyun4"] },
+            { chars: ["谁","怕"," ","怕"," ","怕"," ","快","乐","快","用","完"], jp: ["seoi4","paa3","","paa3","","paa3","","faai3","lok6","faai3","jung6","jyun4"] },
+            { chars: ["可","知","有","情","人","永","远"," ","结","尾","才","是","新","的","开","端"], jp: ["ho2","zi1","jau5","cing4","jan4","wing5","jyun5","","git3","mei5","coi4","si6","san1","dik1","hoi1","dyun1"] },
+            { paragraphBreak: true },
+            { chars: ["情","人","团","聚","的","小","心","愿"], jp: ["cing4","jan4","tyun4","zeoi6","dik1","siu2","sam1","jyun6"] },
+            { chars: ["离","开","一","段","开","一","段","新","一","段"], jp: ["lei4","hoi1","jat1","dyun6","hoi1","jat1","dyun6","san1","jat1","dyun6"] },
+            { chars: ["人","间","的","圆","虽","则","是","不","够","缘"], jp: ["jan4","gaan1","dik1","jyun4","seoi1","zak1","si6","bat1","gau3","jyun4"] },
+            { chars: ["而","有","生","一","天","会","遇","见"], jp: ["ji4","jau5","sang1","jat1","tin1","wui6","jyu6","gin3"] },
+            { chars: ["成","为","遗","憾","的","小","心","愿"], jp: ["sing4","wai4","wai4","ham6","dik1","siu2","sam1","jyun6"] },
+            { chars: ["诚","心","许","愿","一","千","段","都","甘","愿"], jp: ["sing4","sam1","heoi2","jyun6","jat1","cin1","dyun6","dou1","gam1","jyun6"] },
+            { chars: ["如","果","保","存","幸","福","一","段"," ","这","一","段"," ","都","一","样","暖"], jp: ["jyu4","gwo2","bou2","cyun4","hang6","fuk1","jat1","dyun6","","ze5","jat1","dyun6","","dou1","jat1","joeng6","nyun5"] },
+            { chars: ["纵","使","谱","不","上","美","满","的"," ","圆","的","线"], jp: ["zung3","si2","pou2","bat1","soeng6","mei5","mun5","dik1","","jyun4","dik1","sin3"] },
+            { paragraphBreak: true },
+            { chars: ["谁","走","，","走","，","走","，","走","出","了","乐","园"], jp: ["seoi4","zau2","","zau2","","zau2","","zau2","ceot1","liu5","lok6","jyun4"] },
+            { chars: ["谁","痛","，","痛","，","痛","，","痛","恨","里","复","元"], jp: ["seoi4","tung3","","tung3","","tung3","","tung3","han6","lei5","fuk6","jyun4"] },
+            { chars: ["即","使","距","离","还","太","远"," ","我","信","缘","份","安","于","身","边"], jp: ["zik1","si2","keoi5","lei4","waan4","taai3","jyun5","","ngo5","seon3","jyun4","fan6","on1","jyu1","san1","bin1"] },
+            { paragraphBreak: true },
+            { chars: ["情","人","团","聚","的","小","心","愿"], jp: ["cing4","jan4","tyun4","zeoi6","dik1","siu2","sam1","jyun6"] },
+            { chars: ["离","开","一","段","开","一","段","新","一","段"], jp: ["lei4","hoi1","jat1","dyun6","hoi1","jat1","dyun6","san1","jat1","dyun6"] },
+            { chars: ["人","间","的","圆","虽","则","是","不","够","缘"], jp: ["jan4","gaan1","dik1","jyun4","seoi1","zak1","si6","bat1","gau3","jyun4"] },
+            { chars: ["而","有","生","一","天","会","遇","见"], jp: ["ji4","jau5","sang1","jat1","tin1","wui6","jyu6","gin3"] },
+            { chars: ["成","为","遗","憾","的","小","心","愿"], jp: ["sing4","wai4","wai4","ham6","dik1","siu2","sam1","jyun6"] },
+            { chars: ["诚","心","许","愿","一","千","段","都","甘","愿"], jp: ["sing4","sam1","heoi2","jyun6","jat1","cin1","dyun6","dou1","gam1","jyun6"] },
+            { chars: ["如","果","保","存","幸","福","一","段"," ","这","一","段"," ","都","一","样","暖"], jp: ["jyu4","gwo2","bou2","cyun4","hang6","fuk1","jat1","dyun6","","ze5","jat1","dyun6","","dou1","jat1","joeng6","nyun5"] },
+            { chars: ["纵","使","少","一","块","缺","了","的","圆","圈"], jp: ["zung3","si2","siu2","jat1","faai3","kyut3","liu5","dik1","jyun4","hyun1"] },
+            { paragraphBreak: true },
+            { chars: ["悲","观","的","豁","达","点"," ","给","生","命","望","更","远"], jp: ["bei1","gun1","dik1","kut3","daat6","dim2","","kap1","sang1","ming6","mong6","gang1","jyun5"] },
+            { chars: ["别","介","意","永","远","差","一","点","的","欢","笑","差","一","点","的","温","暖","差","一","点","好","好","发","展"], jp: ["bit6","gaai3","ji3","wing5","jyun5","caa1","jat1","dim2","dik1","fun1","siu3","caa1","jat1","dim2","dik1","wan1","nyun5","caa1","jat1","dim2","hou2","hou2","faat3","zin2"] }
+        ]
+    };
+    window.__songs.push(song);
+}());
+
+// ⚠️ 重要：请在 index.html 的 songFiles 数组中添加以下一行：
+// 'lyrics/圆.js',
