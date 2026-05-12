@@ -529,6 +529,29 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
+        /* 播放模式样式 */
+        .tts-mode .char-group {
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .tts-mode .char-group:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .tts-mode .char-group.tts-char-playing {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .tts-mode .char-group.tts-char-playing .char-hanzi {
+            color: #4CAF50;
+        }
+        .toolbar-btn.tts-active {
+            background: #4CAF50;
+            color: #fff;
+            border-color: #4CAF50;
+        }
+        .toolbar-btn.tts-active:hover {
+            background: #43a047;
+        }
         .lyric-line {
             display: flex;
             align-items: center;
@@ -1197,6 +1220,10 @@
                             <span class="icon">📥</span>
                             <span>导入</span>
                         </button>
+                        <button class="toolbar-btn" id="ttsModeBtn" onclick="toggleTTSMode()">
+                            <span class="icon">🔊</span>
+                            <span>播放</span>
+                        </button>
                     </div>
                     <button class="toolbar-btn" onclick="shareSong()">
                         <span class="icon">🔗</span>
@@ -1250,17 +1277,12 @@
     let ttsBaseUrl = '';          // 存储 baseUrl
     let currentAudio = null;      // 当前播放的音频
     let currentPlayingBtn = null; // 当前播放按钮
+    let ttsMode = false;          // 播放模式开关
+    let currentPlayingChar = null; // 当前播放的单字元素
 
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
-
-        // 恢复用户导入的歌曲（localStorage）
-        const importedSongs = JSON.parse(localStorage.getItem('jyutping_imported') || '[]');
-        if (importedSongs.length > 0) {
-            importedSongs.forEach(s => window.__songs.push(s));
-            songs = window.__songs;
-        }
 
         // 加载 TTS manifest
         await loadTTSManifest();
@@ -1367,15 +1389,41 @@
     }
 
     // 播放单个音频（返回 Promise）
+    // 提前触发下一个音频以缩短字间间隔
     function playAudio(url) {
         return new Promise((resolve, reject) => {
             const audio = new Audio(url);
             currentAudio = audio;
-            
-            audio.onended = () => resolve();
-            audio.onerror = (err) => reject(err);
-            
-            audio.play().catch(reject);
+            let resolved = false;
+
+            // 当音频播放到接近结尾时提前 resolve，缩短字间间隔
+            audio.addEventListener('timeupdate', function onTimeUpdate() {
+                if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.08) {
+                    resolved = true;
+                    audio.removeEventListener('timeupdate', onTimeUpdate);
+                    resolve();
+                }
+            });
+
+            audio.onended = () => {
+                if (!resolved) {
+                    resolved = true;
+                    resolve();
+                }
+            };
+            audio.onerror = (err) => {
+                if (!resolved) {
+                    resolved = true;
+                    reject(err);
+                }
+            };
+
+            audio.play().catch(err => {
+                if (!resolved) {
+                    resolved = true;
+                    reject(err);
+                }
+            });
         });
     }
 
@@ -1389,6 +1437,66 @@
             currentPlayingBtn.classList.remove('playing');
             currentPlayingBtn = null;
         }
+        if (currentPlayingChar) {
+            currentPlayingChar.classList.remove('tts-char-playing');
+            currentPlayingChar = null;
+        }
+    }
+
+    // 切换播放模式
+    function toggleTTSMode() {
+        ttsMode = !ttsMode;
+        const btn = document.getElementById('ttsModeBtn');
+        const lyricsView = document.getElementById('lyricsView');
+        if (ttsMode) {
+            btn.classList.add('tts-active');
+            lyricsView.classList.add('tts-mode');
+            showToast('已进入播放模式，点击单字播放语音');
+        } else {
+            btn.classList.remove('tts-active');
+            lyricsView.classList.remove('tts-mode');
+            stopCurrentTTS();
+            showToast('已退出播放模式');
+        }
+    }
+
+    // 播放单字语音
+    function playCharTTS(jp, charEl) {
+        if (!ttsManifest || !jp) return;
+
+        // 清除上一个播放高亮
+        if (currentPlayingChar) {
+            currentPlayingChar.classList.remove('tts-char-playing');
+        }
+
+        const audioPath = ttsManifest[jp];
+        if (!audioPath) return;
+
+        const audioUrl = `${ttsBaseUrl}/${audioPath}`;
+        const audio = new Audio(audioUrl);
+        currentAudio = audio;
+        currentPlayingChar = charEl;
+        charEl.classList.add('tts-char-playing');
+
+        audio.onended = () => {
+            charEl.classList.remove('tts-char-playing');
+            if (currentPlayingChar === charEl) {
+                currentPlayingChar = null;
+            }
+        };
+        audio.onerror = () => {
+            charEl.classList.remove('tts-char-playing');
+            if (currentPlayingChar === charEl) {
+                currentPlayingChar = null;
+            }
+        };
+
+        audio.play().catch(() => {
+            charEl.classList.remove('tts-char-playing');
+            if (currentPlayingChar === charEl) {
+                currentPlayingChar = null;
+            }
+        });
     }
 
     function renderArtistFilter() {
@@ -1757,6 +1865,15 @@
     }
 
     function onCharClick(event, lineIndex, charIndex) {
+        // 播放模式下，点击单字播放语音
+        if (ttsMode) {
+            event.stopPropagation();
+            const charGroup = event.currentTarget;
+            const jp = charGroup.dataset.originalJp;
+            playCharTTS(jp, charGroup);
+            return;
+        }
+
         if (!correctionMode) return;
         event.stopPropagation();
 
@@ -2449,48 +2566,12 @@ ${lyricsStr}
 // 'lyrics/${title}.js',
 `;
 
-        // 直接添加到当前页面
-        const song = {
-            id: songId,
-            title: title,
-            titleJyutping: titleJyutping,
-            artist: artist,
-            artistJyutping: artistJyutping,
-            lyricist: lyricist,
-            lyricistJyutping: lyricistJyutping,
-            composer: composer,
-            composerJyutping: composerJyutping,
-            lyrics: importedLyricsData
-        };
-        window.__songs.push(song);
-        songs = window.__songs;
-
-        // 更新歌手筛选
-        const artistSet = new Set();
-        songs.forEach(s => {
-            s.artist.split(/[\/、,，&]/).forEach(a => {
-                const trimmed = a.trim();
-                if (trimmed) artistSet.add(trimmed);
-            });
-        });
-        artists = [...artistSet];
-        renderArtistFilter();
-        renderSongList();
-
-        // 保存到 localStorage 以便下次访问时恢复
-        const importedSongs = JSON.parse(localStorage.getItem('jyutping_imported') || '[]');
-        importedSongs.push(song);
-        localStorage.setItem('jyutping_imported', JSON.stringify(importedSongs));
-
-        // 同时生成代码供部署
+        // 生成代码供部署
         document.getElementById('generatedCode').value = jsContent;
         document.getElementById('codeModal').style.display = 'flex';
 
         // 关闭导入模态框
         hideImportModal();
-
-        // 选中新导入的歌曲
-        selectSong(songId);
     }
 
     function hideCodeModal() {
