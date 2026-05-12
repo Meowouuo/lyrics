@@ -456,17 +456,56 @@
         addJpRow();
         addLcRow();
 
-        // 读取 URL 参数，自动切换 Tab 并填入歌曲名称
-        const params = new URLSearchParams(window.location.search);
-        const type = params.get('type');
-        const song = params.get('song');
-        if (song) {
-            if (type === 'jyutping') {
-                switchTab('jyutping');
-                document.getElementById('jp-song').value = song;
-            } else if (type === 'lyrics') {
-                switchTab('lyrics');
-                document.getElementById('lc-song').value = song;
+        // 优先读取 localStorage（从纠错/改歌词模式跳转过来）
+        const stored = localStorage.getItem('submitForm');
+        if (stored) {
+            localStorage.removeItem('submitForm');
+            try {
+                const data = JSON.parse(stored);
+                if (data.type === 'jyutping' && data.corrections) {
+                    switchTab('jyutping');
+                    document.getElementById('jp-song').value = data.song || '';
+                    // 清除默认空行
+                    document.getElementById('jp-rows').innerHTML = '';
+                    // 填入纠错数据
+                    data.corrections.forEach(c => {
+                        addJpRow();
+                        const rows = document.querySelectorAll('#jp-rows .correction-row');
+                        const lastRow = rows[rows.length - 1];
+                        lastRow.querySelector('.jp-line').value = c.line || '';
+                        lastRow.querySelector('.jp-char').value = c.char || '';
+                        lastRow.querySelector('.jp-original').value = c.originalJp || '';
+                        lastRow.querySelector('.jp-new').value = c.newJp || '';
+                    });
+                } else if (data.type === 'lyrics' && data.corrections) {
+                    switchTab('lyrics');
+                    document.getElementById('lc-song').value = data.song || '';
+                    document.getElementById('lc-rows').innerHTML = '';
+                    data.corrections.forEach(c => {
+                        addLcRow();
+                        const rows = document.querySelectorAll('#lc-rows .correction-row');
+                        const lastRow = rows[rows.length - 1];
+                        lastRow.querySelector('.lc-line').value = c.line || '';
+                        lastRow.querySelector('.lc-original').value = c.originalText || '';
+                        lastRow.querySelector('.lc-new').value = c.newText || '';
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to parse submitForm data:', e);
+            }
+        } else {
+            // 兼容 URL 参数方式
+            const params = new URLSearchParams(window.location.search);
+            const type = params.get('type');
+            const song = params.get('song');
+            if (song) {
+                if (type === 'jyutping') {
+                    switchTab('jyutping');
+                    document.getElementById('jp-song').value = song;
+                } else if (type === 'lyrics') {
+                    switchTab('lyrics');
+                    document.getElementById('lc-song').value = song;
+                }
             }
         }
     </script>

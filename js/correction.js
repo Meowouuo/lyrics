@@ -284,17 +284,20 @@ function clearCorrections() {
 function submitCorrections() {
     if (corrections.length === 0) return;
 
-    const song = window.currentSong ? `${window.currentSong.title} - ${window.currentSong.artist}` : '';
-
-    let correctionDetails = corrections.map(c => {
-        const line = window.currentSong.lyrics[c.lineIndex];
-        const lineText = line.chars.join('');
-        return `| 第${c.lineIndex + 1}行 | ${c.char} | ${c.originalJp} | ${c.newJp} | ${lineText} |`;
-    }).join('\n');
-
-    const title = encodeURIComponent(`[粤拼纠错] ${song}（${corrections.length}处）`);
-    const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n**修改数量：** ${corrections.length} 处\n\n| 行 | 字 | 原粤拼 | 正确粤拼 | 所在行 |\n|---|---|---|---|---|\n${correctionDetails}\n\n---\n*由网页纠错模式提交*`);
-    window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=纠错`, '_blank');
+    // 将纠错数据存入 localStorage，跳转到表单页面
+    const songName = window.currentSong ? window.currentSong.title : '';
+    const correctionsData = corrections.map(c => ({
+        line: c.lineIndex + 1,
+        char: c.char,
+        originalJp: c.originalJp,
+        newJp: c.newJp,
+    }));
+    localStorage.setItem('submitForm', JSON.stringify({
+        type: 'jyutping',
+        song: songName,
+        corrections: correctionsData,
+    }));
+    window.open('submit.html', '_blank');
 }
 
 // 纠错：进入纠错模式（替换原跳转逻辑）

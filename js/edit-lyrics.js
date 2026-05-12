@@ -192,25 +192,19 @@ function clearEditLyricsSelection() {
 function submitEditLyrics() {
     if (editedLyrics.length === 0) return;
 
-    const song = window.currentSong ? `${window.currentSong.title} - ${window.currentSong.artist}` : '';
-
-    let editDetails = editedLyrics.map(e => {
-        return `| 第${e.lineIndex + 1}行 | ${e.originalText} | ${e.newText} |`;
-    }).join('\n');
-
-    const title = encodeURIComponent(`[歌词纠错] ${song}`);
-    const body = encodeURIComponent(`## 歌词纠错
-
-**歌曲：** ${song}
-**修改数量：** ${editedLyrics.length} 处
-
-| 行号 | 原歌词 | 修改后歌词 |
-|---|---|---|
-${editDetails}
-
----
-*由网页修改歌词模式提交*`);
-    window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=歌词纠错`, '_blank');
+    // 将纠错数据存入 localStorage，跳转到表单页面
+    const songName = window.currentSong ? window.currentSong.title : '';
+    const correctionsData = editedLyrics.map(e => ({
+        line: e.lineIndex + 1,
+        originalText: e.originalText,
+        newText: e.newText,
+    }));
+    localStorage.setItem('submitForm', JSON.stringify({
+        type: 'lyrics',
+        song: songName,
+        corrections: correctionsData,
+    }));
+    window.open('submit.html', '_blank');
 }
 
 // 投稿：跳转到 GitHub Issues
