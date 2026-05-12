@@ -576,10 +576,17 @@
             background: #333;
         }
 
-        .dropdown-wrapper {
+        .dropdown-details {
             position: relative;
         }
-        .dropdown-menu {
+        .dropdown-details summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        .dropdown-details summary::-webkit-details-marker {
+            display: none;
+        }
+        .dropdown-details .dropdown-menu {
             display: none;
             position: absolute;
             bottom: 100%;
@@ -593,7 +600,9 @@
             min-width: 100px;
             overflow: hidden;
         }
-        .dropdown-menu.show { display: block; }
+        .dropdown-details[open] .dropdown-menu {
+            display: block;
+        }
         .dropdown-item {
             padding: 8px 14px;
             font-size: 13px;
@@ -1107,33 +1116,27 @@
                             <span class="icon" id="favIcon">☆</span>
                             <span>收藏</span>
                         </button>
-                        <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('fontDropdown', event)">
-                                <span class="icon">A</span>
-                            </button>
-                            <div class="dropdown-menu" id="fontDropdown">
-                                <div class="dropdown-item" onclick="adjustFontSize(1); closeDropdowns()">A+ 放大</div>
-                                <div class="dropdown-item" onclick="adjustFontSize(-1); closeDropdowns()">A- 缩小</div>
+                        <details class="dropdown-details">
+                            <summary class="toolbar-btn"><span class="icon">A</span></summary>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="adjustFontSize(1)">A+ 放大</div>
+                                <div class="dropdown-item" onclick="adjustFontSize(-1)">A- 缩小</div>
                             </div>
-                        </div>
-                        <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('spacingDropdown', event)">
-                                <span class="icon">↔️</span>
-                            </button>
-                            <div class="dropdown-menu" id="spacingDropdown">
-                                <div class="dropdown-item" onclick="adjustLetterSpacing(1); closeDropdowns()">字距 +</div>
-                                <div class="dropdown-item" onclick="adjustLetterSpacing(-1); closeDropdowns()">字距 -</div>
+                        </details>
+                        <details class="dropdown-details">
+                            <summary class="toolbar-btn"><span class="icon">↔️</span></summary>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="adjustLetterSpacing(1)">字距 +</div>
+                                <div class="dropdown-item" onclick="adjustLetterSpacing(-1)">字距 -</div>
                             </div>
-                        </div>
-                        <div class="dropdown-wrapper">
-                            <button class="toolbar-btn" onclick="toggleDropdown('lineDropdown', event)">
-                                <span class="icon">↕️</span>
-                            </button>
-                            <div class="dropdown-menu" id="lineDropdown">
-                                <div class="dropdown-item" onclick="adjustLineHeight(0.1); closeDropdowns()">行距 +</div>
-                                <div class="dropdown-item" onclick="adjustLineHeight(-0.1); closeDropdowns()">行距 -</div>
+                        </details>
+                        <details class="dropdown-details">
+                            <summary class="toolbar-btn"><span class="icon">↕️</span></summary>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="adjustLineHeight(0.1)">行距 +</div>
+                                <div class="dropdown-item" onclick="adjustLineHeight(-0.1)">行距 -</div>
                             </div>
-                        </div>
+                        </details>
                         <button class="toolbar-btn" onclick="submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
@@ -1237,11 +1240,6 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
-
-        // 点击外部关闭下拉菜单
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown-wrapper')) closeDropdowns();
-        });
     }
 
     function renderArtistFilter() {
@@ -1405,19 +1403,6 @@
                 </span>
             `;
         }).join('');
-    }
-
-    // ===== 下拉菜单 =====
-    function toggleDropdown(id, event) {
-        if (event) event.stopPropagation();
-        const menu = document.getElementById(id);
-        if (!menu) return;
-        const wasOpen = menu.classList.contains('show');
-        closeDropdowns();
-        if (!wasOpen) menu.classList.add('show');
-    }
-    function closeDropdowns() {
-        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     }
 
     function adjustFontSize(delta) {
