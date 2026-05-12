@@ -18,4 +18,5 @@ const songFiles = [
     'lyrics/罗马假期.js',
     'lyrics/致少年时代.js',
     'lyrics/用背脊唱情歌.js',
+    'lyrics/紧急联络人.js',
 ];
