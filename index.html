@@ -604,14 +604,21 @@
             .toolbar-toggle {
                 display: block;
             }
-            .toolbar.collapsed {
+            /* 手机端默认收起 */
+            .toolbar {
                 padding: 8px 16px;
             }
-            .toolbar.collapsed .toolbar-left {
+            .toolbar .toolbar-left,
+            .toolbar .toolbar-btn:not(.toolbar-toggle) {
                 display: none;
             }
-            .toolbar.collapsed .toolbar-btn.primary {
-                display: none;
+            /* 展开状态 */
+            .toolbar.expanded {
+                padding: 12px 24px;
+            }
+            .toolbar.expanded .toolbar-left,
+            .toolbar.expanded .toolbar-btn:not(.toolbar-toggle) {
+                display: flex;
             }
         }
 
@@ -1473,8 +1480,8 @@
     function toggleToolbar() {
         const toolbar = document.getElementById('toolbar');
         const toggle = document.getElementById('toolbarToggle');
-        toolbar.classList.toggle('collapsed');
-        toggle.textContent = toolbar.classList.contains('collapsed') ? '▲' : '▼';
+        toolbar.classList.toggle('expanded');
+        toggle.textContent = toolbar.classList.contains('expanded') ? '▼' : '▲';
     }
 
     function toggleFavorite() {
