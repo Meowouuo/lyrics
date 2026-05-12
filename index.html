@@ -2090,14 +2090,14 @@ ${editDetails}
         }
 
         // 解析歌词：按双换行分段（连续两个或以上换行符表示段落分隔）
-        // 先标准化换行符，然后按两个或以上换行符分割
+        // 单换行表示正常换行（新的一句）
         const normalizedText = lyricsText.replace(/\r\n/g, '\n');
         const paragraphs = normalizedText.split(/\n{2,}/);
         const lyrics = [];
         let previewHtml = '';
 
         paragraphs.forEach((para, pIdx) => {
-            // 段落内按单换行分割，过滤空行
+            // 段落内按单换行分割成多行，每行是一句歌词
             const lines = para.split('\n').filter(l => l.trim());
             lines.forEach((line, lIdx) => {
                 const matched = matchJyutping(line.trim());
@@ -2119,6 +2119,7 @@ ${editDetails}
                     previewHtml += '</div>';
                 }
             });
+            // 段落结束后添加段落分隔（双换行产生的段落）
             if (lines.length > 0) {
                 lyrics.push({ paragraphBreak: true });
             }
@@ -2284,8 +2285,8 @@ ${lyricsStr}
             
             <div class="import-form-group">
                 <label>歌词内容 *</label>
-                <textarea id="importLyrics" placeholder="粘贴歌词内容，连续两个空行表示段落分隔" oninput="previewImport()"></textarea>
-                <div class="import-tip">💡 连续两个空行表示段落分隔，单换行合并到同一行</div>
+                <textarea id="importLyrics" placeholder="粘贴歌词内容，换行表示新的一句，连续两个空行表示段落分隔" oninput="previewImport()"></textarea>
+                <div class="import-tip">💡 单换行 = 新的一句歌词 &nbsp;|&nbsp; 双换行 = 段落分隔（更大间距）</div>
             </div>
             
             <div class="import-preview" id="importPreview" style="display:none;">
