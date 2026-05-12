@@ -1142,9 +1142,6 @@
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
-                        <button class="toolbar-btn" onclick="toggleTraditional()">
-                            <span class="icon" id="traditionalIcon">繁</span>
-                        </button>
                         <button class="toolbar-btn" onclick="submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
@@ -1221,7 +1218,6 @@
     let currentSong = null;
     let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
-    let useTraditional = localStorage.getItem('jyutping_traditional') === 'true';
     let fontSize = 20;
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
     let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
@@ -1250,9 +1246,6 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
-
-        // 初始化繁简切换按钮状态
-        document.getElementById('traditionalIcon').textContent = useTraditional ? '简' : '繁';
     }
 
     function renderArtistFilter() {
@@ -1347,11 +1340,10 @@
 
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('lyricsView').style.display = 'block';
-        const displayTitle = useTraditional ? convertText(currentSong.title, true) : currentSong.title;
-        document.getElementById('mobileTitle').textContent = displayTitle;
+        document.getElementById('mobileTitle').textContent = currentSong.title;
 
         // Render title with jyutping
-        const titleHtml = displayTitle.split('').map((char, i) => {
+        const titleHtml = currentSong.title.split('').map((char, i) => {
             const jp = currentSong.titleJyutping[i] || '';
             return `
                 <span class="title-char-group">
@@ -1363,12 +1355,9 @@
         document.getElementById('songTitle').innerHTML = titleHtml;
 
         // Render metadata with jyutping
-        const displayArtist = useTraditional ? convertText(currentSong.artist, true) : currentSong.artist;
-        const displayLyricist = useTraditional ? convertText(currentSong.lyricist, true) : currentSong.lyricist;
-        const displayComposer = useTraditional ? convertText(currentSong.composer, true) : currentSong.composer;
-        document.getElementById('songArtist').innerHTML = renderMetaName(displayArtist, currentSong.artistJyutping);
-        document.getElementById('songLyricist').innerHTML = renderMetaName(displayLyricist, currentSong.lyricistJyutping);
-        document.getElementById('songComposer').innerHTML = renderMetaName(displayComposer, currentSong.composerJyutping);
+        document.getElementById('songArtist').innerHTML = renderMetaName(currentSong.artist, currentSong.artistJyutping);
+        document.getElementById('songLyricist').innerHTML = renderMetaName(currentSong.lyricist, currentSong.lyricistJyutping);
+        document.getElementById('songComposer').innerHTML = renderMetaName(currentSong.composer, currentSong.composerJyutping);
 
         // Render lyrics with font size, letter spacing and line height
         let lyricsHtml = '';
@@ -1395,14 +1384,12 @@
             }
             // 渲染每个分段为一个独立的 lyric-line
             segments.forEach((segment, segIdx) => {
-                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
-                    const displayChar = useTraditional ? convertText(char, true) : char;
-                    return `
+                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => `
                     <span class="char-group" data-line="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
-                        <span class="char-hanzi" style="font-size:${fontSize}px">${displayChar}</span>
+                        <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
-                `}).join('');
+                `).join('');
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${segmentHtml}</div>`;
             });
         });
@@ -1526,16 +1513,6 @@
     function convertText(text, toTraditional) {
         const map = toTraditional ? s2tMap : t2sMap;
         return text.split('').map(c => map[c] || c).join('');
-    }
-
-    function toggleTraditional() {
-        useTraditional = !useTraditional;
-        localStorage.setItem('jyutping_traditional', useTraditional);
-        document.getElementById('traditionalIcon').textContent = useTraditional ? '简' : '繁';
-        if (currentSong) {
-            renderLyrics();
-        }
-        showToast(useTraditional ? '已切换为繁体' : '已切换为简体');
     }
 
     function toggleFavorite() {
@@ -2210,7 +2187,9 @@ ${editDetails}
     }
 
     function previewImport() {
-        const lyricsText = document.getElementById('importLyrics').value.trim();
+        let lyricsText = document.getElementById('importLyrics').value.trim();
+        // 自动将繁体转为简体
+        lyricsText = convertText(lyricsText, false);
         if (!lyricsText) {
             document.getElementById('importPreview').style.display = 'none';
             importedLyricsData = null;
@@ -2266,10 +2245,11 @@ ${editDetails}
     }
 
     function generateSongFile() {
-        const title = document.getElementById('importTitle').value.trim();
-        const artist = document.getElementById('importArtist').value.trim();
-        const lyricist = document.getElementById('importLyricist').value.trim();
-        const composer = document.getElementById('importComposer').value.trim();
+        // 自动将繁体转为简体
+        const title = convertText(document.getElementById('importTitle').value.trim(), false);
+        const artist = convertText(document.getElementById('importArtist').value.trim(), false);
+        const lyricist = convertText(document.getElementById('importLyricist').value.trim(), false);
+        const composer = convertText(document.getElementById('importComposer').value.trim(), false);
 
         if (!title || !artist) {
             alert('请填写歌曲名称和歌手');
