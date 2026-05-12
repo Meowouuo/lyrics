@@ -5,7 +5,7 @@
         id: 22,
         title: "圆",
         titleJyutping: ["jyun4"],
-        artist: "江海迦/AGA",
+        artist: "江海迦(AGA)",
         artistJyutping: ["gong1","hoi2","haai6","","","",""],
         lyricist: "林若宁",
         lyricistJyutping: ["lam4","joek6","ning4"],
