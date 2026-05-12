@@ -438,6 +438,7 @@
 
         .lyric-line {
             margin-bottom: 12px;
+            line-height: 1.6;
             animation: fadeIn 0.3s ease forwards;
             opacity: 0;
         }
@@ -1313,19 +1314,32 @@
                 lyricsHtml += '<div class="lyric-paragraph-break"></div>';
                 return;
             }
-            const lineHtml = line.chars.map((char, i) => {
-                const jp = line.jp[i] || '';
+            // 按空格分割成多行，确保每行行高一致
+            const segments = [];
+            let currentSegment = [];
+            line.chars.forEach((char, i) => {
                 if (char === ' ') {
-                    return '<br>';
+                    if (currentSegment.length > 0) {
+                        segments.push(currentSegment);
+                        currentSegment = [];
+                    }
+                } else {
+                    currentSegment.push({ char, jp: line.jp[i] || '', index: i });
                 }
-                return `
-                    <span class="char-group" data-line="${index}" data-char="${i}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${i})" style="margin-right:${letterSpacing}px">
+            });
+            if (currentSegment.length > 0) {
+                segments.push(currentSegment);
+            }
+            // 渲染每个分段为一个独立的 lyric-line
+            segments.forEach((segment, segIdx) => {
+                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => `
+                    <span class="char-group" data-line="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
-                `;
-            }).join('');
-            lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${lineHtml}</div>`;
+                `).join('');
+                lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${segmentHtml}</div>`;
+            });
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
 
