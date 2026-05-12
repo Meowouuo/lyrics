@@ -460,6 +460,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+
         .char-group {
             display: inline-flex;
             flex-direction: column;
@@ -518,7 +525,7 @@
 
         .toolbar-left {
             display: flex;
-            gap: 16px;
+            gap: 4px;
         }
 
         .toolbar-btn {
@@ -530,9 +537,10 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 6px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .toolbar-btn:hover {
@@ -760,6 +768,91 @@
             margin-left: 4px;
         }
 
+        /* ===== 修改歌词模式 ===== */
+        .edit-lyrics-mode .lyric-line {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-left: -8px;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .edit-lyrics-mode .lyric-line:hover {
+            background: #e8f4fd;
+        }
+        .edit-lyrics-mode .lyric-line.selected {
+            background: #d0e8ff;
+            outline: 2px solid #4a9eff;
+        }
+
+        /* Edit lyrics popup */
+        .edit-lyrics-popup {
+            position: fixed;
+            z-index: 200;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            padding: 16px;
+            min-width: 320px;
+            max-width: 90vw;
+            animation: popIn 0.15s ease;
+        }
+        .edit-lyrics-popup-title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        .edit-lyrics-popup-line-num {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .edit-lyrics-popup-original {
+            font-size: 14px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .edit-lyrics-popup-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.15s;
+            margin-bottom: 12px;
+        }
+        .edit-lyrics-popup-input:focus {
+            border-color: #4a9eff;
+        }
+        .edit-lyrics-popup-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .edit-lyrics-popup-btn {
+            padding: 6px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .edit-lyrics-popup-btn.confirm {
+            background: #28a745;
+            color: #fff;
+        }
+        .edit-lyrics-popup-btn.confirm:hover { background: #218838; }
+        .edit-lyrics-popup-btn.dismiss {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .edit-lyrics-popup-btn.dismiss:hover { background: #eee; }
+
         /* Import Modal */
         .import-modal {
             position: fixed;
@@ -978,9 +1071,25 @@
                         <button class="toolbar-btn" onclick="adjustFontSize(1)">
                             <span class="icon">A+</span>
                         </button>
+                        <button class="toolbar-btn" onclick="adjustLetterSpacing(-1)">
+                            <span class="icon">↔️</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="adjustLetterSpacing(1)">
+                            <span class="icon">↔️+</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="adjustLineHeight(-0.1)">
+                            <span class="icon">↕️</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="adjustLineHeight(0.1)">
+                            <span class="icon">↕️+</span>
+                        </button>
                         <button class="toolbar-btn" onclick="submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="toggleEditLyricsMode()">
+                            <span class="icon">📝</span>
+                            <span>改歌词</span>
                         </button>
                         <button class="toolbar-btn" onclick="submitNewSong()">
                             <span class="icon">➕</span>
@@ -1024,8 +1133,8 @@
         'lyrics/心跳回忆.js',
         'lyrics/第二最爱.js',
         'lyrics/罗马假期.js',
-        'lyrics/找到你是我最伟大的成功.js',
-        'lyrics/许愿.js',
+
+
         'lyrics/其实我…我…我.js',
         'lyrics/忘了时间的钟.js',
         'lyrics/致少年时代.js',
@@ -1057,6 +1166,10 @@
     let currentFilter = 'all';
     let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
     let fontSize = 20;
+    let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
+    let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
+    const MIN_FONT_SIZE = 12;
+    const MAX_FONT_SIZE = 24;
 
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
@@ -1193,7 +1306,7 @@
         document.getElementById('songLyricist').innerHTML = renderMetaName(currentSong.lyricist, currentSong.lyricistJyutping);
         document.getElementById('songComposer').innerHTML = renderMetaName(currentSong.composer, currentSong.composerJyutping);
 
-        // Render lyrics
+        // Render lyrics with font size, letter spacing and line height
         let lyricsHtml = '';
         currentSong.lyrics.forEach((line, index) => {
             if (line.paragraphBreak) {
@@ -1206,13 +1319,13 @@
                     return '<br>';
                 }
                 return `
-                    <span class="char-group" data-line="${index}" data-char="${i}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${i})">
+                    <span class="char-group" data-line="${index}" data-char="${i}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${i})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
                 `;
             }).join('');
-            lyricsHtml += `<div class="lyric-line">${lineHtml}</div>`;
+            lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${lineHtml}</div>`;
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
 
@@ -1233,8 +1346,70 @@
     }
 
     function adjustFontSize(delta) {
-        fontSize = Math.max(16, Math.min(28, fontSize + delta));
+        const newSize = fontSize + delta;
+        if (newSize < MIN_FONT_SIZE) {
+            showToast('已是最小字号');
+            return;
+        }
+        if (newSize > MAX_FONT_SIZE) {
+            showToast('已是最大字号');
+            return;
+        }
+        fontSize = newSize;
         renderLyrics();
+    }
+
+    function adjustLetterSpacing(delta) {
+        const newSpacing = letterSpacing + delta;
+        if (newSpacing < 0) {
+            showToast('已是最小字间距');
+            return;
+        }
+        if (newSpacing > 10) {
+            showToast('已是最大字间距');
+            return;
+        }
+        letterSpacing = newSpacing;
+        renderLyrics();
+    }
+
+    function adjustLineHeight(delta) {
+        const newHeight = Math.round((lineHeight + delta) * 10) / 10;
+        if (newHeight < 1.0) {
+            showToast('已是最小行间距');
+            return;
+        }
+        if (newHeight > 2.0) {
+            showToast('已是最大行间距');
+            return;
+        }
+        lineHeight = newHeight;
+        renderLyrics();
+    }
+
+    function showToast(message) {
+        const existingToast = document.querySelector('.toast-message');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            animation: fadeInOut 1.5s ease forwards;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
     }
 
     function toggleFavorite() {
@@ -1578,7 +1753,237 @@
     // 纠错：进入纠错模式（替换原跳转逻辑）
     function submitFeedback() {
         if (!currentSong) return;
+        // 如果正在修改歌词模式，先退出
+        if (editLyricsMode) {
+            toggleEditLyricsMode();
+        }
         toggleCorrectionMode();
+    }
+
+    // ===== 修改歌词模式 =====
+    let editLyricsMode = false;
+    let editedLyrics = []; // { lineIndex, originalText, newText }
+
+    function toggleEditLyricsMode() {
+        editLyricsMode = !editLyricsMode;
+        const lyricsContent = document.getElementById('lyricsContent');
+
+        if (editLyricsMode) {
+            // 如果正在纠错模式，先退出
+            if (correctionMode) {
+                toggleCorrectionMode();
+            }
+            lyricsContent.classList.add('edit-lyrics-mode');
+            editedLyrics = [];
+            showEditLyricsBanner();
+            updateEditLyricsBtn();
+        } else {
+            lyricsContent.classList.remove('edit-lyrics-mode');
+            hideEditLyricsBanner();
+            clearEditLyricsSelection();
+            updateEditLyricsBtn();
+        }
+    }
+
+    function updateEditLyricsBtn() {
+        const btn = document.querySelector('.toolbar-btn[onclick="toggleEditLyricsMode()"]');
+        if (!btn) return;
+        if (editLyricsMode) {
+            btn.innerHTML = '<span class="icon">📝</span><span>退出改歌词</span>';
+            btn.style.color = '#28a745';
+        } else {
+            btn.innerHTML = '<span class="icon">📝</span><span>改歌词</span>';
+            btn.style.color = '';
+        }
+    }
+
+    function showEditLyricsBanner() {
+        hideEditLyricsBanner();
+        const banner = document.createElement('div');
+        banner.className = 'correction-banner';
+        banner.id = 'editLyricsBanner';
+        banner.style.background = '#d4edda';
+        banner.style.borderBottomColor = '#28a745';
+        banner.style.color = '#155724';
+        banner.innerHTML = `
+            <span>📝 修改歌词模式：点击行即可编辑整句歌词</span>
+            <span id="editLyricsCountText" style="font-weight:600;"></span>
+            <button class="correction-banner-btn submit" id="submitEditLyricsBtn" onclick="submitEditLyrics()" disabled>提交反馈</button>
+            <button class="correction-banner-btn cancel" onclick="toggleEditLyricsMode()">退出</button>
+        `;
+        // 修改提交按钮颜色为绿色
+        banner.querySelector('#submitEditLyricsBtn').style.background = '#28a745';
+        document.body.appendChild(banner);
+    }
+
+    function hideEditLyricsBanner() {
+        const existing = document.getElementById('editLyricsBanner');
+        if (existing) existing.remove();
+    }
+
+    function updateEditLyricsCount() {
+        const text = document.getElementById('editLyricsCountText');
+        const btn = document.getElementById('submitEditLyricsBtn');
+        if (!text || !btn) return;
+        if (editedLyrics.length > 0) {
+            text.innerHTML = `<span class="correction-count">${editedLyrics.length}</span> 处修改`;
+            btn.disabled = false;
+        } else {
+            text.textContent = '';
+            btn.disabled = true;
+        }
+    }
+
+    function onLyricLineClick(event, lineIndex) {
+        if (!editLyricsMode) return;
+        event.stopPropagation();
+
+        // 清除其他选中状态
+        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
+
+        // 标记当前行为选中
+        const lineEl = event.currentTarget;
+        lineEl.classList.add('selected');
+
+        // 显示编辑弹窗
+        showEditLyricsPopup(lineEl, lineIndex);
+    }
+
+    function showEditLyricsPopup(lineEl, lineIndex) {
+        closeEditLyricsPopup();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'edit-overlay';
+        overlay.id = 'editLyricsOverlay';
+        overlay.onclick = () => { closeEditLyricsPopup(); };
+        document.body.appendChild(overlay);
+
+        const popup = document.createElement('div');
+        popup.className = 'edit-lyrics-popup';
+        popup.id = 'editLyricsPopup';
+
+        // 获取原歌词
+        const line = currentSong.lyrics[lineIndex];
+        const originalText = line.chars ? line.chars.join('') : '';
+
+        // 检查是否已有修改
+        const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
+        const currentText = existingEdit ? existingEdit.newText : originalText;
+
+        popup.innerHTML = `
+            <div class="edit-lyrics-popup-title">修改歌词</div>
+            <div class="edit-lyrics-popup-line-num">第 ${lineIndex + 1} 行</div>
+            <div class="edit-lyrics-popup-original">原歌词：${originalText}</div>
+            <input class="edit-lyrics-popup-input" id="editLyricsInput" type="text" value="${currentText}" placeholder="输入修改后的歌词"
+                   onkeydown="if(event.key==='Enter')confirmEditLyrics(${lineIndex}, '${originalText.replace(/'/g, "\\'")}');if(event.key==='Escape'){closeEditLyricsPopup();}">
+            <div class="edit-lyrics-popup-actions">
+                <button class="edit-lyrics-popup-btn dismiss" onclick="closeEditLyricsPopup()">取消</button>
+                <button class="edit-lyrics-popup-btn confirm" onclick="confirmEditLyrics(${lineIndex}, '${originalText.replace(/'/g, "\\'")}')">确认</button>
+            </div>
+        `;
+
+        document.body.appendChild(popup);
+
+        // 定位弹窗
+        const rect = lineEl.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        let top = rect.bottom + 8;
+        let left = rect.left;
+
+        // 保持在视口内
+        if (top + 200 > window.innerHeight - 60) {
+            top = rect.top - 200 - 8;
+        }
+        if (left + 320 > window.innerWidth - 8) {
+            left = window.innerWidth - 320 - 8;
+        }
+        if (left < 8) left = 8;
+
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+
+        // 聚焦输入框
+        setTimeout(() => {
+            const input = document.getElementById('editLyricsInput');
+            if (input) { input.focus(); input.select(); }
+        }, 50);
+    }
+
+    function closeEditLyricsPopup() {
+        const popup = document.getElementById('editLyricsPopup');
+        const overlay = document.getElementById('editLyricsOverlay');
+        if (popup) popup.remove();
+        if (overlay) overlay.remove();
+        // 清除选中状态
+        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
+    }
+
+    function confirmEditLyrics(lineIndex, originalText) {
+        const input = document.getElementById('editLyricsInput');
+        if (!input) return;
+        const newText = input.value.trim();
+
+        // 如果内容没有变化，不记录
+        if (newText === originalText) {
+            // 移除已有的修改记录
+            const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+            if (existingIdx > -1) {
+                editedLyrics.splice(existingIdx, 1);
+            }
+            closeEditLyricsPopup();
+            updateEditLyricsCount();
+            return;
+        }
+
+        if (!newText) {
+            alert('歌词不能为空');
+            return;
+        }
+
+        // 更新或添加修改记录
+        const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+        if (existingIdx > -1) {
+            editedLyrics[existingIdx].newText = newText;
+        } else {
+            editedLyrics.push({
+                lineIndex: lineIndex,
+                originalText: originalText,
+                newText: newText
+            });
+        }
+
+        closeEditLyricsPopup();
+        updateEditLyricsCount();
+    }
+
+    function clearEditLyricsSelection() {
+        editedLyrics = [];
+        document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
+    }
+
+    function submitEditLyrics() {
+        if (editedLyrics.length === 0) return;
+
+        const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
+
+        // 构建修改详情
+        let editDetails = editedLyrics.map(e => {
+            return `| 第${e.lineIndex + 1}行 | ${e.originalText} | ${e.newText} |`;
+        }).join('\n');
+
+        const title = encodeURIComponent(`[歌词纠错] ${song}`);
+        const body = encodeURIComponent(`## 歌词纠错
+
+**歌曲：** ${song}
+**修改数量：** ${editedLyrics.length} 处
+
+| 行号 | 原歌词 | 修改后歌词 |
+|---|---|---|
+${editDetails}
+
+---
+*由网页修改歌词模式提交*`);
+        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=歌词纠错`, '_blank');
     }
 
     // 投稿：跳转到 GitHub Issues
@@ -1684,12 +2089,15 @@
             return;
         }
 
-        // 解析歌词：按空行分段
-        const paragraphs = lyricsText.split(/\n\s*\n/);
+        // 解析歌词：按双换行分段（连续两个或以上换行符表示段落分隔）
+        // 先标准化换行符，然后按两个或以上换行符分割
+        const normalizedText = lyricsText.replace(/\r\n/g, '\n');
+        const paragraphs = normalizedText.split(/\n{2,}/);
         const lyrics = [];
         let previewHtml = '';
 
         paragraphs.forEach((para, pIdx) => {
+            // 段落内按单换行分割，过滤空行
             const lines = para.split('\n').filter(l => l.trim());
             lines.forEach((line, lIdx) => {
                 const matched = matchJyutping(line.trim());
@@ -1876,8 +2284,8 @@ ${lyricsStr}
             
             <div class="import-form-group">
                 <label>歌词内容 *</label>
-                <textarea id="importLyrics" placeholder="粘贴歌词内容，段落之间用空行分隔" oninput="previewImport()"></textarea>
-                <div class="import-tip">💡 粤拼将自动匹配，可手动修改</div>
+                <textarea id="importLyrics" placeholder="粘贴歌词内容，连续两个空行表示段落分隔" oninput="previewImport()"></textarea>
+                <div class="import-tip">💡 连续两个空行表示段落分隔，单换行合并到同一行</div>
             </div>
             
             <div class="import-preview" id="importPreview" style="display:none;">

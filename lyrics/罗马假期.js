@@ -7,10 +7,10 @@
         titleJyutping: ["lo4","maa5","gaa2","kei4"],
         artist: "古巨基",
         artistJyutping: ["gu2","geoi6","gei1"],
-        lyricist: "信息未获取",
-        lyricistJyutping: [],
-        composer: "信息未获取",
-        composerJyutping: [],
+        lyricist: "林家敏",
+        lyricistJyutping: ["lam4", "gaa1", "man5"],
+        composer: "张佳添",
+        composerJyutping: ["zoeng1", "gaai1", "tim1"],
         lyrics: [
     {
         "chars": [
