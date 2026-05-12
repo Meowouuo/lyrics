@@ -1185,7 +1185,7 @@
 
                 <div class="toolbar" id="toolbar">
                     <div class="toolbar-left" id="toolbarLeft">
-                        <button class="toolbar-btn" id="ttsModeBtn" onclick="toggleTTSMode()">
+                        <button class="toolbar-btn" id="ttsModeBtn" onclick="TTSModule.toggleMode()">
                             <span class="icon">🔊</span>
                             <span>播放</span>
                         </button>
@@ -1216,7 +1216,7 @@
                             <span class="icon">➕</span>
                             <span>投稿</span>
                         </button>
-                        <button class="toolbar-btn" onclick="showImportModal()">
+                        <button class="toolbar-btn" onclick="ImportModule.show()">
                             <span class="icon">📥</span>
                             <span>导入</span>
                         </button>
@@ -1235,6 +1235,15 @@
 
     <!-- 歌曲清单（独立文件，方便维护） -->
     <script src="songFiles.js"></script>
+    
+    <!-- 工具函数模块 -->
+    <script src="js/utils.js"></script>
+    
+    <!-- TTS 语音播报模块 -->
+    <script src="js/tts.js"></script>
+    
+    <!-- 导入歌词模块 -->
+    <script src="js/import.js"></script>
 
     <script>
     async function loadAllSongs() {
@@ -1267,20 +1276,12 @@
     const MIN_FONT_SIZE = 12;
     const MAX_FONT_SIZE = 24;
 
-    // TTS 语音播报相关
-    let ttsManifest = null;       // 存储 manifest 数据
-    let ttsBaseUrl = '';          // 存储 baseUrl
-    let currentAudio = null;      // 当前播放的音频
-    let currentPlayingBtn = null; // 当前播放按钮
-    let ttsMode = false;          // 播放模式开关
-    let currentPlayingChar = null; // 当前播放的单字元素
-
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
 
         // 加载 TTS manifest
-        await loadTTSManifest();
+        await TTSModule.init();
 
         // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
         const artistSet = new Set();
@@ -1293,210 +1294,6 @@
         artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
-    }
-
-    // 加载 TTS manifest 文件
-    async function loadTTSManifest() {
-        try {
-            const response = await fetch('tts/manifest.v1.json');
-            if (response.ok) {
-                const data = await response.json();
-                ttsManifest = data.items;
-                ttsBaseUrl = data.baseUrl;
-                console.log('TTS manifest 加载成功，共', Object.keys(ttsManifest).length, '个语音项');
-            } else {
-                console.warn('TTS manifest 加载失败:', response.status);
-            }
-        } catch (error) {
-            console.warn('TTS manifest 加载出错:', error);
-        }
-    }
-
-    // 播放歌词行的语音
-    async function playLineTTS(lineIndex, btn) {
-        if (!ttsManifest || !currentSong) {
-            showToast('语音数据未加载');
-            return;
-        }
-
-        const line = currentSong.lyrics[lineIndex];
-        if (!line || !line.jp) {
-            showToast('该行没有粤拼数据');
-            return;
-        }
-
-        // 停止当前播放
-        stopCurrentTTS();
-
-        // 获取该行的粤拼数组（过滤空值）
-        const jyutpingArr = line.jp.filter(jp => jp);
-        if (jyutpingArr.length === 0) {
-            showToast('该行没有粤拼数据');
-            return;
-        }
-
-        // 设置当前播放按钮
-        currentPlayingBtn = btn;
-        btn.classList.add('playing');
-
-        // 逐词播放
-        await playJyutpingSequence(jyutpingArr, btn);
-    }
-
-    // 播放分段的语音（用于空格分割后的子行）
-    async function playSegmentTTS(jyutpingArr, btn) {
-        if (!ttsManifest || !jyutpingArr || jyutpingArr.length === 0) return;
-
-        stopCurrentTTS();
-
-        currentPlayingBtn = btn;
-        btn.classList.add('playing');
-
-        await playJyutpingSequence(jyutpingArr, btn);
-    }
-
-    // 逐词播放粤拼序列
-    async function playJyutpingSequence(jyutpingArr, btn) {
-        for (let i = 0; i < jyutpingArr.length; i++) {
-            // 如果用户点击了其他按钮或停止播放，则中断
-            if (!currentPlayingBtn || currentPlayingBtn !== btn) {
-                break;
-            }
-
-            const jp = jyutpingArr[i];
-            const audioPath = ttsManifest[jp];
-            
-            if (!audioPath) {
-                console.log('未找到粤拼:', jp);
-                continue; // 跳过未找到的词，继续播放下一个
-            }
-
-            const audioUrl = `${ttsBaseUrl}/${audioPath}`;
-            
-            try {
-                await playAudio(audioUrl);
-            } catch (err) {
-                console.log('播放失败:', jp, err);
-            }
-        }
-
-        // 播放完成
-        if (currentPlayingBtn === btn) {
-            btn.classList.remove('playing');
-            currentAudio = null;
-            currentPlayingBtn = null;
-        }
-    }
-
-    // 播放单个音频（返回 Promise）
-    // 提前触发下一个音频以缩短字间间隔
-    function playAudio(url) {
-        return new Promise((resolve, reject) => {
-            const audio = new Audio(url);
-            currentAudio = audio;
-            let resolved = false;
-
-            // 当音频播放到接近结尾时提前 resolve，缩短字间间隔
-            audio.addEventListener('timeupdate', function onTimeUpdate() {
-                if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.08) {
-                    resolved = true;
-                    audio.removeEventListener('timeupdate', onTimeUpdate);
-                    resolve();
-                }
-            });
-
-            audio.onended = () => {
-                if (!resolved) {
-                    resolved = true;
-                    resolve();
-                }
-            };
-            audio.onerror = (err) => {
-                if (!resolved) {
-                    resolved = true;
-                    reject(err);
-                }
-            };
-
-            audio.play().catch(err => {
-                if (!resolved) {
-                    resolved = true;
-                    reject(err);
-                }
-            });
-        });
-    }
-
-    // 停止当前播放
-    function stopCurrentTTS() {
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
-        if (currentPlayingBtn) {
-            currentPlayingBtn.classList.remove('playing');
-            currentPlayingBtn = null;
-        }
-        if (currentPlayingChar) {
-            currentPlayingChar.classList.remove('tts-char-playing');
-            currentPlayingChar = null;
-        }
-    }
-
-    // 切换播放模式
-    function toggleTTSMode() {
-        ttsMode = !ttsMode;
-        const btn = document.getElementById('ttsModeBtn');
-        const lyricsView = document.getElementById('lyricsView');
-        if (ttsMode) {
-            btn.classList.add('tts-active');
-            lyricsView.classList.add('tts-mode');
-            showToast('已进入播放模式，点击单字播放语音');
-        } else {
-            btn.classList.remove('tts-active');
-            lyricsView.classList.remove('tts-mode');
-            stopCurrentTTS();
-            showToast('已退出播放模式');
-        }
-    }
-
-    // 播放单字语音
-    function playCharTTS(jp, charEl) {
-        if (!ttsManifest || !jp) return;
-
-        // 清除上一个播放高亮
-        if (currentPlayingChar) {
-            currentPlayingChar.classList.remove('tts-char-playing');
-        }
-
-        const audioPath = ttsManifest[jp];
-        if (!audioPath) return;
-
-        const audioUrl = `${ttsBaseUrl}/${audioPath}`;
-        const audio = new Audio(audioUrl);
-        currentAudio = audio;
-        currentPlayingChar = charEl;
-        charEl.classList.add('tts-char-playing');
-
-        audio.onended = () => {
-            charEl.classList.remove('tts-char-playing');
-            if (currentPlayingChar === charEl) {
-                currentPlayingChar = null;
-            }
-        };
-        audio.onerror = () => {
-            charEl.classList.remove('tts-char-playing');
-            if (currentPlayingChar === charEl) {
-                currentPlayingChar = null;
-            }
-        };
-
-        audio.play().catch(() => {
-            charEl.classList.remove('tts-char-playing');
-            if (currentPlayingChar === charEl) {
-                currentPlayingChar = null;
-            }
-        });
     }
 
     function renderArtistFilter() {
@@ -1643,7 +1440,7 @@
                 `).join('');
                 // 每个分段都添加播放按钮（只播放该分段的语音）
                 const segJp = segment.map(s => s.jp).filter(j => j).map(j => "'" + j.replace(/'/g, "\\'") + "'").join(',');
-                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); playSegmentTTS([${segJp}], this)" title="播放语音">▶</button>`;
+                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); TTSModule.playSegment([${segJp}], this)" title="播放语音">▶</button>`;
                 lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
             });
         });
@@ -1737,36 +1534,6 @@
         toggle.textContent = toolbar.classList.contains('expanded') ? '▼' : '▲';
     }
 
-    // 简繁转换对照表
-    const s2tMap = {
-        '简': '簡', '繁': '繁', '体': '體', '个': '個', '来': '來', '说': '說', '时': '時', '会': '會', '对': '對', '开': '開',
-        '过': '過', '为': '為', '这': '這', '们': '們', '国': '國', '发': '發', '长': '長', '现': '現', '还': '還', '当': '當',
-        '经': '經', '见': '見', '从': '從', '问': '問', '很': '很', '只': '只', '最': '最', '把': '把', '被': '被', '让': '讓',
-        '给': '給', '向': '向', '和': '和', '与': '與', '在': '在', '的': '的', '了': '了', '是': '是', '我': '我', '你': '你',
-        '他': '他', '她': '她', '它': '它', '们': '們', '得': '得', '地': '地', '着': '著', '到': '到', '上': '上', '下': '下',
-        '中': '中', '大': '大', '小': '小', '多': '多', '少': '少', '好': '好', '爱': '愛', '情': '情', '心': '心', '想': '想',
-        '知': '知', '道': '道', '看': '看', '听': '聽', '见': '見', '回': '回', '去': '去', '走': '走', '跑': '跑', '跳': '跳',
-        '唱': '唱', '歌': '歌', '笑': '笑', '哭': '哭', '睡': '睡', '醒': '醒', '吃': '吃', '喝': '喝', '玩': '玩', '乐': '樂',
-        '学': '學', '习': '習', '写': '寫', '读': '讀', '书': '書', '画': '畫', '做': '做', '事': '事', '工': '工', '作': '作',
-        '家': '家', '里': '裡', '外': '外', '前': '前', '后': '後', '左': '左', '右': '右', '东': '東', '西': '西', '南': '南',
-        '北': '北', '天': '天', '地': '地', '日': '日', '月': '月', '星': '星', '云': '雲', '风': '風', '雨': '雨', '雪': '雪',
-        '春': '春', '夏': '夏', '秋': '秋', '冬': '冬', '年': '年', '岁': '歲', '花': '花', '草': '草', '树': '樹', '木': '木',
-        '山': '山', '水': '水', '江': '江', '河': '河', '海': '海', '湖': '湖', '路': '路', '街': '街', '城': '城', '市': '市',
-        '门': '門', '窗': '窗', '房': '房', '屋': '屋', '楼': '樓', '梯': '梯', '墙': '牆', '院': '院', '园': '園', '场': '場',
-        '车': '車', '马': '馬', '船': '船', '机': '機', '飞': '飛', '站': '站', '店': '店', '厂': '廠', '银': '銀', '行': '行',
-        '医': '醫', '院': '院', '学': '學', '校': '校', '师': '師', '生': '生', '医': '醫', '护': '護', '士': '士', '警': '警',
-        '察': '察', '军': '軍', '人': '人', '民': '民', '公': '公', '共': '共', '私': '私', '男': '男', '女': '女', '老': '老',
-        '少': '少', '父': '父', '母': '母', '兄': '兄', '弟': '弟', '姐': '姐', '妹': '妹', '夫': '夫', '妻': '妻', '子': '子',
-        '儿': '兒', '孙': '孫', '朋': '朋', '友': '友', '亲': '親', '爱': '愛', '恋': '戀', '婚': '婚', '姻': '姻', '缘': '緣',
-        '梦': '夢', '想': '想', '愿': '願', '望': '望', '希': '希', '望': '望', '期': '期', '待': '待', '等': '等', '待': '待'
-    };
-    const t2sMap = Object.fromEntries(Object.entries(s2tMap).map(([k, v]) => [v, k]));
-
-    function convertText(text, toTraditional) {
-        const map = toTraditional ? s2tMap : t2sMap;
-        return text.split('').map(c => map[c] || c).join('');
-    }
-
     function shareSong() {
         if (!currentSong) return;
         const url = `${window.location.origin}${window.location.pathname}#${currentSong.id}`;
@@ -1849,11 +1616,11 @@
 
     function onCharClick(event, lineIndex, charIndex) {
         // 播放模式下，点击单字播放语音
-        if (ttsMode) {
+        if (TTSModule.isModeActive()) {
             event.stopPropagation();
             const charGroup = event.currentTarget;
             const jp = charGroup.dataset.originalJp;
-            playCharTTS(jp, charGroup);
+            TTSModule.playChar(jp, charGroup);
             return;
         }
 
@@ -2412,175 +2179,6 @@ ${editDetails}
         toggleDeleteMode();
     }
 
-    // ===== 导入歌词功能 =====
-    let importedLyricsData = null; // 存储导入的歌词数据
-
-    function showImportModal() {
-        document.getElementById('importModal').style.display = 'flex';
-        // 清空表单
-        document.getElementById('importTitle').value = '';
-        document.getElementById('importArtist').value = '';
-        document.getElementById('importLyricist').value = '';
-        document.getElementById('importComposer').value = '';
-        document.getElementById('importLyrics').value = '';
-        document.getElementById('importPreview').style.display = 'none';
-        importedLyricsData = null;
-    }
-
-    function hideImportModal() {
-        document.getElementById('importModal').style.display = 'none';
-    }
-
-    function previewImport() {
-        let lyricsText = document.getElementById('importLyrics').value.trim();
-        // 自动将繁体转为简体
-        lyricsText = convertText(lyricsText, false);
-        // 更新输入框显示为简体
-        document.getElementById('importLyrics').value = lyricsText;
-        if (!lyricsText) {
-            document.getElementById('importPreview').style.display = 'none';
-            importedLyricsData = null;
-            return;
-        }
-
-        // 解析歌词：按双换行分段（连续两个或以上换行符表示段落分隔）
-        // 单换行表示正常换行（新的一句）
-        const normalizedText = lyricsText.replace(/\r\n/g, '\n');
-        const paragraphs = normalizedText.split(/\n{2,}/);
-        const lyrics = [];
-        let previewHtml = '';
-
-        paragraphs.forEach((para, pIdx) => {
-            // 段落内按单换行分割成多行，每行是一句歌词
-            const lines = para.split('\n').filter(l => l.trim());
-            lines.forEach((line, lIdx) => {
-                const matched = matchJyutping(line.trim());
-                lyrics.push({
-                    chars: matched.map(m => m.char),
-                    jp: matched.map(m => m.jp)
-                });
-
-                // 生成预览HTML（只显示前几行）
-                if (pIdx < 2 && lIdx < 3) {
-                    previewHtml += '<div class="import-preview-line">';
-                    matched.forEach(m => {
-                        const jpClass = m.jp ? '' : 'style="color:#dc3545;"'; // 没有匹配到的字显示红色
-                        previewHtml += `<span class="import-preview-char">
-                            <span class="import-preview-jp" ${jpClass}>${m.jp || '?'}</span>
-                            <span class="import-preview-hanzi">${m.char}</span>
-                        </span>`;
-                    });
-                    previewHtml += '</div>';
-                }
-            });
-            // 段落结束后添加段落分隔（双换行产生的段落）
-            if (lines.length > 0) {
-                lyrics.push({ paragraphBreak: true });
-            }
-        });
-
-        // 移除最后一个多余的段落分隔
-        if (lyrics.length > 0 && lyrics[lyrics.length - 1].paragraphBreak) {
-            lyrics.pop();
-        }
-
-        importedLyricsData = lyrics;
-
-        // 显示预览
-        document.getElementById('importPreview').style.display = 'block';
-        document.getElementById('importPreviewContent').innerHTML = previewHtml || '<div style="color:#999;">暂无内容</div>';
-    }
-
-    function generateSongFile() {
-        // 自动将繁体转为简体
-        const title = convertText(document.getElementById('importTitle').value.trim(), false);
-        const artist = convertText(document.getElementById('importArtist').value.trim(), false);
-        const lyricist = convertText(document.getElementById('importLyricist').value.trim(), false);
-        const composer = convertText(document.getElementById('importComposer').value.trim(), false);
-
-        // 更新输入框显示为简体
-        document.getElementById('importTitle').value = title;
-        document.getElementById('importArtist').value = artist;
-        document.getElementById('importLyricist').value = lyricist;
-        document.getElementById('importComposer').value = composer;
-
-        if (!title || !artist) {
-            alert('请填写歌曲名称和歌手');
-            return;
-        }
-
-        if (!importedLyricsData) {
-            previewImport();
-            if (!importedLyricsData) {
-                alert('请输入歌词内容');
-                return;
-            }
-        }
-
-        // 生成歌曲ID（基于现有最大ID+1）
-        const maxId = songs.reduce((max, s) => Math.max(max, s.id || 0), 0);
-        const songId = maxId + 1;
-
-        // 匹配标题、歌手、填词、作曲的粤拼
-        const titleJyutping = matchJyutping(title).map(m => m.jp);
-        const artistJyutping = matchJyutping(artist).map(m => m.jp);
-        const lyricistJyutping = lyricist ? matchJyutping(lyricist).map(m => m.jp) : [];
-        const composerJyutping = composer ? matchJyutping(composer).map(m => m.jp) : [];
-
-        // 生成JS文件内容（格式与现有歌曲文件一致）
-        const lyricsStr = importedLyricsData.map(line => {
-            if (line.paragraphBreak) return '            { paragraphBreak: true }';
-            return '            { chars: ' + JSON.stringify(line.chars) + ', jp: ' + JSON.stringify(line.jp) + ' }';
-        }).join(',\n');
-
-        const jsContent = `// 歌曲：${title}
-
-(function() {
-    const song = {
-        id: ${songId},
-        title: "${title}",
-        titleJyutping: ${JSON.stringify(titleJyutping)},
-        artist: "${artist}",
-        artistJyutping: ${JSON.stringify(artistJyutping)},
-        lyricist: "${lyricist}",
-        lyricistJyutping: ${JSON.stringify(lyricistJyutping)},
-        composer: "${composer}",
-        composerJyutping: ${JSON.stringify(composerJyutping)},
-        lyrics: [
-${lyricsStr}
-        ]
-    };
-    window.__songs.push(song);
-}());
-
-// ⚠️ 重要：请在 index.html 的 songFiles 数组中添加以下一行：
-// 'lyrics/${title}.js',
-`;
-
-        // 生成代码供部署
-        document.getElementById('generatedCode').value = jsContent;
-        document.getElementById('codeModal').style.display = 'flex';
-
-        // 关闭导入模态框
-        hideImportModal();
-    }
-
-    function hideCodeModal() {
-        document.getElementById('codeModal').style.display = 'none';
-    }
-
-    function copyGeneratedCode() {
-        const code = document.getElementById('generatedCode').value;
-        navigator.clipboard.writeText(code).then(() => {
-            alert('代码已复制到剪贴板！\n\n请将代码保存为 lyrics/${document.getElementById("importTitle").value}.js 文件');
-        }).catch(() => {
-            // 备用方案
-            const textarea = document.getElementById('generatedCode');
-            textarea.select();
-            document.execCommand('copy');
-            alert('代码已复制！');
-        });
-    }
     </script>
 
     <!-- 导入歌词模态框 -->
@@ -2610,7 +2208,7 @@ ${lyricsStr}
             
             <div class="import-form-group">
                 <label>歌词内容 *</label>
-                <textarea id="importLyrics" placeholder="粘贴歌词内容，换行表示新的一句，连续两个空行表示段落分隔" oninput="previewImport()"></textarea>
+                <textarea id="importLyrics" placeholder="粘贴歌词内容，换行表示新的一句，连续两个空行表示段落分隔" oninput="ImportModule.preview()"></textarea>
                 <div class="import-tip">💡 单换行 = 新的一句歌词 &nbsp;|&nbsp; 双换行 = 段落分隔（更大间距）</div>
             </div>
             
@@ -2620,8 +2218,8 @@ ${lyricsStr}
             </div>
             
             <div class="import-actions">
-                <button class="import-btn cancel" onclick="hideImportModal()">取消</button>
-                <button class="import-btn confirm" onclick="generateSongFile()">生成歌曲文件</button>
+                <button class="import-btn cancel" onclick="ImportModule.hide()">取消</button>
+                <button class="import-btn confirm" onclick="ImportModule.generate()">生成歌曲文件</button>
             </div>
         </div>
     </div>
@@ -2635,8 +2233,8 @@ ${lyricsStr}
                 <textarea id="generatedCode" style="min-height: 300px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px;" readonly></textarea>
             </div>
             <div class="import-actions">
-                <button class="import-btn cancel" onclick="hideCodeModal()">关闭</button>
-                <button class="import-btn confirm" onclick="copyGeneratedCode()">复制代码</button>
+                <button class="import-btn cancel" onclick="ImportModule.hideCode()">关闭</button>
+                <button class="import-btn confirm" onclick="ImportModule.copyCode()">复制代码</button>
             </div>
         </div>
     </div>
