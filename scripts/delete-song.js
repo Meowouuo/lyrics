@@ -1,10 +1,9 @@
-// 处理删除歌曲：解析 Issue → 删除文件 → 创建 PR
+// 处理删除歌曲：解析 Issue → 删除文件 → 更新 songFiles.js → 创建 PR
 
 const fs = require('fs');
 const path = require('path');
 const {
     getIssueInfo,
-    parseTable,
     getAllSongs,
     createBranch,
     commitAndPush,
@@ -12,14 +11,49 @@ const {
     addComment,
 } = require('./utils');
 
+// 从 Issue body 中解析歌曲列表
+// 支持两种格式：
+// 1. 编号列表：1. **歌名** - 歌手（ID: X）
+// 2. Markdown 表格
+function parseSongList(body) {
+    const songs = [];
+
+    // 尝试解析编号列表格式
+    const lines = body.split('\n');
+    for (const line of lines) {
+        const match = line.match(/^\d+\.\s*\*\*(.+?)\*\*\s*-\s*(.+?)(?:\s*（ID:\s*(\d+)）)?$/);
+        if (match) {
+            songs.push({
+                title: match[1].trim(),
+                artist: match[2].trim(),
+                id: match[3] ? parseInt(match[3]) : null,
+            });
+        }
+    }
+
+    // 如果编号列表没解析到，尝试解析表格
+    if (songs.length === 0) {
+        const { parseTable } = require('./utils');
+        const rows = parseTable(body);
+        for (const row of rows) {
+            const fullText = row.join(' ');
+            const titleMatch = fullText.match(/\*\*(.+?)\*\*/);
+            if (titleMatch) {
+                songs.push({ title: titleMatch[1].trim(), artist: '', id: null });
+            }
+        }
+    }
+
+    return songs;
+}
+
 function processDeleteSong() {
     const issue = getIssueInfo();
 
     // 解析要删除的歌曲列表
-    const rows = parseTable(issue.body);
-    if (rows.length === 0) {
-        // 尝试从标题中提取
-        addComment(issue.number, '❌ 未检测到要删除的歌曲列表，请使用模板中的格式。');
+    const songList = parseSongList(issue.body);
+    if (songList.length === 0) {
+        addComment(issue.number, '❌ 未检测到要删除的歌曲列表，请使用正确的格式。');
         return;
     }
 
@@ -27,17 +61,12 @@ function processDeleteSong() {
     let deletedFiles = [];
     let notFound = [];
 
-    for (const row of rows) {
-        // 格式：序号. **歌曲名称** - 歌手（ID: X）
-        const fullText = row.join(' ');
-        const titleMatch = fullText.match(/\*\*(.+?)\*\*/);
-        const title = titleMatch ? titleMatch[1] : row[0];
-
-        const song = allSongs.find(s => s.title === title);
+    for (const item of songList) {
+        const song = allSongs.find(s => s.title === item.title);
         if (song) {
             deletedFiles.push(song);
         } else {
-            notFound.push(title);
+            notFound.push(item.title);
         }
     }
 
@@ -90,11 +119,9 @@ ${notFound.length > 0 ? `\n### ⚠️ 未找到的歌曲\n${notFound.map(n => `-
 
 删除的歌曲：
 ${deletedFiles.map(s => `- 《${s.title}》- ${s.artist}`).join('\n')}
-
 ${notFound.length > 0 ? `\n⚠️ 以下歌曲未找到：${notFound.join(', ')}` : ''}
 
 请等待管理员审核合并。`);
-
 }
 
 module.exports = { processDeleteSong };
