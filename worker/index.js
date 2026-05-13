@@ -57,6 +57,16 @@ export default {
           issueBody = buildLyricsCorrectionBody({ songName, corrections });
           break;
 
+        case 'delete-song':
+          const songs = data.songs;
+          if (!songs || songs.length === 0) {
+            return jsonResponse({ error: '删除歌曲需要选择要删除的歌曲' }, 400);
+          }
+          issueTitle = `[删除歌曲] ${songs.length}首歌曲`;
+          labels = ['删除'];
+          issueBody = buildDeleteSongBody({ songs });
+          break;
+
         default:
           return jsonResponse({ error: `未知的 type: ${type}` }, 400);
       }
@@ -144,6 +154,21 @@ function buildJyutpingCorrectionBody({ songName, corrections }) {
 | 行号 | 字 | 原粤拼 | 正确粤拼 |
 |------|-----|--------|----------|
 ${tableRows}
+
+---
+*由网站投稿表单提交*`;
+}
+
+function buildDeleteSongBody({ songs }) {
+  const songList = songs.map((s, i) =>
+    `${i + 1}. **${s.title}** - ${s.artist}（ID: ${s.id}）`
+  ).join('\n');
+
+  return `## 删除歌曲请求
+
+**删除数量：** ${songs.length} 首
+
+${songList}
 
 ---
 *由网站投稿表单提交*`;

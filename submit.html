@@ -190,6 +190,7 @@
             <div class="tab active" onclick="switchTab('new-song')">📝 投稿新歌</div>
             <div class="tab" onclick="switchTab('jyutping')">✏️ 粤拼纠错</div>
             <div class="tab" onclick="switchTab('lyrics')">📝 歌词纠错</div>
+            <div class="tab" onclick="switchTab('delete')">🗑️ 删除歌曲</div>
         </div>
 
         <!-- 投稿新歌 -->
@@ -269,6 +270,21 @@
                 <div class="result" id="lc-result"></div>
             </div>
         </div>
+
+        <!-- 删除歌曲 -->
+        <div class="panel" id="panel-delete">
+            <div class="form-card">
+                <div class="form-group">
+                    <label>要删除的歌曲列表</label>
+                    <div id="delete-list" style="min-height:100px;border:1px dashed #d9d9d9;border-radius:6px;padding:12px;margin-bottom:12px;">
+                        <div style="color:#999;font-size:13px;">暂无选择的歌曲</div>
+                    </div>
+                    <div class="hint">请在主页面点击「管理」按钮选择要删除的歌曲</div>
+                </div>
+                <button class="submit-btn" onclick="submitDeleteRequest()">提交删除请求</button>
+                <div class="result" id="del-result"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -278,7 +294,7 @@
         // Tab 切换
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => {
-                t.classList.toggle('active', ['new-song', 'jyutping', 'lyrics'][i] === tab);
+                t.classList.toggle('active', ['new-song', 'jyutping', 'lyrics', 'delete'][i] === tab);
             });
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById('panel-' + tab).classList.add('active');
@@ -452,6 +468,60 @@
             }
         }
 
+        // 删除歌曲数据
+        let deleteSongs = [];
+
+        // 提交删除请求
+        async function submitDeleteRequest() {
+            if (deleteSongs.length === 0) {
+                showResult('del-result', false, '请选择要删除的歌曲');
+                return;
+            }
+
+            const btn = document.querySelector('#panel-delete .submit-btn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'delete-song', songs: deleteSongs }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showResult('del-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
+                } else {
+                    showResult('del-result', false, `❌ 提交失败：${data.error}`);
+                }
+            } catch (e) {
+                showResult('del-result', false, '❌ 网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '提交删除请求';
+            }
+        }
+
+        // 渲染删除歌曲列表
+        function renderDeleteList() {
+            const container = document.getElementById('delete-list');
+            if (deleteSongs.length === 0) {
+                container.innerHTML = '<div style="color:#999;font-size:13px;">暂无选择的歌曲</div>';
+                return;
+            }
+            container.innerHTML = deleteSongs.map((s, i) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;">
+                    <span>${i + 1}. ${s.title} - ${s.artist}</span>
+                    <button onclick="removeDeleteSong(${i})" style="border:none;background:#ff4d4f;color:#fff;padding:2px 8px;border-radius:4px;cursor:pointer;">移除</button>
+                </div>
+            `).join('');
+        }
+
+        function removeDeleteSong(index) {
+            deleteSongs.splice(index, 1);
+            renderDeleteList();
+        }
+
         // 初始化：各添加一行空行
         addJpRow();
         addLcRow();
@@ -489,6 +559,10 @@
                         lastRow.querySelector('.lc-original').value = c.originalText || '';
                         lastRow.querySelector('.lc-new').value = c.newText || '';
                     });
+                } else if (data.type === 'delete' && data.songs) {
+                    switchTab('delete');
+                    deleteSongs = data.songs;
+                    renderDeleteList();
                 }
             } catch (e) {
                 console.error('Failed to parse submitForm data:', e);

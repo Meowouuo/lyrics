@@ -54,15 +54,18 @@ function submitDeleteRequest() {
     if (selectedForDelete.length === 0) return;
     const songsList = window.songs || [];
     const songsToDelete = selectedForDelete.map(id => songsList.find(s => s.id === id)).filter(Boolean);
-    if (!confirm(`确定删除以下 ${songsToDelete.length} 首歌曲吗？\n\n${songsToDelete.map(s => `· ${s.title} - ${s.artist}`).join('\n')}\n\n删除请求将提交到 GitHub Issues。`)) return;
 
-    const songList = songsToDelete.map((s, i) =>
-        `${i + 1}. **${s.title}** - ${s.artist}（ID: ${s.id}）`
-    ).join('\n');
-
-    const title = encodeURIComponent(`[删除歌曲] ${songsToDelete.length}首歌曲`);
-    const body = encodeURIComponent(`## 删除歌曲请求\n\n**删除数量：** ${songsToDelete.length} 首\n\n${songList}\n\n---\n\n请确认后删除对应歌曲的 JS 文件，并从 index.html 的 songFiles 数组中移除。`);
-    window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=删除`, '_blank');
+    // 将删除数据存入 localStorage，跳转到表单页面
+    const deleteData = songsToDelete.map(s => ({
+        title: s.title,
+        artist: s.artist,
+        id: s.id,
+    }));
+    localStorage.setItem('submitForm', JSON.stringify({
+        type: 'delete',
+        songs: deleteData,
+    }));
+    window.open('submit.html', '_blank');
 
     toggleDeleteMode();
 }
