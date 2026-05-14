@@ -29,4 +29,5 @@ const songFiles = [
     'lyrics/游乐场.js',
     'lyrics/黑暗中漫舞.js',
     'lyrics/喜帖街.js',
+    'lyrics/十面埋伏.js',
 ];
