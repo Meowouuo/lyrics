@@ -185,6 +185,19 @@
             overflow-y: auto;
             flex: 1;
         }
+        
+        .load-more-btn {
+            padding: 12px 24px;
+            text-align: center;
+            color: #1890ff;
+            cursor: pointer;
+            font-size: 14px;
+            border-top: 1px solid #e8e8e8;
+            transition: background 0.2s;
+        }
+        .load-more-btn:hover {
+            background: #f5f5f5;
+        }
 
         .song-item {
             display: flex;
@@ -1282,6 +1295,9 @@
     window.currentSong = null;
     let currentFilter = 'all';
     let fontSize = 20;
+    // 懒加载状态
+    let displayedSongs = 5;
+    const SONGS_PER_LOAD = 5;
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
     let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
     const MIN_FONT_SIZE = 12;
@@ -1353,8 +1369,10 @@
             });
         }
 
+        // 懒加载：只显示前 displayedSongs 条
+        const songsToShow = filtered.slice(0, displayedSongs);
         let html = '';
-        filtered.forEach((song, index) => {
+        songsToShow.forEach((song, index) => {
             const isActive = currentSong && currentSong.id === song.id;
             const clickAction = DeleteModule.isActive() ? `DeleteModule.toggleSelect(${song.id}, event)` : `selectSong(${song.id})`;
             html += `
@@ -1367,7 +1385,28 @@
                 </div>
             `;
         });
+        
+        // 如果还有更多歌曲，显示"加载更多"按钮
+        if (filtered.length > displayedSongs) {
+            html += `
+                <div class="load-more-btn" onclick="loadMoreSongs()">
+                    加载更多 (${filtered.length - displayedSongs} 首)
+                </div>
+            `;
+        }
+        
         container.innerHTML = html;
+    }
+    
+    // 加载更多歌曲
+    function loadMoreSongs() {
+        displayedSongs += SONGS_PER_LOAD;
+        renderSongList();
+    }
+    
+    // 重置懒加载计数器
+    function resetLazyLoad() {
+        displayedSongs = SONGS_PER_LOAD;
     }
 
     function filterSongs() {
@@ -1394,10 +1433,20 @@
     function showSongList() {
         document.getElementById('appContainer').classList.remove('view-lyrics');
         document.getElementById('mobileHeader').style.display = 'none';
+        // 清除当前歌曲，返回首页时不显示歌词
+        currentSong = null;
+        window.currentSong = null;
+        renderLyrics();
+        renderSongList();
     }
 
     function renderLyrics() {
-        if (!currentSong) return;
+        if (!currentSong) {
+            // 没有选中歌曲时显示空状态
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('lyricsView').style.display = 'none';
+            return;
+        }
 
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('lyricsView').style.display = 'block';
