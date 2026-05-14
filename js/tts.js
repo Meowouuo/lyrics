@@ -109,6 +109,9 @@ function playAudio(url) {
         currentAudio = audio;
         let resolved = false;
 
+        // 移动端兼容性：预加载音频
+        audio.preload = 'auto';
+        
         // 当音频播放到接近结尾时提前 resolve，缩短字间间隔
         audio.addEventListener('timeupdate', function onTimeUpdate() {
             if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.08) {
@@ -131,12 +134,34 @@ function playAudio(url) {
             }
         };
 
-        audio.play().catch(err => {
-            if (!resolved) {
-                resolved = true;
-                reject(err);
-            }
-        });
+        // 移动端兼容性：先尝试加载再播放
+        audio.load();
+        
+        // 使用 canplaythrough 事件确保音频可以播放
+        const playWhenReady = () => {
+            audio.play().then(() => {
+                // 播放成功
+            }).catch(err => {
+                if (!resolved) {
+                    resolved = true;
+                    reject(err);
+                }
+            });
+        };
+
+        // 如果已经加载完成，直接播放
+        if (audio.readyState >= 3) {
+            playWhenReady();
+        } else {
+            audio.addEventListener('canplaythrough', playWhenReady, { once: true });
+            // 超时处理
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    reject(new Error('Audio load timeout'));
+                }
+            }, 5000);
+        }
     });
 }
 
@@ -187,6 +212,8 @@ function playCharTTS(jp, charEl) {
 
     const audioUrl = `${ttsBaseUrl}/${audioPath}`;
     const audio = new Audio(audioUrl);
+    // 移动端兼容性
+    audio.preload = 'auto';
     currentAudio = audio;
     currentPlayingChar = charEl;
     charEl.classList.add('tts-char-playing');
@@ -204,12 +231,31 @@ function playCharTTS(jp, charEl) {
         }
     };
 
-    audio.play().catch(() => {
-        charEl.classList.remove('tts-char-playing');
-        if (currentPlayingChar === charEl) {
-            currentPlayingChar = null;
-        }
-    });
+    // 移动端兼容性：先加载再播放
+    audio.load();
+    const playAudio = () => {
+        audio.play().catch(() => {
+            charEl.classList.remove('tts-char-playing');
+            if (currentPlayingChar === charEl) {
+                currentPlayingChar = null;
+            }
+        });
+    };
+
+    if (audio.readyState >= 3) {
+        playAudio();
+    } else {
+        audio.addEventListener('canplaythrough', playAudio, { once: true });
+        // 超时处理
+        setTimeout(() => {
+            if (charEl.classList.contains('tts-char-playing')) {
+                charEl.classList.remove('tts-char-playing');
+                if (currentPlayingChar === charEl) {
+                    currentPlayingChar = null;
+                }
+            }
+        }, 5000);
+    }
 }
 
 // 导出 TTS 模块初始化函数
