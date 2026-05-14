@@ -1213,13 +1213,10 @@
                 </button>
                 <div class="settings-dropdown" id="settingsDropdown" style="display:none;">
                     <div class="settings-dropdown-item" id="themeToggleBtn" onclick="cycleThemeMode();">
-                        ☀️ 日间模式
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> 日间模式
                     </div>
                     <div class="settings-dropdown-item" id="deleteModeBtn" onclick="DeleteModule.toggle(); toggleSettings();">
-                        🗑️ 管理歌曲
-                    </div>
-                    <div class="settings-dropdown-item" id="deleteModeBtn" onclick="DeleteModule.toggle(); toggleSettings();">
-                        🗑️ 管理歌曲
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> 管理歌曲
                     </div>
                 </div>
                 <div class="logo">🎵 粤拼歌词</div>
@@ -1795,11 +1792,11 @@
         if (!btn) return;
         const mode = ThemeModule.getMode();
         if (mode === 'light') {
-            btn.innerHTML = '☀️ 日间模式';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> 日间模式';
         } else if (mode === 'dark') {
-            btn.innerHTML = '🌙 夜间模式';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> 夜间模式';
         } else {
-            btn.innerHTML = '💻 跟随系统';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg> 跟随系统';
         }
     }
 
