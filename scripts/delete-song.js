@@ -1,4 +1,4 @@
-// 处理删除歌曲：解析 Issue → 删除文件 → 更新 songFiles.js → 创建 PR
+// 处理删除歌曲：解析 Issue → 删除文件 → 创建 PR
 
 const fs = require('fs');
 const path = require('path');
@@ -83,16 +83,7 @@ function processDeleteSong() {
         }
     }
 
-    // 更新 songFiles.js
-    const songFilesPath = path.join(__dirname, '..', 'songFiles.js');
-    let songFilesContent = fs.readFileSync(songFilesPath, 'utf8');
-    for (const song of deletedFiles) {
-        songFilesContent = songFilesContent.replace(
-            new RegExp(`\\s*'lyrics/${song.fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.js',?`),
-            ''
-        );
-    }
-    fs.writeFileSync(songFilesPath, songFilesContent, 'utf8');
+    // 不再手动修改 songFiles.js，由 generate-song-list.yml 自动生成
 
     // 创建分支、提交、PR
     const branchName = `delete/${issue.number}`;
