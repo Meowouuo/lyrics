@@ -14,9 +14,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
 
     steps:
-      - name: Batch merge PRs
+      - name: Batch merge PRs and close Issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -27,9 +28,49 @@ jobs:
           for pr in "${PRS[@]}"; do
             pr=$(echo "$pr" | tr -d ' ')
             if [ -n "$pr" ]; then
-              echo "正在合并 PR #$pr..."
-              gh pr merge "$pr" --squash --delete-branch --auto || echo "PR #$pr 合并失败，跳过"
+              echo "正在处理 PR #$pr..."
+              
+              # 获取 PR 信息
+              pr_info=$(gh pr view "$pr" --json title,body,headRefName --jq '.title + "|||" + .body + "|||" + .headRefName' 2>/dev/null || echo "")
+              
+              if [ -n "$pr_info" ]; then
+                pr_title=$(echo "$pr_info" | cut -d'|||' -f1)
+                pr_body=$(echo "$pr_info" | cut -d'|||' -f2)
+                branch_name=$(echo "$pr_info" | cut -d'|||' -f3)
+                
+                echo "  PR 标题: $pr_title"
+                
+                # 从 PR body 中提取 Issue 编号
+                issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+                
+                # 从分支名中提取 Issue 编号（如 new-song/24-xxx）
+                if [ -z "$issue_number" ]; then
+                  issue_number=$(echo "$branch_name" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
+                fi
+                
+                # 合并 PR
+                echo "  正在合并 PR #$pr..."
+                if gh pr merge "$pr" --squash --delete-branch --auto; then
+                  echo "  ✅ PR #$pr 合并成功"
+                  
+                  # 关闭关联的 Issue
+                  if [ -n "$issue_number" ]; then
+                    echo "  正在关闭 Issue #$issue_number..."
+                    gh issue close "$issue_number" --comment "✅ 已通过 PR #$pr 自动合并并关闭" || echo "  Issue #$issue_number 关闭失败或已关闭"
+                    
+                    # 添加已完成标签
+                    gh issue edit "$issue_number" --add-label "已完成" 2>/dev/null || true
+                  else
+                    echo "  未找到关联的 Issue"
+                  fi
+                else
+                  echo "  ❌ PR #$pr 合并失败"
+                fi
+              else
+                echo "  无法获取 PR #$pr 信息，跳过"
+              fi
+              
               echo ""
             fi
           done
-          echo "✅ 批量合并完成"
+          echo "✅ 批量处理完成"
