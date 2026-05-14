@@ -13,45 +13,68 @@ let currentPlayingChar = null;
 // 移动端（含微信）的关键问题：
 // 1. AudioContext 必须在用户交互中创建/恢复
 // 2. 微信 WeixinJSBridgeReady 事件后才允许播放
-// 3. 跨域音频需要 fetch + decodeAudioData（部分环境）
+// 3. iOS Safari 需要特殊处理
 // 策略：优先 AudioContext，失败时回退 HTMLAudioElement
 
 let _audioCtx = null;
-let _audioCtxReady = false;
 
 function _getAudioContext() {
     if (!_audioCtx) {
         const Ctor = window.AudioContext || window.webkitAudioContext;
-        if (Ctor) _audioCtx = new Ctor();
+        if (Ctor) {
+            _audioCtx = new Ctor();
+            console.log('[TTS] AudioContext created, state:', _audioCtx.state);
+        }
     }
     return _audioCtx;
 }
 
-// 在用户交互中调用一次，解锁音频
-function _unlockAudio() {
-    if (_audioCtxReady) return;
+// 解锁音频上下文 - 必须在用户交互中调用
+async function _unlockAudio() {
     try {
         const ctx = _getAudioContext();
-        if (ctx && ctx.state === 'suspended') ctx.resume();
-        _audioCtxReady = true;
-    } catch (e) { /* ignore */ }
+        if (!ctx) return false;
+        
+        if (ctx.state === 'suspended') {
+            await ctx.resume();
+            console.log('[TTS] AudioContext resumed, state:', ctx.state);
+        }
+        return ctx.state === 'running';
+    } catch (e) {
+        console.warn('[TTS] unlockAudio failed:', e);
+        return false;
+    }
 }
 
 // 微信环境检测与初始化
 function _initWechat() {
     if (!/MicroMessenger/i.test(navigator.userAgent)) return;
-    const unlock = () => _unlockAudio();
-    if (window.WeixinJSBridge) {
+    console.log('[TTS] WeChat detected');
+    
+    const unlock = async () => {
+        console.log('[TTS] WeChat unlock triggered');
+        await _unlockAudio();
+    };
+    
+    if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
         WeixinJSBridge.invoke('getNetworkType', {}, unlock);
     } else {
         document.addEventListener('WeixinJSBridgeReady', unlock, { once: true });
     }
 }
 
-// 方式1: AudioContext 播放（移动端最稳定）
+// 方式1: AudioContext 播放
 async function _playWithAudioContext(url) {
     const ctx = _getAudioContext();
     if (!ctx) throw new Error('No AudioContext');
+    
+    // 确保音频上下文是 running 状态
+    if (ctx.state !== 'running') {
+        await ctx.resume();
+        if (ctx.state !== 'running') {
+            throw new Error('AudioContext not running: ' + ctx.state);
+        }
+    }
 
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -59,24 +82,25 @@ async function _playWithAudioContext(url) {
     const audioBuf = await ctx.decodeAudioData(buf);
 
     return new Promise((resolve, reject) => {
-        if (ctx.state === 'suspended') {
-            ctx.resume().then(() => _startSource(ctx, audioBuf, resolve, reject))
-                .catch(reject);
-        } else {
-            _startSource(ctx, audioBuf, resolve, reject);
-        }
+        const src = ctx.createBufferSource();
+        src.buffer = audioBuf;
+        src.connect(ctx.destination);
+        
+        let resolved = false;
+        const done = () => {
+            if (!resolved) {
+                resolved = true;
+                resolve();
+            }
+        };
+        
+        src.onended = done;
+        src.start(0);
+        
+        // 安全超时
+        const timeout = Math.max((audioBuf.duration + 0.5) * 1000, 1000);
+        setTimeout(done, timeout);
     });
-}
-
-function _startSource(ctx, audioBuf, resolve, reject) {
-    const src = ctx.createBufferSource();
-    src.buffer = audioBuf;
-    src.connect(ctx.destination);
-    src.onended = resolve;
-    src.onerror = reject;
-    src.start(0);
-    // 安全超时
-    setTimeout(resolve, Math.max((audioBuf.duration - 0.05) * 1000, 500));
 }
 
 // 方式2: HTMLAudioElement 播放（回退方案）
@@ -85,30 +109,72 @@ function _playWithAudioElement(url) {
         const audio = new Audio();
         audio.preload = 'auto';
         currentAudio = audio;
-        let done = false;
-        const finish = () => { if (!done) { done = true; resolve(); } };
-        const fail = (e) => { if (!done) { done = true; reject(e); } };
+        
+        let resolved = false;
+        const done = () => {
+            if (!resolved) {
+                resolved = true;
+                resolve();
+            }
+        };
+        const fail = (e) => {
+            if (!resolved) {
+                resolved = true;
+                reject(e || new Error('Audio error'));
+            }
+        };
 
-        audio.onended = finish;
-        audio.onerror = fail;
+        audio.onended = done;
+        audio.onerror = () => fail(new Error('Audio load/play error'));
+        
+        // iOS Safari 需要设置这些属性
+        audio.muted = false;
+        audio.playsInline = true;
+        
+        // 提前结束检测
         audio.addEventListener('timeupdate', function () {
-            if (!done && audio.duration && audio.currentTime >= audio.duration - 0.06) finish();
+            if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.05) {
+                done();
+            }
         });
 
-        audio.play().catch(fail);
+        audio.src = url;
+        
+        // 播放
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(fail);
+        }
+        
         // 超时
-        setTimeout(() => fail(new Error('timeout')), 8000);
+        setTimeout(() => fail(new Error('timeout')), 10000);
     });
 }
 
-// 统一播放入口：先 AudioContext，失败回退 AudioElement
+// 统一播放入口
 async function _playAudio(url) {
-    _unlockAudio();
+    console.log('[TTS] Playing:', url);
+    
+    // 每次播放前都尝试解锁音频上下文
+    const unlocked = await _unlockAudio();
+    console.log('[TTS] Audio unlocked:', unlocked);
+    
+    // 尝试 AudioContext
     try {
         await _playWithAudioContext(url);
+        console.log('[TTS] AudioContext playback success');
+        return;
     } catch (e) {
-        console.warn('AudioContext 播放失败，回退 AudioElement:', e.message);
+        console.warn('[TTS] AudioContext failed:', e.message);
+    }
+    
+    // 回退到 AudioElement
+    try {
         await _playWithAudioElement(url);
+        console.log('[TTS] AudioElement playback success');
+    } catch (e) {
+        console.error('[TTS] AudioElement failed:', e.message);
+        throw e;
     }
 }
 
@@ -122,22 +188,31 @@ async function loadTTSManifest() {
             const data = await resp.json();
             ttsManifest = data.items;
             ttsBaseUrl = data.baseUrl;
-            console.log('TTS manifest 加载成功，共', Object.keys(ttsManifest).length, '个语音项');
+            console.log('[TTS] Manifest loaded:', Object.keys(ttsManifest).length, 'items');
         }
     } catch (e) {
-        console.warn('TTS manifest 加载出错:', e);
+        console.warn('[TTS] Manifest load error:', e);
     }
 }
 
 // 播放整行
 async function playLineTTS(lineIndex, btn) {
-    if (!ttsManifest || !window.currentSong) { showToast('语音数据未加载'); return; }
+    if (!ttsManifest || !window.currentSong) { 
+        showToast('语音数据未加载'); 
+        return; 
+    }
     const line = window.currentSong.lyrics[lineIndex];
-    if (!line || !line.jp) { showToast('该行没有粤拼数据'); return; }
+    if (!line || !line.jp) { 
+        showToast('该行没有粤拼数据'); 
+        return; 
+    }
 
     stopCurrentTTS();
     const arr = line.jp.filter(Boolean);
-    if (!arr.length) { showToast('该行没有粤拼数据'); return; }
+    if (!arr.length) { 
+        showToast('该行没有粤拼数据'); 
+        return; 
+    }
 
     currentPlayingBtn = btn;
     btn.classList.add('playing');
@@ -162,7 +237,7 @@ async function _playSequence(arr, btn) {
         try {
             await _playAudio(`${ttsBaseUrl}/${p}`);
         } catch (e) {
-            console.warn('播放失败:', jp, e.message);
+            console.warn('[TTS] Play failed:', jp, e.message);
         }
     }
     if (currentPlayingBtn === btn) {
@@ -173,7 +248,7 @@ async function _playSequence(arr, btn) {
 }
 
 // 播放单字
-function playCharTTS(jp, charEl) {
+async function playCharTTS(jp, charEl) {
     if (!ttsManifest || !jp) return;
     if (currentPlayingChar) currentPlayingChar.classList.remove('tts-char-playing');
 
@@ -183,9 +258,12 @@ function playCharTTS(jp, charEl) {
     currentPlayingChar = charEl;
     charEl.classList.add('tts-char-playing');
 
-    _playAudio(`${ttsBaseUrl}/${p}`)
-        .then(() => _clearChar(charEl))
-        .catch(() => _clearChar(charEl));
+    try {
+        await _playAudio(`${ttsBaseUrl}/${p}`);
+    } catch (e) {
+        console.error('[TTS] Char play failed:', e);
+    }
+    _clearChar(charEl);
 }
 
 function _clearChar(el) {
@@ -195,20 +273,30 @@ function _clearChar(el) {
 
 // 停止
 function stopCurrentTTS() {
-    if (currentAudio) { try { currentAudio.pause(); } catch(e){} currentAudio = null; }
-    if (currentPlayingBtn) { currentPlayingBtn.classList.remove('playing'); currentPlayingBtn = null; }
-    if (currentPlayingChar) { currentPlayingChar.classList.remove('tts-char-playing'); currentPlayingChar = null; }
+    if (currentAudio) { 
+        try { currentAudio.pause(); } catch(e){} 
+        currentAudio = null; 
+    }
+    if (currentPlayingBtn) { 
+        currentPlayingBtn.classList.remove('playing'); 
+        currentPlayingBtn = null; 
+    }
+    if (currentPlayingChar) { 
+        currentPlayingChar.classList.remove('tts-char-playing'); 
+        currentPlayingChar = null; 
+    }
 }
 
 // 切换模式
-function toggleTTSMode() {
+async function toggleTTSMode() {
     ttsMode = !ttsMode;
     const btn = document.getElementById('ttsModeBtn');
     const view = document.getElementById('lyricsView');
     if (ttsMode) {
         btn.classList.add('tts-active');
         view.classList.add('tts-mode');
-        _unlockAudio();
+        // 进入模式时立即解锁音频
+        await _unlockAudio();
         _initWechat();
         showToast('已进入播放模式，点击单字播放语音');
     } else {
@@ -219,11 +307,17 @@ function toggleTTSMode() {
     }
 }
 
-// 页面加载时初始化微信环境
-document.addEventListener('DOMContentLoaded', _initWechat);
-// 首次触摸/点击也解锁
-document.addEventListener('touchstart', _unlockAudio, { once: true });
-document.addEventListener('click', _unlockAudio, { once: true });
+// 页面加载时初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initWechat);
+} else {
+    _initWechat();
+}
+
+// 全局点击/触摸解锁（多次，确保有效）
+['touchstart', 'click', 'touchend'].forEach(evt => {
+    document.addEventListener(evt, () => _unlockAudio(), { passive: true });
+});
 
 // 导出
 window.TTSModule = {
