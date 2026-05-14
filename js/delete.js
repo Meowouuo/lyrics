@@ -9,15 +9,21 @@ function toggleDeleteMode() {
     const list = document.getElementById('songList');
     const btn = document.getElementById('deleteModeBtn');
     const bar = document.getElementById('deleteBar');
+    
+    if (!btn || !bar || !list) {
+        console.warn('[Delete] Required elements not found');
+        return;
+    }
+    
     if (deleteMode) {
         list.classList.add('delete-mode');
-        btn.textContent = '✅ 完成';
+        btn.innerHTML = '✅ 完成';
         btn.classList.add('active');
         bar.style.display = 'flex';
         updateDeleteBar();
     } else {
         list.classList.remove('delete-mode');
-        btn.textContent = '🗑️ 管理';
+        btn.innerHTML = '🗑️ 管理歌曲';
         btn.classList.remove('active');
         bar.style.display = 'none';
         // 重新渲染列表，恢复正常的 selectSong 点击
@@ -45,9 +51,13 @@ function toggleDeleteSelect(id, event) {
 }
 
 function updateDeleteBar() {
+    const countEl = document.getElementById('deleteCount');
+    const btnEl = document.getElementById('deleteSubmitBtn');
+    if (!countEl || !btnEl) return;
+    
     const count = selectedForDelete.length;
-    document.getElementById('deleteCount').textContent = count > 0 ? `已选 ${count} 首` : '请选择要删除的歌曲';
-    document.getElementById('deleteSubmitBtn').disabled = count === 0;
+    countEl.textContent = count > 0 ? `已选 ${count} 首` : '请选择要删除的歌曲';
+    btnEl.disabled = count === 0;
 }
 
 function submitDeleteRequest() {
