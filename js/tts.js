@@ -17,6 +17,7 @@ let currentPlayingChar = null;
 // 策略：优先 AudioContext，失败时回退 HTMLAudioElement
 
 let _audioCtx = null;
+let _hasUserInteraction = false;
 
 function _getAudioContext() {
     if (!_audioCtx) {
@@ -46,6 +47,12 @@ async function _unlockAudio() {
     }
 }
 
+// 标记用户交互
+function _markUserInteraction() {
+    _hasUserInteraction = true;
+    _unlockAudio();
+}
+
 // 微信环境检测与初始化
 function _initWechat() {
     if (!/MicroMessenger/i.test(navigator.userAgent)) return;
@@ -53,6 +60,7 @@ function _initWechat() {
     
     const unlock = async () => {
         console.log('[TTS] WeChat unlock triggered');
+        _markUserInteraction();
         await _unlockAudio();
     };
     
@@ -107,7 +115,6 @@ async function _playWithAudioContext(url) {
 function _playWithAudioElement(url) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
-        audio.preload = 'auto';
         currentAudio = audio;
         
         let resolved = false;
@@ -125,11 +132,7 @@ function _playWithAudioElement(url) {
         };
 
         audio.onended = done;
-        audio.onerror = () => fail(new Error('Audio load/play error'));
-        
-        // iOS Safari 需要设置这些属性
-        audio.muted = false;
-        audio.playsInline = true;
+        audio.onerror = (e) => fail(new Error('Audio load/play error'));
         
         // 提前结束检测
         audio.addEventListener('timeupdate', function () {
@@ -138,13 +141,21 @@ function _playWithAudioElement(url) {
             }
         });
 
-        audio.src = url;
+        // 设置属性
+        audio.preload = 'auto';
+        audio.crossOrigin = 'anonymous';
         
-        // 播放
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(fail);
-        }
+        // 加载并播放
+        audio.src = url;
+        audio.load();
+        
+        // 延迟播放，确保加载完成
+        setTimeout(() => {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(fail);
+            }
+        }, 100);
         
         // 超时
         setTimeout(() => fail(new Error('timeout')), 10000);
@@ -154,6 +165,11 @@ function _playWithAudioElement(url) {
 // 统一播放入口
 async function _playAudio(url) {
     console.log('[TTS] Playing:', url);
+    
+    // 确保有用户交互
+    if (!_hasUserInteraction) {
+        console.warn('[TTS] No user interaction yet');
+    }
     
     // 每次播放前都尝试解锁音频上下文
     const unlocked = await _unlockAudio();
@@ -296,6 +312,7 @@ async function toggleTTSMode() {
         btn.classList.add('tts-active');
         view.classList.add('tts-mode');
         // 进入模式时立即解锁音频
+        _markUserInteraction();
         await _unlockAudio();
         _initWechat();
         showToast('已进入播放模式，点击单字播放语音');
@@ -315,8 +332,8 @@ if (document.readyState === 'loading') {
 }
 
 // 全局点击/触摸解锁（多次，确保有效）
-['touchstart', 'click', 'touchend'].forEach(evt => {
-    document.addEventListener(evt, () => _unlockAudio(), { passive: true });
+['touchstart', 'click', 'touchend', 'mousedown'].forEach(evt => {
+    document.addEventListener(evt, () => _markUserInteraction(), { passive: true });
 });
 
 // 导出
