@@ -1197,6 +1197,10 @@
                 background: var(--border-color);
                 margin: 4px 0;
             }
+            .settings-submenu {
+                margin-left: 12px;
+                border-left: 1px solid var(--border-color);
+            }
     </style>
 </head>
 <body>
@@ -1208,16 +1212,20 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                 </button>
                 <div class="settings-dropdown" id="settingsDropdown" style="display:none;">
-                    <div class="settings-dropdown-item" id="themeLightBtn" onclick="ThemeModule.set('light'); updateThemeMenu(); toggleSettings();">
-                        ☀️ 日间模式
+                    <div class="settings-dropdown-item" id="appearanceBtn" onclick="toggleAppearanceSubmenu(event)">
+                        🎨 外观 ▶
                     </div>
-                    <div class="settings-dropdown-item" id="themeDarkBtn" onclick="ThemeModule.set('dark'); updateThemeMenu(); toggleSettings();">
-                        🌙 夜间模式
+                    <div class="settings-submenu" id="appearanceSubmenu" style="display:none;">
+                        <div class="settings-dropdown-item" id="themeLightBtn" onclick="ThemeModule.set('light'); updateThemeMenu(); toggleSettings();">
+                            ☀️ 日间模式
+                        </div>
+                        <div class="settings-dropdown-item" id="themeDarkBtn" onclick="ThemeModule.set('dark'); updateThemeMenu(); toggleSettings();">
+                            🌙 夜间模式
+                        </div>
+                        <div class="settings-dropdown-item" id="themeAutoBtn" onclick="ThemeModule.set('auto'); updateThemeMenu(); toggleSettings();">
+                            💻 跟随系统
+                        </div>
                     </div>
-                    <div class="settings-dropdown-item" id="themeAutoBtn" onclick="ThemeModule.set('auto'); updateThemeMenu(); toggleSettings();">
-                        💻 跟随系统
-                    </div>
-                    <div class="settings-dropdown-divider"></div>
                     <div class="settings-dropdown-item" onclick="DeleteModule.toggle(); toggleSettings();">
                         🗑️ 管理歌曲
                     </div>
@@ -1780,6 +1788,16 @@
         }
     }
 
+
+    function toggleAppearanceSubmenu(event) {
+        event.stopPropagation();
+        const submenu = document.getElementById('appearanceSubmenu');
+        const btn = document.getElementById('appearanceBtn');
+        const isOpen = submenu.style.display === 'block';
+        submenu.style.display = isOpen ? 'none' : 'block';
+        btn.innerHTML = isOpen ? '🎨 外观 ▶' : '🎨 外观 ▼';
+        if (!isOpen) updateThemeMenu();
+    }
 
     function updateThemeMenu() {
         const mode = ThemeModule.getMode();
