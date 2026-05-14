@@ -9,11 +9,26 @@
     <title>粤拼歌词 | Cantonese Lyrics with Jyutping</title>
     <link rel="icon" type="image/png" href="icon.png">
     <style>
+        :root {
+            --bg-primary: #fff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #f0f0f0;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-tertiary: #999;
+            --border-color: #eee;
+            --border-dark: #e8e8e8;
+            --accent: #000;
+            --accent-hover: #333;
+            --danger: #dc2626;
+            --success: #4CAF50;
+            --info: #4a9eff;
+        }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-            background: #f5f5f5;
-            color: #333;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
@@ -22,32 +37,32 @@
         .app-container {
             max-width: 100%;
             margin: 0 auto;
-            background: #fff;
+            background: var(--bg-primary);
             min-height: 100vh;
         }
 
         /* ===== Desktop: Split Layout ===== */
         @media (min-width: 1024px) {
-            body { background: #f0f0f0; }
+            body { background: var(--bg-tertiary); }
             .app-container {
                 display: flex;
                 max-width: 1400px;
                 min-height: 100vh;
                 margin: 0 auto;
-                background: #fff;
+                background: var(--bg-primary);
             }
         }
 
         /* ===== Sidebar (Left) ===== */
         .sidebar {
-            background: #fff;
-            border-bottom: 1px solid #eee;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
         }
         @media (min-width: 1024px) {
             .sidebar {
                 width: 360px;
                 min-width: 360px;
-                border-right: 1px solid #e8e8e8;
+                border-right: 1px solid var(--border-dark);
                 border-bottom: none;
                 display: flex;
                 flex-direction: column;
@@ -59,7 +74,7 @@
 
         .sidebar-header {
             padding: 20px 24px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
         }
         @media (min-width: 1024px) {
             .sidebar-header { padding: 24px 28px; }
@@ -68,7 +83,7 @@
         .logo {
             font-size: 22px;
             font-weight: 700;
-            color: #000;
+            color: var(--text-primary);
             margin-bottom: 4px;
         }
         @media (min-width: 1024px) {
@@ -77,12 +92,12 @@
 
         .logo-sub {
             font-size: 13px;
-            color: #999;
+            color: var(--text-tertiary);
         }
 
         .search-box {
             padding: 16px 24px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -99,9 +114,9 @@
         .manage-btn {
             flex-shrink: 0;
             padding: 8px 14px;
-            border: 1px solid #dc2626;
+            border: 1px solid var(--danger);
             background: transparent;
-            color: #dc2626;
+            color: var(--danger);
             border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
@@ -110,23 +125,23 @@
         }
         .manage-btn:hover { background: #fef2f2; }
         .manage-btn.active {
-            background: #dc2626;
+            background: var(--danger);
             color: #fff;
         }
 
         .search-input {
             width: 100%;
             padding: 10px 14px 10px 38px;
-            border: 1px solid #e8e8e8;
+            border: 1px solid var(--border-dark);
             border-radius: 8px;
             font-size: 14px;
-            background: #fafafa;
+            background: var(--bg-secondary);
             outline: none;
             transition: all 0.2s;
         }
         .search-input:focus {
-            border-color: #ccc;
-            background: #fff;
+            border-color: var(--border-dark);
+            background: var(--bg-primary);
         }
 
         .search-icon {
@@ -134,7 +149,7 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: #bbb;
+            color: var(--text-tertiary);
         }
 
         .search-wrapper { position: relative; }
@@ -142,7 +157,7 @@
         /* Artist Filter */
         .artist-filter {
             padding: 16px 24px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
             overflow-x: auto;
             white-space: nowrap;
         }
@@ -167,19 +182,19 @@
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
-            border: 1px solid #e8e8e8;
-            background: #fff;
-            color: #666;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
         }
         @media (min-width: 1024px) {
             .filter-btn { margin-right: 0; }
         }
 
-        .filter-btn:hover { background: #f5f5f5; }
+        .filter-btn:hover { background: var(--bg-secondary); }
         .filter-btn.active {
-            background: #000;
-            color: #fff;
-            border-color: #000;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
         }
 
         /* Song List */
@@ -195,11 +210,11 @@
             color: #1890ff;
             cursor: pointer;
             font-size: 14px;
-            border-top: 1px solid #e8e8e8;
+            border-top: 1px solid var(--border-dark);
             transition: background 0.2s;
         }
         .load-more-btn:hover {
-            background: #f5f5f5;
+            background: var(--bg-secondary);
         }
 
         .song-item {
@@ -214,20 +229,20 @@
             .song-item { padding: 14px 28px; }
         }
 
-        .song-item:hover { background: #f8f8f8; }
+        .song-item:hover { background: var(--bg-secondary); }
         .song-item.active {
-            background: #f5f5f5;
-            border-left-color: #000;
+            background: var(--bg-secondary);
+            border-left-color: var(--accent);
         }
 
         .song-delete-btn { display: none; }
         .delete-mode .song-item { cursor: pointer; }
         .delete-mode .song-item.delete-selected {
             background: #fef2f2;
-            border-left-color: #dc2626;
+            border-left-color: var(--danger);
         }
         .delete-mode .song-item.delete-selected .song-number {
-            color: #dc2626;
+            color: var(--danger);
             font-weight: bold;
         }
 
@@ -236,16 +251,16 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 24px;
-            border-top: 1px solid #f0f0f0;
-            background: #fff;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-primary);
             position: sticky;
             bottom: 0;
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
         }
         .delete-submit-btn {
             padding: 8px 16px;
-            background: #dc2626;
+            background: var(--danger);
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -262,7 +277,7 @@
         .song-number {
             width: 28px;
             font-size: 13px;
-            color: #bbb;
+            color: var(--text-tertiary);
             flex-shrink: 0;
         }
 
@@ -274,7 +289,7 @@
         .song-title-compact {
             font-size: 15px;
             font-weight: 500;
-            color: #000;
+            color: var(--text-primary);
             margin-bottom: 2px;
             white-space: nowrap;
             overflow: hidden;
@@ -283,14 +298,14 @@
 
         .song-artist-compact {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
         }
 
         /* ===== Main Content (Right) ===== */
         .main-content {
             flex: 1;
             min-width: 0;
-            background: #fff;
+            background: var(--bg-primary);
         }
         @media (min-width: 1024px) {
             .main-content {
@@ -319,13 +334,13 @@
         .empty-title {
             font-size: 20px;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 8px;
         }
 
         .empty-desc {
             font-size: 14px;
-            color: #999;
+            color: var(--text-tertiary);
         }
 
         /* Lyrics View */
@@ -344,7 +359,7 @@
         .song-header {
             margin-bottom: 32px;
             padding-bottom: 24px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .song-title-row {
@@ -372,7 +387,7 @@
 
         .title-char-jyutping {
             font-size: 11px;
-            color: #999;
+            color: var(--text-tertiary);
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             margin-bottom: 2px;
             height: 14px;
@@ -384,7 +399,7 @@
         .title-char-hanzi {
             font-size: 28px;
             font-weight: 700;
-            color: #000;
+            color: var(--text-primary);
             line-height: 1.2;
         }
         @media (min-width: 1024px) {
@@ -396,7 +411,7 @@
             flex-direction: column;
             gap: 8px;
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .song-meta-row-inner {
@@ -412,7 +427,7 @@
         }
 
         .song-meta-label {
-            color: #999;
+            color: var(--text-tertiary);
             display: inline-flex;
             flex-direction: column;
             align-items: center;
@@ -420,14 +435,14 @@
 
         .song-meta-label-jyutping {
             font-size: 9px;
-            color: #bbb;
+            color: var(--text-tertiary);
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;
         }
 
         .song-meta-label-hanzi {
             font-size: 14px;
-            color: #999;
+            color: var(--text-tertiary);
         }
 
         .meta-name-group {
@@ -438,14 +453,14 @@
 
         .meta-name-jyutping {
             font-size: 9px;
-            color: #bbb;
+            color: var(--text-tertiary);
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;
         }
 
         .meta-name-hanzi {
             font-size: 14px;
-            color: #666;
+            color: var(--text-secondary);
         }
 
         /* Lyrics Content */
@@ -491,7 +506,7 @@
 
         .char-jyutping {
             font-size: 13px;
-            color: #888;
+            color: var(--text-tertiary);
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             margin-bottom: 2px;
             height: 16px;
@@ -505,7 +520,7 @@
         .char-hanzi {
             font-size: 20px;
             font-weight: 400;
-            color: #000;
+            color: var(--text-primary);
         }
         @media (min-width: 1024px) {
             .char-hanzi { font-size: 24px; }
@@ -519,24 +534,24 @@
             width: 24px;
             height: 24px;
             margin-right: 8px;
-            background: #f0f0f0;
+            background: var(--bg-tertiary);
             border: none;
             border-radius: 50%;
             cursor: pointer;
             font-size: 12px;
-            color: #666;
+            color: var(--text-secondary);
             transition: all 0.2s;
             vertical-align: middle;
         }
         .tts-play-btn:hover {
-            background: #e0e0e0;
-            color: #333;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
         .tts-play-btn:active {
             transform: scale(0.95);
         }
         .tts-play-btn.playing {
-            background: #4CAF50;
+            background: var(--success);
             color: #fff;
             animation: pulse 1s infinite;
         }
@@ -561,9 +576,9 @@
             color: #4CAF50;
         }
         .toolbar-btn.tts-active {
-            background: #4CAF50;
+            background: var(--success);
             color: #fff;
-            border-color: #4CAF50;
+            border-color: var(--success);
         }
         .toolbar-btn.tts-active:hover {
             background: #43a047;
@@ -609,8 +624,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: #fff;
-            border-top: 1px solid #eee;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
             padding: 12px 24px;
             display: flex;
             justify-content: space-between;
@@ -640,7 +655,7 @@
         .toolbar-btn {
             background: none;
             border: none;
-            color: #666;
+            color: var(--text-secondary);
             font-size: 13px;
             cursor: pointer;
             display: flex;
@@ -653,8 +668,8 @@
         }
 
         .toolbar-btn:hover {
-            background: #f5f5f5;
-            color: #000;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
 
         .toolbar-btn .icon {
@@ -670,18 +685,18 @@
         }
 
         .toolbar-btn.primary {
-            background: #000;
-            color: #fff;
+            background: var(--accent);
+            color: var(--bg-primary);
         }
 
         .toolbar-btn.primary:hover {
-            background: #333;
+            background: var(--accent-hover);
         }
 
         .toolbar-select {
             background: none;
             border: none;
-            color: #666;
+            color: var(--text-secondary);
             font-size: 13px;
             cursor: pointer;
             padding: 8px 2px;
@@ -698,7 +713,7 @@
             background: none;
             border: none;
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             cursor: pointer;
             padding: 8px;
         }
@@ -729,8 +744,8 @@
             display: flex;
             align-items: center;
             padding: 14px 24px;
-            border-bottom: 1px solid #eee;
-            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
         }
         @media (min-width: 1024px) {
             .mobile-header { display: none; }
@@ -747,7 +762,7 @@
             background: none;
             border: none;
             font-size: 20px;
-            color: #333;
+            color: var(--text-primary);
             cursor: pointer;
             padding: 4px;
         }
@@ -791,7 +806,7 @@
         }
         .correction-mode .char-group.selected {
             background: #d0e8ff;
-            outline: 2px solid #4a9eff;
+            outline: 2px solid var(--info);
             outline-offset: -1px;
         }
         .correction-mode .char-group.corrected {
@@ -840,19 +855,19 @@
             color: #fff;
         }
         .correction-banner-btn.submit:hover { background: #218838; }
-        .correction-banner-btn.submit:disabled { background: #ccc; cursor: not-allowed; }
+        .correction-banner-btn.submit:disabled { background: var(--border-dark); cursor: not-allowed; }
         .correction-banner-btn.cancel {
-            background: #fff;
-            color: #666;
-            border: 1px solid #ddd;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
         }
-        .correction-banner-btn.cancel:hover { background: #f5f5f5; }
+        .correction-banner-btn.cancel:hover { background: var(--bg-secondary); }
 
         /* Edit popup */
         .edit-popup {
             position: fixed;
             z-index: 200;
-            background: #fff;
+            background: var(--bg-primary);
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
             padding: 16px;
@@ -865,20 +880,20 @@
         }
         .edit-popup-title {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
             margin-bottom: 8px;
         }
         .edit-popup-chars {
             font-size: 18px;
             font-weight: 600;
-            color: #000;
+            color: var(--text-primary);
             margin-bottom: 10px;
             letter-spacing: 2px;
         }
         .edit-popup-input {
             width: 100%;
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
@@ -886,7 +901,7 @@
             transition: border-color 0.15s;
         }
         .edit-popup-input:focus {
-            border-color: #4a9eff;
+            border-color: var(--info);
         }
         .edit-popup-actions {
             display: flex;
@@ -903,15 +918,15 @@
             transition: all 0.15s;
         }
         .edit-popup-btn.confirm {
-            background: #4a9eff;
+            background: var(--info);
             color: #fff;
         }
         .edit-popup-btn.confirm:hover { background: #3a8bee; }
         .edit-popup-btn.dismiss {
-            background: #f5f5f5;
-            color: #666;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
         }
-        .edit-popup-btn.dismiss:hover { background: #eee; }
+        .edit-popup-btn.dismiss:hover { background: var(--bg-tertiary); }
 
         /* Overlay */
         .edit-overlay {
@@ -922,7 +937,7 @@
 
         /* Correction count badge */
         .correction-count {
-            background: #dc3545;
+            background: var(--danger);
             color: #fff;
             font-size: 11px;
             font-weight: 600;
@@ -945,14 +960,14 @@
         }
         .edit-lyrics-mode .lyric-line.selected {
             background: #d0e8ff;
-            outline: 2px solid #4a9eff;
+            outline: 2px solid var(--info);
         }
 
         /* Edit lyrics popup */
         .edit-lyrics-popup {
             position: fixed;
             z-index: 200;
-            background: #fff;
+            background: var(--bg-primary);
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
             padding: 16px;
@@ -962,18 +977,18 @@
         }
         .edit-lyrics-popup-title {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
             margin-bottom: 8px;
         }
         .edit-lyrics-popup-line-num {
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 8px;
         }
         .edit-lyrics-popup-original {
             font-size: 14px;
-            color: #666;
-            background: #f5f5f5;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 12px;
@@ -982,7 +997,7 @@
         .edit-lyrics-popup-input {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 15px;
             outline: none;
@@ -990,7 +1005,7 @@
             margin-bottom: 12px;
         }
         .edit-lyrics-popup-input:focus {
-            border-color: #4a9eff;
+            border-color: var(--info);
         }
         .edit-lyrics-popup-actions {
             display: flex;
@@ -1011,10 +1026,10 @@
         }
         .edit-lyrics-popup-btn.confirm:hover { background: #218838; }
         .edit-lyrics-popup-btn.dismiss {
-            background: #f5f5f5;
-            color: #666;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
         }
-        .edit-lyrics-popup-btn.dismiss:hover { background: #eee; }
+        .edit-lyrics-popup-btn.dismiss:hover { background: var(--bg-tertiary); }
 
         /* Import Modal */
         .import-modal {
@@ -1027,7 +1042,7 @@
             z-index: 300;
         }
         .import-modal-content {
-            background: #fff;
+            background: var(--bg-primary);
             border-radius: 12px;
             padding: 24px;
             width: 90%;
@@ -1040,7 +1055,7 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
-            color: #333;
+            color: var(--text-primary);
         }
         .import-form-group {
             margin-bottom: 16px;
@@ -1048,14 +1063,14 @@
         .import-form-group label {
             display: block;
             font-size: 13px;
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 6px;
         }
         .import-form-group input,
         .import-form-group textarea {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
             outline: none;
@@ -1063,7 +1078,7 @@
         }
         .import-form-group input:focus,
         .import-form-group textarea:focus {
-            border-color: #4a9eff;
+            border-color: var(--info);
         }
         .import-form-group textarea {
             min-height: 200px;
@@ -1087,18 +1102,18 @@
             transition: all 0.15s;
         }
         .import-btn.cancel {
-            background: #f5f5f5;
-            color: #666;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
         }
-        .import-btn.cancel:hover { background: #eee; }
+        .import-btn.cancel:hover { background: var(--bg-tertiary); }
         .import-btn.confirm {
-            background: #4a9eff;
+            background: var(--info);
             color: #fff;
         }
         .import-btn.confirm:hover { background: #3a8bee; }
         .import-preview {
-            background: #f9f9f9;
-            border: 1px solid #eee;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
@@ -1109,7 +1124,7 @@
         .import-preview-title {
             font-weight: 600;
             margin-bottom: 8px;
-            color: #333;
+            color: var(--text-primary);
         }
         .import-preview-line {
             display: flex;
@@ -1117,7 +1132,7 @@
             gap: 4px;
             margin-bottom: 8px;
             padding-bottom: 8px;
-            border-bottom: 1px dashed #eee;
+            border-bottom: 1px dashed var(--border-color);
         }
         .import-preview-char {
             display: inline-flex;
@@ -1127,15 +1142,55 @@
         }
         .import-preview-jp {
             font-size: 10px;
-            color: #888;
+            color: var(--text-tertiary);
         }
         .import-preview-hanzi {
             font-size: 14px;
         }
         .import-tip {
             font-size: 12px;
-            color: #999;
+            color: var(--text-tertiary);
             margin-top: 8px;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.15s;
+            float: right;
+        }
+        .settings-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .settings-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 160px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .settings-dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+        .settings-dropdown-item:hover {
+            background: var(--bg-secondary);
         }
     </style>
 </head>
@@ -1143,7 +1198,18 @@
     <div class="app-container" id="appContainer">
         <!-- Sidebar: Song List -->
         <aside class="sidebar">
-            <div class="sidebar-header">
+            <div class="sidebar-header" style="position: relative;">
+                <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <div class="settings-dropdown" id="settingsDropdown" style="display:none;">
+                    <div class="settings-dropdown-item" id="themeToggleBtn" onclick="ThemeModule.toggle(); toggleSettings();">
+                        🌙 夜间模式（跟随系统）
+                    </div>
+                    <div class="settings-dropdown-item" onclick="DeleteModule.toggle(); toggleSettings();">
+                        🗑️ 管理歌曲
+                    </div>
+                </div>
                 <div class="logo">🎵 粤拼歌词</div>
                 <div class="logo-sub">粤语歌词 · 粤拼对照</div>
             </div>
@@ -1153,7 +1219,7 @@
                     <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
                     <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
-                <button class="manage-btn" id="deleteModeBtn" onclick="DeleteModule.toggle()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> 管理</button>
+
             </div>
 
             <div class="artist-filter" id="artistFilter">
@@ -1278,6 +1344,9 @@
     <!-- 工具函数模块 -->
     <script src="js/utils.js"></script>
     
+    <!-- 主题切换模块 -->
+    <script src="js/theme.js"></script>
+
     <!-- TTS 语音播报模块 -->
     <script src="js/tts-loading.js"></script>
     <script src="js/tts.js"></script>
@@ -1341,6 +1410,7 @@
 
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
+        ThemeModule.init();
         songs = await loadAllSongs();
         window.songs = songs;
 
@@ -1672,6 +1742,20 @@
         }
     }
 
+
+    function toggleSettings() {
+        const dropdown = document.getElementById('settingsDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // 点击页面其他地方关闭设置菜单
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('settingsDropdown');
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (dropdown && settingsBtn && !dropdown.contains(e.target) && !settingsBtn.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
     </script>
 
     <!-- 导入歌词模态框 -->
