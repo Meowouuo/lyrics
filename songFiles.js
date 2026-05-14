@@ -31,4 +31,5 @@ const songFiles = [
     'lyrics/喜帖街.js',
     'lyrics/十面埋伏.js',
     'lyrics/习惯失恋.js',
+    'lyrics/天之骄女.js',
 ];
