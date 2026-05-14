@@ -110,13 +110,7 @@ ${lyricsStr}
     const filePath = path.join(__dirname, '..', 'lyrics', fileName);
     fs.writeFileSync(filePath, fileContent, 'utf8');
 
-    // 更新 songFiles.js
-    const songFilesPath = path.join(__dirname, '..', 'songFiles.js');
-    let songFilesContent = fs.readFileSync(songFilesPath, 'utf8');
-    const newEntry = `    'lyrics/${fileName}',`;
-    // 在数组末尾的 ]; 之前插入
-    songFilesContent = songFilesContent.replace(/(\];)/, `${newEntry}\n$1`);
-    fs.writeFileSync(songFilesPath, songFilesContent, 'utf8');
+    // 不再手动修改 songFiles.js，由 generate-song-list.yml 自动生成
 
     // 创建分支、提交、PR
     const branchName = `new-song/${issue.number}-${title.replace(/\*+/g, '').replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '-')}`;
