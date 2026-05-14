@@ -33,4 +33,5 @@ const songFiles = [
     'lyrics/习惯失恋.js',
     'lyrics/恋无可恋.js',
     'lyrics/忍.js',
+    'lyrics/呼吸有害.js',
 ];
