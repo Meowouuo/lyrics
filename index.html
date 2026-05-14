@@ -1234,12 +1234,12 @@
                             <option value="adjustFontSize(-1)">A- 缩小</option>
                         </select>
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
-                            <option value="">↔️</option>
+                            <option value=""><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="m7 16 4-4-4-4"/><path d="M17 8v8"/><path d="M3 12h18"/></svg>字距</option>
                             <option value="adjustLetterSpacing(1)">字距 +</option>
                             <option value="adjustLetterSpacing(-1)">字距 -</option>
                         </select>
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
-                            <option value="">↕️</option>
+                            <option value=""><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="m8 7 4-4 4 4"/><path d="m8 17 4 4 4-4"/><path d="M12 3v18"/></svg>行距</option>
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
@@ -1248,7 +1248,7 @@
                             <span>纠错</span>
                         </button>
                         <button class="toolbar-btn" onclick="EditLyricsModule.toggle()">
-                            <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M18 14a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8"/><path d="m15 5 4 4"/></svg></span>
+                            <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
                             <span>改歌词</span>
                         </button>
                         <button class="toolbar-btn" onclick="window.open('submit.html','_blank')">
@@ -1295,6 +1295,18 @@
     <script src="js/delete.js"></script>
 
     <script>
+    // 全局筛选函数（必须在HTML调用之前定义）
+    let currentFilter = "all";
+    function setFilter(artist) {
+        currentFilter = artist;
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.filter === artist);
+        });
+        if (typeof renderSongList === "function") {
+            renderSongList();
+        }
+    }
+
     async function loadAllSongs() {
         window.__songs = [];
         const loadPromises = songFiles.map(file => {
@@ -1358,14 +1370,6 @@
             html += `<span class="filter-btn" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</span>`;
         });
         container.innerHTML = html;
-    }
-
-    function setFilter(artist) {
-        currentFilter = artist;
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.filter === artist);
-        });
-        renderSongList();
     }
 
     function renderSongList() {
