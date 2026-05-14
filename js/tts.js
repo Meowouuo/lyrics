@@ -96,74 +96,39 @@ function _playAudio(url) {
 
 // ===== TTS 业务逻辑 =====
 
-// 加载 manifest（使用 XMLHttpRequest，iOS Safari 更兼容）
+// 加载 manifest（iOS Safari 兼容版本）
 function loadTTSManifest() {
     return new Promise(function(resolve) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'tts/manifest.v1.json', true);
-        xhr.timeout = 10000;  // 10秒超时
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    var data = JSON.parse(xhr.responseText);
-                    ttsManifest = data.items;
-                    ttsBaseUrl = data.baseUrl;
-                    console.log('[TTS] Manifest loaded:', Object.keys(ttsManifest).length, 'items');
-                } catch (e) {
-                    console.warn('[TTS] Manifest parse error:', e.message);
+        fetch('tts/manifest.v1.json')
+            .then(function(resp) {
+                if (resp.ok) {
+                    return resp.json();
                 }
-            } else {
-                console.warn('[TTS] Manifest load error: HTTP', xhr.status);
+                throw new Error('HTTP ' + resp.status);
+            })
+            .then(function(data) {
+                ttsManifest = data.items;
+                ttsBaseUrl = data.baseUrl;
+                console.log('[TTS] Manifest loaded:', Object.keys(ttsManifest).length, 'items');
+                resolve();
+            })
+            .catch(function(e) {
+                console.warn('[TTS] Manifest load error:', e.message || e);
                 // 重试一次
-                setTimeout(retryLoad, 1000);
-            }
-            resolve();
-        };
-        
-        xhr.onerror = function() {
-            console.warn('[TTS] Manifest load error: network error');
-            // 重试一次
-            setTimeout(retryLoad, 1000);
-            resolve();
-        };
-        
-        xhr.ontimeout = function() {
-            console.warn('[TTS] Manifest load error: timeout');
-            // 重试一次
-            setTimeout(retryLoad, 1000);
-            resolve();
-        };
-        
-        xhr.send();
-        
-        // 重试函数
-        function retryLoad() {
-            var retryXhr = new XMLHttpRequest();
-            retryXhr.open('GET', 'tts/manifest.v1.json', true);
-            retryXhr.timeout = 10000;
-            retryXhr.onload = function() {
-                if (retryXhr.status === 200) {
-                    try {
-                        var data = JSON.parse(retryXhr.responseText);
-                        ttsManifest = data.items;
-                        ttsBaseUrl = data.baseUrl;
-                        console.log('[TTS] Manifest loaded (retry):', Object.keys(ttsManifest).length, 'items');
-                    } catch (e) {
-                        console.warn('[TTS] Manifest parse error (retry):', e.message);
-                    }
-                } else {
-                    console.warn('[TTS] Manifest load error (retry): HTTP', retryXhr.status);
-                }
-            };
-            retryXhr.onerror = function() {
-                console.warn('[TTS] Manifest load error (retry): network error');
-            };
-            retryXhr.ontimeout = function() {
-                console.warn('[TTS] Manifest load error (retry): timeout');
-            };
-            retryXhr.send();
-        }
+                setTimeout(function() {
+                    fetch('tts/manifest.v1.json')
+                        .then(function(resp) { return resp.json(); })
+                        .then(function(data) {
+                            ttsManifest = data.items;
+                            ttsBaseUrl = data.baseUrl;
+                            console.log('[TTS] Manifest loaded (retry):', Object.keys(ttsManifest).length, 'items');
+                        })
+                        .catch(function(e2) {
+                            console.warn('[TTS] Manifest load error (retry):', e2.message || e2);
+                        });
+                }, 1000);
+                resolve();
+            });
     });
 }
 
