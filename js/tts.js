@@ -1,5 +1,6 @@
 // TTS 语音播报模块
 // 兼容：桌面浏览器、移动端 Safari/Chrome、微信内置浏览器
+// 注意：使用 Audio 元素播放，避免 fetch 导致的 CORS 问题
 
 // TTS 状态
 let ttsManifest = null;
@@ -10,47 +11,13 @@ let ttsMode = false;
 let currentPlayingChar = null;
 
 // ===== 音频播放核心 =====
-// 移动端（含微信）的关键问题：
-// 1. AudioContext 必须在用户交互中创建/恢复
-// 2. 微信 WeixinJSBridgeReady 事件后才允许播放
-// 3. iOS Safari 需要特殊处理
-// 策略：优先 AudioContext，失败时回退 HTMLAudioElement
+// 策略：只用 HTMLAudioElement，避免 fetch 导致的 CORS 问题
 
-let _audioCtx = null;
 let _hasUserInteraction = false;
-
-function _getAudioContext() {
-    if (!_audioCtx) {
-        const Ctor = window.AudioContext || window.webkitAudioContext;
-        if (Ctor) {
-            _audioCtx = new Ctor();
-            console.log('[TTS] AudioContext created, state:', _audioCtx.state);
-        }
-    }
-    return _audioCtx;
-}
-
-// 解锁音频上下文 - 必须在用户交互中调用
-async function _unlockAudio() {
-    try {
-        const ctx = _getAudioContext();
-        if (!ctx) return false;
-        
-        if (ctx.state === 'suspended') {
-            await ctx.resume();
-            console.log('[TTS] AudioContext resumed, state:', ctx.state);
-        }
-        return ctx.state === 'running';
-    } catch (e) {
-        console.warn('[TTS] unlockAudio failed:', e);
-        return false;
-    }
-}
 
 // 标记用户交互
 function _markUserInteraction() {
     _hasUserInteraction = true;
-    _unlockAudio();
 }
 
 // 微信环境检测与初始化
@@ -58,10 +25,9 @@ function _initWechat() {
     if (!/MicroMessenger/i.test(navigator.userAgent)) return;
     console.log('[TTS] WeChat detected');
     
-    const unlock = async () => {
+    const unlock = () => {
         console.log('[TTS] WeChat unlock triggered');
         _markUserInteraction();
-        await _unlockAudio();
     };
     
     if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
@@ -71,48 +37,8 @@ function _initWechat() {
     }
 }
 
-// 方式1: AudioContext 播放
-async function _playWithAudioContext(url) {
-    const ctx = _getAudioContext();
-    if (!ctx) throw new Error('No AudioContext');
-    
-    // 确保音频上下文是 running 状态
-    if (ctx.state !== 'running') {
-        await ctx.resume();
-        if (ctx.state !== 'running') {
-            throw new Error('AudioContext not running: ' + ctx.state);
-        }
-    }
-
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const buf = await resp.arrayBuffer();
-    const audioBuf = await ctx.decodeAudioData(buf);
-
-    return new Promise((resolve, reject) => {
-        const src = ctx.createBufferSource();
-        src.buffer = audioBuf;
-        src.connect(ctx.destination);
-        
-        let resolved = false;
-        const done = () => {
-            if (!resolved) {
-                resolved = true;
-                resolve();
-            }
-        };
-        
-        src.onended = done;
-        src.start(0);
-        
-        // 安全超时
-        const timeout = Math.max((audioBuf.duration + 0.5) * 1000, 1000);
-        setTimeout(done, timeout);
-    });
-}
-
-// 方式2: HTMLAudioElement 播放（回退方案）
-function _playWithAudioElement(url) {
+// 使用 HTMLAudioElement 播放（避免 CORS）
+function _playAudio(url) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
         currentAudio = audio;
@@ -132,66 +58,40 @@ function _playWithAudioElement(url) {
         };
 
         audio.onended = done;
-        audio.onerror = (e) => fail(new Error('Audio load/play error'));
+        audio.onerror = () => fail(new Error('Audio load/play error'));
         
         // 提前结束检测
         audio.addEventListener('timeupdate', function () {
-            if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.05) {
+            if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.06) {
                 done();
             }
         });
 
-        // 设置属性
-        audio.preload = 'auto';
-        audio.crossOrigin = 'anonymous';
-        
         // 加载并播放
         audio.src = url;
-        audio.load();
         
-        // 延迟播放，确保加载完成
-        setTimeout(() => {
+        // 尝试播放
+        const tryPlay = () => {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
-                playPromise.catch(fail);
+                playPromise.catch((err) => {
+                    console.warn('[TTS] Play failed:', err.message);
+                    fail(err);
+                });
             }
-        }, 100);
+        };
         
-        // 超时
+        // 等待 canplay 事件后再播放（更可靠）
+        audio.addEventListener('canplay', tryPlay, { once: true });
+        
+        // 超时回退
+        setTimeout(() => {
+            if (!resolved) tryPlay();
+        }, 500);
+        
+        // 总超时
         setTimeout(() => fail(new Error('timeout')), 10000);
     });
-}
-
-// 统一播放入口
-async function _playAudio(url) {
-    console.log('[TTS] Playing:', url);
-    
-    // 确保有用户交互
-    if (!_hasUserInteraction) {
-        console.warn('[TTS] No user interaction yet');
-    }
-    
-    // 每次播放前都尝试解锁音频上下文
-    const unlocked = await _unlockAudio();
-    console.log('[TTS] Audio unlocked:', unlocked);
-    
-    // 尝试 AudioContext
-    try {
-        await _playWithAudioContext(url);
-        console.log('[TTS] AudioContext playback success');
-        return;
-    } catch (e) {
-        console.warn('[TTS] AudioContext failed:', e.message);
-    }
-    
-    // 回退到 AudioElement
-    try {
-        await _playWithAudioElement(url);
-        console.log('[TTS] AudioElement playback success');
-    } catch (e) {
-        console.error('[TTS] AudioElement failed:', e.message);
-        throw e;
-    }
 }
 
 // ===== TTS 业务逻辑 =====
@@ -290,7 +190,7 @@ function _clearChar(el) {
 // 停止
 function stopCurrentTTS() {
     if (currentAudio) { 
-        try { currentAudio.pause(); } catch(e){} 
+        try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e){} 
         currentAudio = null; 
     }
     if (currentPlayingBtn) { 
@@ -304,16 +204,14 @@ function stopCurrentTTS() {
 }
 
 // 切换模式
-async function toggleTTSMode() {
+function toggleTTSMode() {
     ttsMode = !ttsMode;
     const btn = document.getElementById('ttsModeBtn');
     const view = document.getElementById('lyricsView');
     if (ttsMode) {
         btn.classList.add('tts-active');
         view.classList.add('tts-mode');
-        // 进入模式时立即解锁音频
         _markUserInteraction();
-        await _unlockAudio();
         _initWechat();
         showToast('已进入播放模式，点击单字播放语音');
     } else {
@@ -331,10 +229,9 @@ if (document.readyState === 'loading') {
     _initWechat();
 }
 
-// 全局点击/触摸解锁（多次，确保有效）
-['touchstart', 'click', 'touchend', 'mousedown'].forEach(evt => {
-    document.addEventListener(evt, () => _markUserInteraction(), { passive: true });
-});
+// 全局点击/触摸解锁
+document.addEventListener('touchstart', _markUserInteraction, { passive: true });
+document.addEventListener('click', _markUserInteraction, { passive: true });
 
 // 导出
 window.TTSModule = {
