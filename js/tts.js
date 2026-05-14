@@ -14,6 +14,7 @@ let currentPlayingChar = null;
 // 策略：只用 HTMLAudioElement，避免 fetch 导致的 CORS 问题
 
 let _hasUserInteraction = false;
+let _audioUnlocked = false;
 
 // 标记用户交互
 function _markUserInteraction() {
@@ -28,6 +29,7 @@ function _initWechat() {
     const unlock = () => {
         console.log('[TTS] WeChat unlock triggered');
         _markUserInteraction();
+        _unlockAudio();
     };
 
     if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
@@ -37,11 +39,39 @@ function _initWechat() {
     }
 }
 
+// 解锁音频上下文（播放一个静音音频来解锁）
+function _unlockAudio() {
+    if (_audioUnlocked) return;
+    try {
+        const silentAudio = new Audio();
+        silentAudio.volume = 0.01;
+        silentAudio.play().then(() => {
+            _audioUnlocked = true;
+            console.log('[TTS] Audio unlocked');
+        }).catch(() => {
+            // 忽略错误
+        });
+    } catch (e) {
+        // 忽略错误
+    }
+}
+
 // 使用 HTMLAudioElement 播放（避免 CORS）
 function _playAudio(url) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
         currentAudio = audio;
+
+        // 防止微信弹出视频播放器的关键设置
+        audio.preload = 'none';  // 不要自动预加载
+        audio.volume = 1.0;
+        
+        // iOS Safari 需要这些属性
+        audio.setAttribute('playsinline', '');
+        audio.setAttribute('webkit-playsinline', '');
+        audio.setAttribute('x5-playsinline', '');
+        audio.setAttribute('x5-video-player-type', 'h5');
+        audio.setAttribute('x5-video-player-fullscreen', 'false');
 
         let resolved = false;
         const done = () => {
@@ -67,7 +97,7 @@ function _playAudio(url) {
             }
         });
 
-        // 加载并播放
+        // 设置音频源
         audio.src = url;
 
         // 尝试播放
@@ -233,6 +263,7 @@ function toggleTTSMode() {
         btn.classList.add('tts-active');
         view.classList.add('tts-mode');
         _markUserInteraction();
+        _unlockAudio();
         _initWechat();
         showToast('已进入播放模式，点击单字播放语音');
     } else {
@@ -251,8 +282,8 @@ if (document.readyState === 'loading') {
 }
 
 // 全局点击/触摸解锁
-document.addEventListener('touchstart', _markUserInteraction, { passive: true });
-document.addEventListener('click', _markUserInteraction, { passive: true });
+document.addEventListener('touchstart', () => { _markUserInteraction(); _unlockAudio(); }, { passive: true });
+document.addEventListener('click', () => { _markUserInteraction(); _unlockAudio(); }, { passive: true });
 
 // 导出
 window.TTSModule = {
