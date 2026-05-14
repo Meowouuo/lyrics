@@ -1295,9 +1295,9 @@
     window.currentSong = null;
     let currentFilter = 'all';
     let fontSize = 20;
-    // 懒加载状态
-    let displayedSongs = 5;
-    const SONGS_PER_LOAD = 5;
+    // 懒加载状态：初始显示数量根据容器高度动态计算
+    let displayedSongs = 0;  // 0 表示自动计算
+    const SONG_ITEM_HEIGHT = 56;  // 每个歌曲项的大致高度(px)
     let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
     let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
     const MIN_FONT_SIZE = 12;
@@ -1369,7 +1369,11 @@
             });
         }
 
-        // 懒加载：只显示前 displayedSongs 条
+        // 懒加载：动态计算初始显示数量（填满容器可视高度）
+        if (displayedSongs === 0) {
+            const containerHeight = container.clientHeight || 400;
+            displayedSongs = Math.max(Math.ceil(containerHeight / SONG_ITEM_HEIGHT), 5);
+        }
         const songsToShow = filtered.slice(0, displayedSongs);
         let html = '';
         songsToShow.forEach((song, index) => {
@@ -1400,13 +1404,13 @@
     
     // 加载更多歌曲
     function loadMoreSongs() {
-        displayedSongs += SONGS_PER_LOAD;
+        displayedSongs += 10;
         renderSongList();
     }
     
-    // 重置懒加载计数器
+    // 重置懒加载计数器（切换筛选时重新计算）
     function resetLazyLoad() {
-        displayedSongs = SONGS_PER_LOAD;
+        displayedSongs = 0;
     }
 
     function filterSongs() {
