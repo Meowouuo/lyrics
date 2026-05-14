@@ -96,19 +96,40 @@ function _playAudio(url) {
 
 // ===== TTS 业务逻辑 =====
 
-// 加载 manifest
-async function loadTTSManifest() {
-    try {
-        const resp = await fetch('tts/manifest.v1.json');
-        if (resp.ok) {
-            const data = await resp.json();
-            ttsManifest = data.items;
-            ttsBaseUrl = data.baseUrl;
-            console.log('[TTS] Manifest loaded:', Object.keys(ttsManifest).length, 'items');
-        }
-    } catch (e) {
-        console.warn('[TTS] Manifest load error:', e);
-    }
+// 加载 manifest（iOS Safari 兼容版本）
+function loadTTSManifest() {
+    return new Promise(function(resolve) {
+        fetch('tts/manifest.v1.json')
+            .then(function(resp) {
+                if (resp.ok) {
+                    return resp.json();
+                }
+                throw new Error('HTTP ' + resp.status);
+            })
+            .then(function(data) {
+                ttsManifest = data.items;
+                ttsBaseUrl = data.baseUrl;
+                console.log('[TTS] Manifest loaded:', Object.keys(ttsManifest).length, 'items');
+                resolve();
+            })
+            .catch(function(e) {
+                console.warn('[TTS] Manifest load error:', e.message || e);
+                // 重试一次
+                setTimeout(function() {
+                    fetch('tts/manifest.v1.json')
+                        .then(function(resp) { return resp.json(); })
+                        .then(function(data) {
+                            ttsManifest = data.items;
+                            ttsBaseUrl = data.baseUrl;
+                            console.log('[TTS] Manifest loaded (retry):', Object.keys(ttsManifest).length, 'items');
+                        })
+                        .catch(function(e2) {
+                            console.warn('[TTS] Manifest load error (retry):', e2.message || e2);
+                        });
+                }, 1000);
+                resolve();
+            });
+    });
 }
 
 // 播放整行
