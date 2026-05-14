@@ -9,29 +9,6 @@ let currentAudio = null;
 let currentPlayingBtn = null;
 let ttsMode = false;
 let currentPlayingChar = null;
-let isLoading = false; // 加载状态
-
-// 显示加载提示
-function _showLoading() {
-    isLoading = true;
-    if (currentPlayingBtn) {
-        currentPlayingBtn.classList.add('tts-loading');
-    }
-    if (currentPlayingChar) {
-        currentPlayingChar.classList.add('tts-loading');
-    }
-}
-
-// 隐藏加载提示
-function _hideLoading() {
-    isLoading = false;
-    if (currentPlayingBtn) {
-        currentPlayingBtn.classList.remove('tts-loading');
-    }
-    if (currentPlayingChar) {
-        currentPlayingChar.classList.remove('tts-loading');
-    }
-}
 
 // ===== 音频播放核心 =====
 // 策略：只用 HTMLAudioElement，避免 fetch 导致的 CORS 问题
@@ -61,12 +38,16 @@ function _initWechat() {
 }
 
 // 使用 HTMLAudioElement 播放（避免 CORS）
-// 支持重试机制
+// 支持重试机制和首次加载提示
 function _playAudio(url, retryCount = 0) {
     const MAX_RETRIES = 2; // 最大重试次数
     
     return new Promise((resolve, reject) => {
-        _showLoading();
+        // 显示首次加载提示
+        if (window.TTSLoading && window.currentSong) {
+            window.TTSLoading.show(window.currentSong.id);
+        }
+        
         const audio = new Audio();
         currentAudio = audio;
 
@@ -74,14 +55,12 @@ function _playAudio(url, retryCount = 0) {
         const done = () => {
             if (!resolved) {
                 resolved = true;
-                _hideLoading();
                 resolve();
             }
         };
         const fail = (e) => {
             if (!resolved) {
                 resolved = true;
-                _hideLoading();
                 reject(e || new Error('Audio error'));
             }
         };
@@ -235,7 +214,6 @@ async function _playSequence(arr, btn) {
     }
     if (currentPlayingBtn === btn) {
         btn.classList.remove('playing');
-        btn.classList.remove('tts-loading');
         currentAudio = null;
         currentPlayingBtn = null;
     }
@@ -263,7 +241,6 @@ async function playCharTTS(jp, charEl) {
 
 function _clearChar(el) {
     el.classList.remove('tts-char-playing');
-    el.classList.remove('tts-loading');
     if (currentPlayingChar === el) currentPlayingChar = null;
 }
 
@@ -275,15 +252,12 @@ function stopCurrentTTS() {
     }
     if (currentPlayingBtn) {
         currentPlayingBtn.classList.remove('playing');
-        currentPlayingBtn.classList.remove('tts-loading');
         currentPlayingBtn = null;
     }
     if (currentPlayingChar) {
         currentPlayingChar.classList.remove('tts-char-playing');
-        currentPlayingChar.classList.remove('tts-loading');
         currentPlayingChar = null;
     }
-    isLoading = false;
 }
 
 // 切换模式
