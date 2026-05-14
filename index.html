@@ -1212,19 +1212,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                 </button>
                 <div class="settings-dropdown" id="settingsDropdown" style="display:none;">
-                    <div class="settings-dropdown-item" id="appearanceBtn" onclick="toggleAppearanceSubmenu(event)">
-                        🎨 外观 ▶
+                    <div class="settings-dropdown-item" id="themeToggleBtn" onclick="cycleThemeMode();">
+                        ☀️ 日间模式
                     </div>
-                    <div class="settings-submenu" id="appearanceSubmenu" style="display:none;">
-                        <div class="settings-dropdown-item" id="themeLightBtn" onclick="ThemeModule.set('light'); updateThemeMenu(); toggleSettings();">
-                            ☀️ 日间模式
-                        </div>
-                        <div class="settings-dropdown-item" id="themeDarkBtn" onclick="ThemeModule.set('dark'); updateThemeMenu(); toggleSettings();">
-                            🌙 夜间模式
-                        </div>
-                        <div class="settings-dropdown-item" id="themeAutoBtn" onclick="ThemeModule.set('auto'); updateThemeMenu(); toggleSettings();">
-                            💻 跟随系统
-                        </div>
+                    <div class="settings-dropdown-item" id="deleteModeBtn" onclick="DeleteModule.toggle(); toggleSettings();">
+                        🗑️ 管理歌曲
                     </div>
                     <div class="settings-dropdown-item" id="deleteModeBtn" onclick="DeleteModule.toggle(); toggleSettings();">
                         🗑️ 管理歌曲
@@ -1789,29 +1781,31 @@
     }
 
 
-    function toggleAppearanceSubmenu(event) {
-        event.stopPropagation();
-        const submenu = document.getElementById('appearanceSubmenu');
-        const btn = document.getElementById('appearanceBtn');
-        const isOpen = submenu.style.display === 'block';
-        submenu.style.display = isOpen ? 'none' : 'block';
-        btn.innerHTML = isOpen ? '🎨 外观 ▶' : '🎨 外观 ▼';
-        if (!isOpen) updateThemeMenu();
+
+
+    function cycleThemeMode() {
+        const mode = ThemeModule.getMode();
+        const nextMode = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+        ThemeModule.set(nextMode);
+        updateThemeToggleButton();
     }
 
-    function updateThemeMenu() {
+    function updateThemeToggleButton() {
+        const btn = document.getElementById('themeToggleBtn');
+        if (!btn) return;
         const mode = ThemeModule.getMode();
-        document.getElementById('themeLightBtn').style.color = mode === 'light' ? 'var(--info)' : 'var(--text-secondary)';
-        document.getElementById('themeDarkBtn').style.color = mode === 'dark' ? 'var(--info)' : 'var(--text-secondary)';
-        document.getElementById('themeAutoBtn').style.color = mode === 'auto' ? 'var(--info)' : 'var(--text-secondary)';
-        document.getElementById('themeLightBtn').innerHTML = mode === 'light' ? '☀️ 日间模式 ✓' : '☀️ 日间模式';
-        document.getElementById('themeDarkBtn').innerHTML = mode === 'dark' ? '🌙 夜间模式 ✓' : '🌙 夜间模式';
-        document.getElementById('themeAutoBtn').innerHTML = mode === 'auto' ? '💻 跟随系统 ✓' : '💻 跟随系统';
+        if (mode === 'light') {
+            btn.innerHTML = '☀️ 日间模式';
+        } else if (mode === 'dark') {
+            btn.innerHTML = '🌙 夜间模式';
+        } else {
+            btn.innerHTML = '💻 跟随系统';
+        }
     }
 
     function toggleSettings() {
         const dropdown = document.getElementById('settingsDropdown');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; if (dropdown.style.display === 'block') updateThemeMenu();
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; if (dropdown.style.display === 'block') updateThemeToggleButton();
     }
 
     // 点击页面其他地方关闭设置菜单
