@@ -24,12 +24,12 @@ function _markUserInteraction() {
 function _initWechat() {
     if (!/MicroMessenger/i.test(navigator.userAgent)) return;
     console.log('[TTS] WeChat detected');
-    
+
     const unlock = () => {
         console.log('[TTS] WeChat unlock triggered');
         _markUserInteraction();
     };
-    
+
     if (window.WeixinJSBridge && window.WeixinJSBridge.invoke) {
         WeixinJSBridge.invoke('getNetworkType', {}, unlock);
     } else {
@@ -42,7 +42,7 @@ function _playAudio(url) {
     return new Promise((resolve, reject) => {
         const audio = new Audio();
         currentAudio = audio;
-        
+
         let resolved = false;
         const done = () => {
             if (!resolved) {
@@ -59,7 +59,7 @@ function _playAudio(url) {
 
         audio.onended = done;
         audio.onerror = () => fail(new Error('Audio load/play error'));
-        
+
         // 提前结束检测
         audio.addEventListener('timeupdate', function () {
             if (!resolved && audio.duration && audio.currentTime >= audio.duration - 0.06) {
@@ -69,7 +69,7 @@ function _playAudio(url) {
 
         // 加载并播放
         audio.src = url;
-        
+
         // 尝试播放
         const tryPlay = () => {
             const playPromise = audio.play();
@@ -80,15 +80,15 @@ function _playAudio(url) {
                 });
             }
         };
-        
+
         // 等待 canplay 事件后再播放（更可靠）
         audio.addEventListener('canplay', tryPlay, { once: true });
-        
+
         // 超时回退
         setTimeout(() => {
             if (!resolved) tryPlay();
         }, 500);
-        
+
         // 总超时
         setTimeout(() => fail(new Error('timeout')), 10000);
     });
@@ -113,21 +113,21 @@ async function loadTTSManifest() {
 
 // 播放整行
 async function playLineTTS(lineIndex, btn) {
-    if (!ttsManifest || !window.currentSong) { 
-        showToast('语音数据未加载'); 
-        return; 
+    if (!ttsManifest || !window.currentSong) {
+        showToast('语音数据未加载');
+        return;
     }
     const line = window.currentSong.lyrics[lineIndex];
-    if (!line || !line.jp) { 
-        showToast('该行没有粤拼数据'); 
-        return; 
+    if (!line || !line.jp) {
+        showToast('该行没有粤拼数据');
+        return;
     }
 
     stopCurrentTTS();
     const arr = line.jp.filter(Boolean);
-    if (!arr.length) { 
-        showToast('该行没有粤拼数据'); 
-        return; 
+    if (!arr.length) {
+        showToast('该行没有粤拼数据');
+        return;
     }
 
     currentPlayingBtn = btn;
@@ -189,17 +189,17 @@ function _clearChar(el) {
 
 // 停止
 function stopCurrentTTS() {
-    if (currentAudio) { 
-        try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e){} 
-        currentAudio = null; 
+    if (currentAudio) {
+        try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e){}
+        currentAudio = null;
     }
-    if (currentPlayingBtn) { 
-        currentPlayingBtn.classList.remove('playing'); 
-        currentPlayingBtn = null; 
+    if (currentPlayingBtn) {
+        currentPlayingBtn.classList.remove('playing');
+        currentPlayingBtn = null;
     }
-    if (currentPlayingChar) { 
-        currentPlayingChar.classList.remove('tts-char-playing'); 
-        currentPlayingChar = null; 
+    if (currentPlayingChar) {
+        currentPlayingChar.classList.remove('tts-char-playing');
+        currentPlayingChar = null;
     }
 }
 
