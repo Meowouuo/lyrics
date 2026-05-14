@@ -1432,11 +1432,37 @@
 
     function renderArtistFilter() {
         const container = document.getElementById('artistFilter');
+        const MAX_VISIBLE = 5;
+        const artistCounts = {};
+        songs.forEach(s => {
+            s.artist.split(/[\/、,，&]/).forEach(a => {
+                const trimmed = a.trim();
+                if (trimmed) {
+                    artistCounts[trimmed] = (artistCounts[trimmed] || 0) + 1;
+                }
+            });
+        });
+        const sortedArtists = Object.keys(artistCounts).sort((a, b) => artistCounts[b] - artistCounts[a]);
+        const isExpanded = window.artistFilterExpanded || false;
+        const visibleArtists = isExpanded ? sortedArtists : sortedArtists.slice(0, MAX_VISIBLE);
+        const hasMore = sortedArtists.length > MAX_VISIBLE;
         let html = '<span class="filter-btn active" data-filter="all" onclick="setFilter(\'all\')">全部</span>';
-        artists.forEach(artist => {
+        visibleArtists.forEach(artist => {
             html += `<span class="filter-btn" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</span>`;
         });
+        if (hasMore) {
+            if (isExpanded) {
+                html += `<span class="filter-btn expand-btn" onclick="toggleArtistFilter()">收起 ▲</span>`;
+            } else {
+                html += `<span class="filter-btn expand-btn" onclick="toggleArtistFilter()">展开 ▼</span>`;
+            }
+        }
         container.innerHTML = html;
+    }
+
+    function toggleArtistFilter() {
+        window.artistFilterExpanded = !window.artistFilterExpanded;
+        renderArtistFilter();
     }
 
     function renderSongList() {
