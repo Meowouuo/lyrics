@@ -53,7 +53,10 @@ function parseField(body, fieldName) {
     ];
     for (const pattern of patterns) {
         const match = body.match(pattern);
-        if (match) return match[1].trim();
+        if (match) {
+            // 去除 Markdown 格式（**粗体**）
+            return match[1].trim().replace(/^\*\*|\*\*$/g, '');
+        }
     }
     return '';
 }
