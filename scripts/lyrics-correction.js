@@ -102,7 +102,7 @@ function processFullReplacement(content, body, songTitle) {
     }
 
     // 解析歌词为段落
-    const paragraphs = fullLyrics.replace(/\\r\\n/g, '\n').split(/\\n{2,}/).filter(p => p.trim());
+    const paragraphs = fullLyrics.replace(/\r\n/g, '\n').split(/\n{2,}/).filter(p => p.trim());
     
     const lyricsArray = [];
     paragraphs.forEach((para, pIdx) => {
