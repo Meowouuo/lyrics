@@ -14,33 +14,9 @@ const {
     addComment,
 } = require('./utils');
 
-// 简单的粤拼音标匹配
-function loadJyutpingDict() {
-    const dictPath = path.join(__dirname, '..', 'jyutping-dict.js');
-    const content = fs.readFileSync(dictPath, 'utf8');
-    const match = content.match(/const jyutpingDict = ({[\\s\\S]*?});/);
-    if (!match) return {};
-    
-    try {
-        const dictStr = match[1];
-        const dict = {};
-        const pairs = dictStr.match(/"([^"]+)":\\s*"([^"]+)"/g);
-        if (pairs) {
-            pairs.forEach(p => {
-                const m = p.match(/"([^"]+)":\\s*"([^"]+)"/);
-                if (m) dict[m[1]] = m[2];
-            });
-        }
-        return dict;
-    } catch (e) {
-        return {};
-    }
-}
-
-function matchJyutping(text, dict) {
-    const chars = [...text];
-    return chars.map(char => dict[char] || '?');
-}
+// 加载粤拼字典和匹配函数
+const dictContent = fs.readFileSync(path.join(__dirname, '..', 'jyutping-dict.js'), 'utf8');
+eval(dictContent);
 
 function processLyricsCorrection() {
     const issue = getIssueInfo();
@@ -125,20 +101,18 @@ function processFullReplacement(content, body, songTitle) {
     if (!fullLyrics) {
         return { success: false, message: '❌ 未找到完整歌词，请使用代码块(```)或##完整歌词标题提供歌词' };
     }
-    const dict = loadJyutpingDict();
 
     // 解析歌词为段落
-    const paragraphs = fullLyrics.replace(/\\r\\n/g, '\\n').split(/\\n{2,}/).filter(p => p.trim());
+    const paragraphs = fullLyrics.replace(/\\r\\n/g, '\n').split(/\\n{2,}/).filter(p => p.trim());
     
     const lyricsArray = [];
     paragraphs.forEach((para, pIdx) => {
-        const lines = para.split('\\n').filter(l => l.trim());
+        const lines = para.split('\n').filter(l => l.trim());
         lines.forEach(line => {
-            const chars = [...line.trim()];
-            const jp = matchJyutping(line.trim(), dict);
+            const matched = matchJyutping(line.trim());
             lyricsArray.push({
-                chars: chars.map(c => `"${c}"`).join(', '),
-                jp: jp.map(j => `"${j}"`).join(', ')
+                chars: matched.map(m => `"${m.char}"`).join(', '),
+                jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
             });
         });
         if (pIdx < paragraphs.length - 1) {
@@ -201,15 +175,13 @@ function processInsertLine(content, body, songTitle) {
     const lineMatch = body.match(/第\s*(\d+)\s*行/);
     if (lineMatch) insertLine = parseInt(lineMatch[1]);
     if (body.includes('前')) position = 'before';
-    const dict = loadJyutpingDict();
 
-    const insertLines = insertLyrics.split('\\n').filter(l => l.trim());
+    const insertLines = insertLyrics.split('\n').filter(l => l.trim());
     const insertArray = insertLines.map(line => {
-        const chars = [...line.trim()];
-        const jp = matchJyutping(line.trim(), dict);
+        const matched = matchJyutping(line.trim());
         return {
-            chars: chars.map(c => `"${c}"`).join(', '),
-            jp: jp.map(j => `"${j}"`).join(', ')
+            chars: matched.map(m => `"${m.char}"`).join(', '),
+            jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
         };
     });
 
