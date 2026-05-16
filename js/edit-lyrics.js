@@ -1,7 +1,11 @@
-// 修改歌词模式模块
+// 修改歌词模式模块 - 增强版
+// 支持：逐行纠错、整首替换、插入行
 
 let editLyricsMode = false;
+let editLyricsType = 'line'; // 'line', 'full', 'insert'
 let editedLyrics = []; // { lineIndex, originalText, newText }
+let fullReplacementLyrics = '';
+let insertData = { position: 'after', line: 1, lyrics: '' };
 
 function toggleEditLyricsMode() {
     editLyricsMode = !editLyricsMode;
@@ -13,11 +17,13 @@ function toggleEditLyricsMode() {
         }
         lyricsContent.classList.add('edit-lyrics-mode');
         editedLyrics = [];
-        showEditLyricsBanner();
+        fullReplacementLyrics = '';
+        insertData = { position: 'after', line: 1, lyrics: '' };
+        showEditLyricsMenu();
         updateEditLyricsBtn();
     } else {
         lyricsContent.classList.remove('edit-lyrics-mode');
-        hideEditLyricsBanner();
+        hideEditLyricsMenu();
         clearEditLyricsSelection();
         updateEditLyricsBtn();
     }
@@ -35,192 +41,411 @@ function updateEditLyricsBtn() {
     }
 }
 
-function showEditLyricsBanner() {
-    hideEditLyricsBanner();
-    const banner = document.createElement('div');
-    banner.className = 'correction-banner';
-    banner.id = 'editLyricsBanner';
-    banner.style.background = '#d4edda';
-    banner.style.borderBottomColor = '#28a745';
-    banner.style.color = '#155724';
-    banner.innerHTML = `
-        <span>📝 修改歌词模式：点击行即可编辑整句歌词</span>
-        <span id="editLyricsCountText" style="font-weight:600;"></span>
-        <button class="correction-banner-btn submit" id="submitEditLyricsBtn" onclick="EditLyricsModule.submit()" disabled>提交反馈</button>
-        <button class="correction-banner-btn cancel" onclick="EditLyricsModule.toggle()">退出</button>
-    `;
-    banner.querySelector('#submitEditLyricsBtn').style.background = '#28a745';
-    document.body.appendChild(banner);
-}
-
-function hideEditLyricsBanner() {
-    const existing = document.getElementById('editLyricsBanner');
-    if (existing) existing.remove();
-}
-
-function updateEditLyricsCount() {
-    const text = document.getElementById('editLyricsCountText');
-    const btn = document.getElementById('submitEditLyricsBtn');
-    if (!text || !btn) return;
-    if (editedLyrics.length > 0) {
-        text.innerHTML = `<span class="correction-count">${editedLyrics.length}</span> 处修改`;
-        btn.disabled = false;
-    } else {
-        text.textContent = '';
-        btn.disabled = true;
-    }
-}
-
-function handleLyricLineClick(event, lineIndex) {
-    if (!editLyricsMode) return false;
-
-    event.stopPropagation();
-
-    document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
-
-    const lineEl = event.currentTarget;
-    lineEl.classList.add('selected');
-
-    showEditLyricsPopup(lineEl, lineIndex);
-    return true;
-}
-
-function showEditLyricsPopup(lineEl, lineIndex) {
-    closeEditLyricsPopup();
-
-    const overlay = document.createElement('div');
-    overlay.className = 'edit-overlay';
-    overlay.id = 'editLyricsOverlay';
-    overlay.onclick = () => { closeEditLyricsPopup(); };
-    document.body.appendChild(overlay);
-
-    const popup = document.createElement('div');
-    popup.className = 'edit-lyrics-popup';
-    popup.id = 'editLyricsPopup';
-
+// 显示改歌词菜单（子菜单形式）
+function showEditLyricsMenu() {
+    hideEditLyricsMenu();
+    
     const song = window.currentSong;
-    const line = song.lyrics[lineIndex];
-    const originalText = line.chars ? line.chars.join('') : '';
+    if (!song) {
+        alert('请先选择一首歌曲');
+        toggleEditLyricsMode();
+        return;
+    }
 
-    const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
-    const currentText = existingEdit ? existingEdit.newText : originalText;
-
-    popup.innerHTML = `
-        <div class="edit-lyrics-popup-title">修改歌词</div>
-        <div class="edit-lyrics-popup-line-num">第 ${lineIndex + 1} 行</div>
-        <div class="edit-lyrics-popup-original">原歌词：${originalText}</div>
-        <input class="edit-lyrics-popup-input" id="editLyricsInput" type="text" value="${currentText}" placeholder="输入修改后的歌词"
-               onkeydown="if(event.key==='Enter')EditLyricsModule.confirmEdit(${lineIndex}, '${originalText.replace(/'/g, "\\'")}');if(event.key==='Escape'){EditLyricsModule.closePopup();}">
-        <div class="edit-lyrics-popup-actions">
-            <button class="edit-lyrics-popup-btn dismiss" onclick="EditLyricsModule.closePopup()">取消</button>
-            <button class="edit-lyrics-popup-btn confirm" onclick="EditLyricsModule.confirmEdit(${lineIndex}, '${originalText.replace(/'/g, "\\'")}')">确认</button>
+    const menu = document.createElement('div');
+    menu.className = 'edit-lyrics-menu';
+    menu.id = 'editLyricsMenu';
+    menu.innerHTML = `
+        <div class="edit-lyrics-menu-header">
+            <span>📝 修改歌词 - ${song.title}</span>
+            <button class="edit-lyrics-menu-close" onclick="EditLyricsModule.toggle()">✕</button>
+        </div>
+        <div class="edit-lyrics-menu-tabs">
+            <div class="edit-lyrics-tab active" data-type="line" onclick="switchEditType('line')">
+                <span class="tab-icon">✏️</span>
+                <span class="tab-text">逐行纠错</span>
+            </div>
+            <div class="edit-lyrics-tab" data-type="full" onclick="switchEditType('full')">
+                <span class="tab-icon">🔄</span>
+                <span class="tab-text">整首替换</span>
+            </div>
+            <div class="edit-lyrics-tab" data-type="insert" onclick="switchEditType('insert')">
+                <span class="tab-icon">➕</span>
+                <span class="tab-text">插入行</span>
+            </div>
+        </div>
+        <div class="edit-lyrics-content">
+            <!-- 逐行纠错 -->
+            <div class="edit-lyrics-panel active" id="panel-line">
+                <div class="edit-lyrics-hint">点击左侧歌词行进行编辑</div>
+                <div class="edit-lyrics-list" id="editLyricsList"></div>
+                <button class="edit-lyrics-submit" onclick="submitEditLyrics()" disabled id="submitLineBtn">
+                    提交纠错 (${editedLyrics.length}处)
+                </button>
+            </div>
+            <!-- 整首替换 -->
+            <div class="edit-lyrics-panel" id="panel-full">
+                <div class="edit-lyrics-hint">粘贴完整歌词替换整首歌曲</div>
+                <textarea class="edit-lyrics-textarea" id="fullLyricsText" 
+                    placeholder="请粘贴完整的替换歌词&#10;&#10;格式：&#10;- 每句歌词单独一行&#10;- 段落之间空一行"
+                    oninput="updateFullLyrics(this.value)"></textarea>
+                <button class="edit-lyrics-submit" onclick="submitFullReplacement()" disabled id="submitFullBtn">
+                    提交整首替换
+                </button>
+            </div>
+            <!-- 插入行 -->
+            <div class="edit-lyrics-panel" id="panel-insert">
+                <div class="edit-lyrics-insert-config">
+                    <label>插入位置：</label>
+                    <select id="insertPosition" onchange="updateInsertData()">
+                        <option value="after">在第...行后插入</option>
+                        <option value="before">在第...行前插入</option>
+                    </select>
+                    <input type="number" id="insertLineNum" min="1" max="${song.lyrics.filter(l => l.chars).length}" 
+                        value="1" onchange="updateInsertData()">
+                </div>
+                <div class="edit-lyrics-hint">要插入的歌词（每行一句）：</div>
+                <textarea class="edit-lyrics-textarea" id="insertLyricsText" 
+                    placeholder="请粘贴要插入的歌词&#10;可以一次插入多行"
+                    oninput="updateInsertData()"></textarea>
+                <button class="edit-lyrics-submit" onclick="submitInsert()" disabled id="submitInsertBtn">
+                    提交插入
+                </button>
+            </div>
         </div>
     `;
-
-    document.body.appendChild(popup);
-
-    const rect = lineEl.getBoundingClientRect();
-    const popupRect = popup.getBoundingClientRect();
-    let top = rect.bottom + 8;
-    let left = rect.left;
-
-    if (top + 200 > window.innerHeight - 60) {
-        top = rect.top - 200 - 8;
+    
+    document.body.appendChild(menu);
+    
+    // 添加样式
+    if (!document.getElementById('editLyricsStyles')) {
+        const styles = document.createElement('style');
+        styles.id = 'editLyricsStyles';
+        styles.textContent = `
+            .edit-lyrics-menu {
+                position: fixed;
+                right: 0;
+                top: 0;
+                width: 400px;
+                height: 100vh;
+                background: #fff;
+                box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+                z-index: 1000;
+                display: flex;
+                flex-direction: column;
+            }
+            .edit-lyrics-menu-header {
+                padding: 16px 20px;
+                background: #28a745;
+                color: #fff;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 600;
+            }
+            .edit-lyrics-menu-close {
+                background: none;
+                border: none;
+                color: #fff;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+            }
+            .edit-lyrics-menu-close:hover {
+                background: rgba(255,255,255,0.2);
+            }
+            .edit-lyrics-menu-tabs {
+                display: flex;
+                border-bottom: 1px solid #e8e8e8;
+            }
+            .edit-lyrics-tab {
+                flex: 1;
+                padding: 12px 8px;
+                text-align: center;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+                font-size: 13px;
+            }
+            .edit-lyrics-tab:hover {
+                background: #f5f5f5;
+            }
+            .edit-lyrics-tab.active {
+                border-bottom-color: #28a745;
+                color: #28a745;
+                background: #f6ffed;
+            }
+            .edit-lyrics-tab .tab-icon {
+                display: block;
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+            .edit-lyrics-tab .tab-text {
+                display: block;
+            }
+            .edit-lyrics-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 16px;
+            }
+            .edit-lyrics-panel {
+                display: none;
+            }
+            .edit-lyrics-panel.active {
+                display: block;
+            }
+            .edit-lyrics-hint {
+                color: #666;
+                font-size: 13px;
+                margin-bottom: 12px;
+                padding: 8px 12px;
+                background: #f5f5f5;
+                border-radius: 4px;
+            }
+            .edit-lyrics-list {
+                max-height: 300px;
+                overflow-y: auto;
+                margin-bottom: 16px;
+            }
+            .edit-lyrics-item {
+                padding: 10px 12px;
+                border: 1px solid #e8e8e8;
+                border-radius: 6px;
+                margin-bottom: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .edit-lyrics-item:hover {
+                border-color: #28a745;
+                background: #f6ffed;
+            }
+            .edit-lyrics-item .line-num {
+                font-size: 12px;
+                color: #999;
+                margin-bottom: 4px;
+            }
+            .edit-lyrics-item .line-text {
+                font-size: 14px;
+            }
+            .edit-lyrics-textarea {
+                width: 100%;
+                min-height: 200px;
+                padding: 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 6px;
+                font-family: inherit;
+                font-size: 14px;
+                resize: vertical;
+                margin-bottom: 16px;
+            }
+            .edit-lyrics-textarea:focus {
+                outline: none;
+                border-color: #28a745;
+            }
+            .edit-lyrics-insert-config {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+            .edit-lyrics-insert-config label {
+                font-size: 14px;
+                color: #333;
+            }
+            .edit-lyrics-insert-config select,
+            .edit-lyrics-insert-config input {
+                padding: 8px 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+            .edit-lyrics-submit {
+                width: 100%;
+                padding: 12px;
+                background: #28a745;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                font-size: 15px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .edit-lyrics-submit:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+            .edit-lyrics-submit:not(:disabled):hover {
+                background: #218838;
+            }
+        `;
+        document.head.appendChild(styles);
     }
-    if (left + 320 > window.innerWidth - 8) {
-        left = window.innerWidth - 320 - 8;
-    }
-    if (left < 8) left = 8;
-
-    popup.style.top = top + 'px';
-    popup.style.left = left + 'px';
-
-    setTimeout(() => {
-        const input = document.getElementById('editLyricsInput');
-        if (input) { input.focus(); input.select(); }
-    }, 50);
+    
+    // 加载歌词列表（逐行纠错用）
+    loadLyricsList();
 }
 
-function closeEditLyricsPopup() {
-    const popup = document.getElementById('editLyricsPopup');
-    const overlay = document.getElementById('editLyricsOverlay');
-    if (popup) popup.remove();
-    if (overlay) overlay.remove();
-    document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
+function hideEditLyricsMenu() {
+    const menu = document.getElementById('editLyricsMenu');
+    if (menu) menu.remove();
 }
 
-function confirmEditLyrics(lineIndex, originalText) {
-    const input = document.getElementById('editLyricsInput');
-    if (!input) return;
-    const newText = input.value.trim();
+function switchEditType(type) {
+    editLyricsType = type;
+    
+    // 切换标签
+    document.querySelectorAll('.edit-lyrics-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.type === type);
+    });
+    
+    // 切换面板
+    document.querySelectorAll('.edit-lyrics-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById('panel-' + type).classList.add('active');
+}
 
+function loadLyricsList() {
+    const song = window.currentSong;
+    if (!song) return;
+    
+    const list = document.getElementById('editLyricsList');
+    if (!list) return;
+    
+    let html = '';
+    let lineNum = 0;
+    song.lyrics.forEach((line, idx) => {
+        if (!line.chars) return;
+        lineNum++;
+        const text = line.chars.join('');
+        html += `
+            <div class="edit-lyrics-item" onclick="editLine(${idx}, '${text.replace(/'/g, "\\'")}')">
+                <div class="line-num">第 ${lineNum} 行</div>
+                <div class="line-text">${text}</div>
+            </div>
+        `;
+    });
+    list.innerHTML = html || '<div style="color:#999;padding:20px;text-align:center;">暂无歌词</div>';
+}
+
+function editLine(lineIndex, originalText) {
+    const newText = prompt('修改第 ' + (lineIndex + 1) + ' 行歌词：', originalText);
+    if (newText === null) return; // 取消
+    
     if (newText === originalText) {
-        const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
-        if (existingIdx > -1) {
-            editedLyrics.splice(existingIdx, 1);
+        // 删除已有的修改
+        const idx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+        if (idx > -1) editedLyrics.splice(idx, 1);
+    } else if (newText.trim()) {
+        const idx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+        if (idx > -1) {
+            editedLyrics[idx].newText = newText.trim();
+        } else {
+            editedLyrics.push({ lineIndex, originalText, newText: newText.trim() });
         }
-        closeEditLyricsPopup();
-        updateEditLyricsCount();
-        return;
     }
-
-    if (!newText) {
-        alert('歌词不能为空');
-        return;
-    }
-
-    const existingIdx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
-    if (existingIdx > -1) {
-        editedLyrics[existingIdx].newText = newText;
-    } else {
-        editedLyrics.push({
-            lineIndex: lineIndex,
-            originalText: originalText,
-            newText: newText
-        });
-    }
-
-    closeEditLyricsPopup();
-    updateEditLyricsCount();
+    
+    updateLineSubmitBtn();
 }
 
-function clearEditLyricsSelection() {
-    editedLyrics = [];
-    document.querySelectorAll('.lyric-line.selected').forEach(el => el.classList.remove('selected'));
+function updateLineSubmitBtn() {
+    const btn = document.getElementById('submitLineBtn');
+    if (btn) {
+        btn.disabled = editedLyrics.length === 0;
+        btn.textContent = '提交纠错 (' + editedLyrics.length + '处)';
+    }
 }
 
+function updateFullLyrics(value) {
+    fullReplacementLyrics = value.trim();
+    const btn = document.getElementById('submitFullBtn');
+    if (btn) btn.disabled = !fullReplacementLyrics;
+}
+
+function updateInsertData() {
+    const position = document.getElementById('insertPosition')?.value || 'after';
+    const line = parseInt(document.getElementById('insertLineNum')?.value) || 1;
+    const lyrics = document.getElementById('insertLyricsText')?.value.trim() || '';
+    
+    insertData = { position, line, lyrics };
+    
+    const btn = document.getElementById('submitInsertBtn');
+    if (btn) btn.disabled = !lyrics;
+}
+
+// 提交逐行纠错
 function submitEditLyrics() {
     if (editedLyrics.length === 0) return;
-
-    // 将纠错数据存入 localStorage，跳转到表单页面
-    const songName = window.currentSong ? window.currentSong.title : '';
+    
+    const song = window.currentSong;
     const correctionsData = editedLyrics.map(e => ({
         line: e.lineIndex + 1,
         originalText: e.originalText,
         newText: e.newText,
     }));
+    
+    // 存储到 localStorage，跳转提交页面
     localStorage.setItem('submitForm', JSON.stringify({
         type: 'lyrics',
-        song: songName,
+        song: song.title,
+        correctionType: 'line',
         corrections: correctionsData,
     }));
-    window.open('submit.html', '_blank');
+    window.open('submit.html?type=lyrics&mode=line', '_blank');
 }
 
-// 投稿：跳转到 GitHub Issues
-function submitNewSong() {
-    const title = encodeURIComponent('[新歌投稿]');
-    const body = encodeURIComponent(`## 投稿新歌\n\n**歌曲名称：**\n\n**歌手：**\n\n**填词：**\n\n**作曲：**\n\n**完整歌词：**\n\`\`\`\n请在这里粘贴完整歌词\n\`\`\`\n\n---\n\n请尽量提供完整歌词，粤拼会由我们添加，谢谢投稿！`);
-    window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=投稿`, '_blank');
+// 提交整首替换
+function submitFullReplacement() {
+    if (!fullReplacementLyrics) return;
+    
+    const song = window.currentSong;
+    
+    localStorage.setItem('submitForm', JSON.stringify({
+        type: 'lyrics',
+        song: song.title,
+        correctionType: 'full',
+        fullLyrics: fullReplacementLyrics,
+    }));
+    window.open('submit.html?type=lyrics&mode=full', '_blank');
+}
+
+// 提交插入行
+function submitInsert() {
+    if (!insertData.lyrics) return;
+    
+    const song = window.currentSong;
+    
+    localStorage.setItem('submitForm', JSON.stringify({
+        type: 'lyrics',
+        song: song.title,
+        correctionType: 'insert',
+        insert: insertData,
+    }));
+    window.open('submit.html?type=lyrics&mode=insert', '_blank');
+}
+
+function clearEditLyricsSelection() {
+    editedLyrics = [];
+    fullReplacementLyrics = '';
+    insertData = { position: 'after', line: 1, lyrics: '' };
 }
 
 // 导出模块
 window.EditLyricsModule = {
     toggle: toggleEditLyricsMode,
-    handleLineClick: handleLyricLineClick,
-    confirmEdit: confirmEditLyrics,
-    closePopup: closeEditLyricsPopup,
+    switchType: switchEditType,
+    editLine: editLine,
+    updateFullLyrics: updateFullLyrics,
+    updateInsertData: updateInsertData,
     submit: submitEditLyrics,
-    submitNewSong: submitNewSong,
+    submitFull: submitFullReplacement,
+    submitInsert: submitInsert,
     isActive: () => editLyricsMode
 };
