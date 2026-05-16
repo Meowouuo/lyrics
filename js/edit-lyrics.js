@@ -101,8 +101,10 @@ function enterLineEditMode() {
     showEditBanner('逐行纠错', '点击歌词行进行编辑，确认后添加到列表');
     enableTitleEditing();
     
-    document.querySelectorAll('.lyric-line').forEach((line, idx) => {
-        line.onclick = (e) => handleLineClick(e, idx);
+    document.querySelectorAll('.lyric-line').forEach((line) => {
+        const lineIndex = parseInt(line.dataset.line);
+        if (isNaN(lineIndex)) return;
+        line.onclick = (e) => handleLineClick(e, lineIndex);
         line.style.cursor = 'pointer';
     });
     
@@ -259,8 +261,14 @@ function updateEditList() {
     }
     
     // 逐行纠错
+    const song = window.currentSong;
     editedLyrics.forEach((item, idx) => {
-        html += `<div class="edit-list-item"><span class="edit-list-tag line">第${item.lineIndex + 1}行</span> ${item.newText.substring(0, 20)}${item.newText.length > 20 ? '...' : ''} <button onclick="removeLineEdit(${idx})" class="edit-list-remove">删除</button></div>`;
+        // 计算实际歌词行号（排除 paragraphBreak）
+        let displayLine = 0;
+        for (let i = 0; i <= item.lineIndex; i++) {
+            if (song.lyrics[i].chars) displayLine++;
+        }
+        html += `<div class="edit-list-item"><span class="edit-list-tag line">第${displayLine}行</span> ${item.newText.substring(0, 20)}${item.newText.length > 20 ? '...' : ''} <button onclick="removeLineEdit(${idx})" class="edit-list-remove">删除</button></div>`;
         count++;
     });
     
@@ -310,13 +318,19 @@ function handleLineClick(event, lineIndex) {
     
     const song = window.currentSong;
     const line = song.lyrics[lineIndex];
-    if (!line.chars) return;
+    if (!line || !line.chars) return;
+    
+    // 计算实际歌词行号（排除 paragraphBreak）
+    let displayLine = 0;
+    for (let i = 0; i <= lineIndex; i++) {
+        if (song.lyrics[i].chars) displayLine++;
+    }
     
     const originalText = line.chars.join('');
     const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
     const currentText = existingEdit ? existingEdit.newText : originalText;
     
-    const newText = prompt(`修改第 ${lineIndex + 1} 行歌词：`, currentText);
+    const newText = prompt(`修改第 ${displayLine} 行歌词：`, currentText);
     if (newText === null) return;
     
     if (newText === originalText) {
@@ -452,11 +466,17 @@ function submitEdit() {
     switch (editLyricsType) {
         case 'line':
             if (editedLyrics.length === 0) return;
-            submitData.corrections = editedLyrics.map(e => ({
-                line: e.lineIndex + 1,
-                originalText: e.originalText,
-                newText: e.newText
-            }));
+            submitData.corrections = editedLyrics.map(e => {
+                let displayLine = 0;
+                for (let i = 0; i <= e.lineIndex; i++) {
+                    if (song.lyrics[i].chars) displayLine++;
+                }
+                return {
+                    line: displayLine,
+                    originalText: e.originalText,
+                    newText: e.newText
+                };
+            });
             break;
             
         case 'full':
