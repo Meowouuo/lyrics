@@ -770,7 +770,8 @@
                         const storedInsertions = data.insertions || (data.insert ? [data.insert] : []);
                         if (storedInsertions.length > 0) {
                             insertItems = storedInsertions;
-                            renderInsertList();
+                            // 延迟执行，确保 DOM 已更新
+                            setTimeout(() => renderInsertList(), 0);
                         }
                     } else if (data.corrections && data.corrections.length > 0) {
                         document.getElementById('lc-rows').innerHTML = '';
