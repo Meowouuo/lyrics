@@ -17,7 +17,7 @@ function processJyutpingCorrection() {
     const issue = getIssueInfo();
 
     // 提取歌曲名称
-    const songTitle = parseField(issue.body, '歌曲名称');
+    const songTitle = parseField(issue.body, '歌曲名称').trim();
     if (!songTitle) {
         addComment(issue.number, '❌ 未找到歌曲名称，请确保填写了**歌曲名称**。');
         return;
