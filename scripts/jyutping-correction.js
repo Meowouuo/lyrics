@@ -60,7 +60,7 @@ function processJyutpingCorrection() {
 
         // 在文件中查找对应的行并替换粤拼
         // 查找包含原粤拼的 lyrics 行
-        const lines = content.split('\n');
+        let lines = content.split('\n');
         let lyricsLineIndex = -1;
         let charCount = 0;
 
@@ -120,6 +120,7 @@ function processJyutpingCorrection() {
                 /jp:\s*\[[^\]]+\]/,
                 `jp: [${newJpStr}]`
             );
+            content = lines.join('\n');
             appliedCount++;
         } else {
             failedRows.push(row);
@@ -132,7 +133,7 @@ function processJyutpingCorrection() {
     }
 
     // 写入修改后的文件
-    fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+    fs.writeFileSync(filePath, content, 'utf8');
 
     // 创建分支、提交、PR
     const branchName = `fix/jyutping-${issue.number}`;
