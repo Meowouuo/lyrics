@@ -226,7 +226,7 @@ function processInsertLine(content, body, songTitle) {
             };
         });
         
-        const lines = newContent.split('\\n');
+        const lines = newContent.split('\n');
         let lyricsLineCount = 0;
         let insertIndex = -1;
         
@@ -253,7 +253,7 @@ function processInsertLine(content, body, songTitle) {
         );
         
         lines.splice(insertIndex + 1, 0, ...insertContent);
-        newContent = lines.join('\\n');
+        newContent = lines.join('\n');
         totalInsertedLines += insertArray.length;
     }
     
@@ -269,14 +269,98 @@ function processInsertLine(content, body, songTitle) {
     };
 }
 
-// 逐行修改（简化版）
+// 逐行修改（完整实现）
 function processLineByLine(content, body, songTitle) {
     const rows = parseTable(body);
     if (rows.length === 0) {
         return { success: false, message: '❌ 未检测到纠错表格' };
     }
-    // ... 原有逻辑
-    return { success: true, content, commitMsg: `fix: 歌词纠错`, prTitle: `fix`, prBody: ``, comment: `✅` };
+    
+    let newContent = content;
+    let appliedCount = 0;
+    let failedRows = [];
+    
+    for (const row of rows) {
+        // 解析表格行：行号、原歌词、正确歌词
+        const [lineNumStr, originalText, newText] = row;
+        const lineNum = parseInt(lineNumStr.toString().replace(/[^0-9]/g, ''));
+        
+        if (isNaN(lineNum) || !originalText || !newText) {
+            failedRows.push(row);
+            continue;
+        }
+        
+        // 查找并替换歌词
+        const lines = newContent.split('\n');
+        let lyricsLineCount = 0;
+        let targetIndex = -1;
+        
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
+                lyricsLineCount++;
+                if (lyricsLineCount === lineNum) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (targetIndex === -1) {
+            failedRows.push(row);
+            continue;
+        }
+        
+        // 获取当前行的 chars
+        const line = lines[targetIndex];
+        const charsMatch = line.match(/chars:\s*\[([^\]]+)\]/);
+        if (!charsMatch) {
+            failedRows.push(row);
+            continue;
+        }
+        
+        const currentChars = charsMatch[1].replace(/"/g, '').replace(/,\s*/g, '');
+        
+        // 检查原歌词是否匹配
+        if (currentChars !== originalText.toString().trim()) {
+            failedRows.push(row);
+            continue;
+        }
+        
+        // 替换歌词并重新匹配粤拼
+        const matched = matchJyutping(newText.toString().trim());
+        const newChars = matched.map(m => `"${m.char}"`).join(', ');
+        const newJp = matched.map(m => `"${m.jp || '?'}"`).join(', ');
+        
+        // 替换行内容
+        lines[targetIndex] = line.replace(
+            /chars:\s*\[[^\]]+\]/,
+            `chars: [${newChars}]`
+        ).replace(
+            /jp:\s*\[[^\]]+\]/,
+            `jp: [${newJp}]`
+        );
+        
+        newContent = lines.join('\n');
+        appliedCount++;
+    }
+    
+    if (appliedCount === 0) {
+        return { 
+            success: false, 
+            message: `❌ 未能应用任何纠错。请检查行号、原歌词是否正确。\n\n失败的行：\n${failedRows.map(r => r.join(' | ')).join('\n')}` 
+        };
+    }
+    
+    const correctionsTable = rows.map(r => `| ${r.join(' | ')} |`).join('\\n');
+    
+    return {
+        success: true,
+        content: newContent,
+        commitMsg: `fix: 歌词纠错《${songTitle}》(${appliedCount}处)`,
+        prTitle: `fix: 歌词纠错《${songTitle}》(${appliedCount}处)`,
+        prBody: `## 歌词纠错\\n\\n**歌曲：** ${songTitle}\\n**修改数量：** ${appliedCount} 处\\n\\n| 行号 | 原歌词 | 正确歌词 |\\n|------|--------|----------|\\n${correctionsTable}`,
+        comment: `✅ 已自动修改 ${appliedCount} 处歌词并创建 Pull Request。${failedRows.length > 0 ? `\\n\\n⚠️ 以下 ${failedRows.length} 处纠错未能自动应用：\\n${failedRows.map(r => `- ${r.join(' | ')}`).join('\\n')}` : ''}`
+    };
 }
 
 module.exports = { processLyricsCorrection };
