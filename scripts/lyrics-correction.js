@@ -60,7 +60,7 @@ function processLyricsCorrection() {
     const branchName = `fix/lyrics-${issue.number}`;
     createBranch(branchName);
     commitAndPush(branchName, result.commitMsg);
-    createPR(result.prTitle, result.prBody, branchName);
+    createPR(result.prTitle, result.prBody, branchName, issue.number);
     addComment(issue.number, result.comment);
 }
 

@@ -127,7 +127,11 @@ function commitAndPush(branchName, message) {
 }
 
 // 创建 Pull Request
-function createPR(title, body, branchName) {
+function createPR(title, body, branchName, issueNumber) {
+    // 自动添加 Fixes #XX 以在合并时自动关闭 Issue
+    if (issueNumber) {
+        body += `\n\nFixes #${issueNumber}`;
+    }
     const tmpFile = '/tmp/pr_body.md';
     fs.writeFileSync(tmpFile, body, 'utf8');
     execSync(

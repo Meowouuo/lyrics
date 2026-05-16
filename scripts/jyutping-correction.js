@@ -155,7 +155,7 @@ ${failedRows.length > 0 ? `\n### ⚠️ 未能应用的纠错\n${failedRows.map(
 `;
 
     const prTitle = `fix: 粤拼纠错《${songTitle}》(${appliedCount}处)`;
-    createPR(prTitle, prBody, branchName);
+    createPR(prTitle, prBody, branchName, issue.number);
 
     addComment(issue.number, `✅ 已自动修改 ${appliedCount} 处粤拼并创建 [Pull Request](${prTitle})。
 
