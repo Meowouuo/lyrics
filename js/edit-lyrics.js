@@ -235,10 +235,10 @@ function confirmFullReplace() {
 function confirmInsert() {
     const position = document.getElementById('insertPositionInput')?.value || 'after';
     const line = parseInt(document.getElementById('insertLineInput')?.value) || 1;
-    const lyrics = document.getElementById('insertLyricsInput')?.value.trim();
+    const lyrics = document.getElementById('insertLyricsInput')?.value;
     
     if (!lyrics) {
-        alert('请输入要插入的歌词');
+        alert('请输入要插入的歌词或空行');
         return;
     }
     
