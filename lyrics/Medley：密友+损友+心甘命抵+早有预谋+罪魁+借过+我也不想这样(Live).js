@@ -250,8 +250,7 @@
             { chars: ["牵", "强"], jp: ["hin1", "koeng4"] },
             { chars: ["如", "果", "多", "她", "一", "位", "会", "多", "一", "点", "爱"], jp: ["jyu4", "gwo2", "do1", "taa1", "jat1", "wai6", "wui6", "do1", "jat1", "dim2", "ngoi3"] },
             { chars: ["两", "个", "人", "被", "怜", "爱"], jp: ["loeng5", "go3", "jan4", "bei6", "lin4", "ngoi3"] },
-            { chars: ["一", "点", "都", "不", "勉", "强"], jp: ["jat1", "dim2", "dou1", "bat1", "min5", "koeng4"] }
-        ] },
+            { chars: ["一", "点", "都", "不", "勉", "强"], jp: ["jat1", "dim2", "dou1", "bat1", "min5", "koeng4"] },
             { chars: ["彼", "此", "间", "再", "亲"], jp: ["bei2", "ci2", "gaan1", "zoi3", "can1"] },
             { chars: ["而", "在", "眼", "里", "都", "不", "配", "衬"], jp: ["ji4", "zoi6", "ngaan5", "lei5", "dou1", "bat1", "pui3", "can3"] },
             { chars: ["如", "若", "靠", "近"], jp: ["jyu4", "joek6", "kaau3", "gan6"] },
