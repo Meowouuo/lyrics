@@ -16,6 +16,7 @@ const {
 
 // 加载粤拼字典和匹配函数
 const { matchJyutping } = require('../jyutping-dict');
+const { toSimplified } = require('./t2s-converter');
 
 function processLyricsCorrection() {
     const issue = getIssueInfo();
@@ -100,6 +101,9 @@ function processFullReplacement(content, body, songTitle) {
     if (!fullLyrics) {
         return { success: false, message: '❌ 未找到完整歌词，请使用代码块(```)或##完整歌词标题提供歌词' };
     }
+
+    // 繁体→简体转换
+    fullLyrics = toSimplified(fullLyrics);
 
     // 解析歌词为段落
     const paragraphs = fullLyrics.replace(/\r\n/g, '\n').split(/\n{2,}/).filter(p => p.trim());
@@ -224,7 +228,9 @@ function processInsertLine(content, body, songTitle) {
     let totalInsertedLines = 0;
     
     for (const insertion of sortedInsertions) {
-        const insertLines = insertion.lyrics.split('\n').filter(l => l.trim());
+        // 繁体→简体转换
+        const simplifiedLyrics = toSimplified(insertion.lyrics);
+        const insertLines = simplifiedLyrics.split('\n').filter(l => l.trim());
         const insertArray = insertLines.map(line => {
             const matched = matchJyutping(line.trim());
             if (matched.length === 0) return null;
@@ -364,14 +370,18 @@ function processLineByLine(content, body, songTitle) {
         
         const currentChars = charsMatch[1].replace(/"/g, '').replace(/,\s*/g, '');
         
-        // 检查原歌词是否匹配
-        if (currentChars !== originalText.toString().trim()) {
+        // 繁体→简体转换
+        const simplifiedOriginal = toSimplified(originalText.toString().trim());
+        const simplifiedNew = toSimplified(newText.toString().trim());
+        
+        // 检查原歌词是否匹配（简体比较）
+        if (currentChars !== simplifiedOriginal) {
             failedRows.push(row);
             continue;
         }
         
-        // 替换歌词并重新匹配粤拼
-        const matched = matchJyutping(newText.toString().trim());
+        // 替换歌词并重新匹配粤拼（使用简体）
+        const matched = matchJyutping(simplifiedNew);
         const newChars = matched.map(m => `"${m.char}"`).join(', ');
         const newJp = matched.map(m => {
             if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {

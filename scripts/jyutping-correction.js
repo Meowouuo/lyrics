@@ -13,6 +13,8 @@ const {
     addComment,
 } = require('./utils');
 
+const { toSimplified } = require('./t2s-converter');
+
 function processJyutpingCorrection() {
     const issue = getIssueInfo();
 
@@ -108,11 +110,13 @@ function processJyutpingCorrection() {
         const charsArray = charsArrayMatch ? charsArrayMatch[1].split(',').map(c => c.trim().replace(/"/g, '')) : [];
 
         // 找到需要修改的字的位置
+        // 繁体→简体转换，确保与文件中的简体字匹配
+        const simplifiedChar = char ? toSimplified(char) : null;
         let modified = false;
-        if (char) {
+        if (simplifiedChar) {
             // 按字匹配
             for (let i = 0; i < charsArray.length; i++) {
-                if (charsArray[i] === char && jpArray[i] === originalJp) {
+                if (charsArray[i] === simplifiedChar && jpArray[i] === originalJp) {
                     jpArray[i] = newJp;
                     modified = true;
                     break;
