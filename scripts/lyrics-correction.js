@@ -240,14 +240,13 @@ function processInsertLine(content, body, songTitle) {
         }).filter(Boolean);
         
         const lines = newContent.split('\n');
-        // 行号计算与前端一致：paragraphBreak 也算一行
+        // 行号计算与前端一致：每个segment算一行（按空格分割）
         let lineCount = 0;
         let insertIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('paragraphBreak')) {
-                lineCount++;
-                continue;
+                continue; // paragraphBreak 不算行
             }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
                 if (lineCount === insertion.line) {
@@ -258,7 +257,18 @@ function processInsertLine(content, body, songTitle) {
                     }
                     break;
                 }
-                lineCount++;
+                // 计算这行歌词有多少个segment（按空格分割）
+                const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
+                if (charsMatch) {
+                    const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
+                    let segments = 1;
+                    for (const c of chars) {
+                        if (c === '" "') segments++;
+                    }
+                    lineCount += segments;
+                } else {
+                    lineCount++;
+                }
             }
         }
         
@@ -310,22 +320,32 @@ function processLineByLine(content, body, songTitle) {
         }
         
         // 查找并替换歌词
-        // 行号计算与前端一致：paragraphBreak 也算一行
+        // 行号计算与前端一致：每个segment算一行（按空格分割）
         const lines = newContent.split('\n');
         let lineCount = 0;
         let targetIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('paragraphBreak')) {
-                lineCount++;
-                continue;
+                continue; // paragraphBreak 不算行
             }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
                 if (lineCount === lineNum) {
                     targetIndex = i;
                     break;
                 }
-                lineCount++;
+                // 计算这行歌词有多少个segment（按空格分割）
+                const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
+                if (charsMatch) {
+                    const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
+                    let segments = 1;
+                    for (const c of chars) {
+                        if (c === '" "') segments++;
+                    }
+                    lineCount += segments;
+                } else {
+                    lineCount++;
+                }
             }
         }
         

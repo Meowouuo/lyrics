@@ -314,36 +314,36 @@ function removeInsert(idx) {
     updateEditStatus();
 }
 
-// 原有的逐行编辑点击处理
-function handleLineClick(event, lineIndex) {
+// 逐行编辑点击处理
+function handleLineClick(event, displayLineIndex) {
     event.stopPropagation();
     
     const song = window.currentSong;
-    const line = song.lyrics[lineIndex];
+    // displayLineIndex 是用户可见的行号，需要通过 data-song-index 获取实际的 song.lyrics 索引
+    const songIndex = parseInt(event.currentTarget.dataset.songIndex);
+    if (isNaN(songIndex)) return;
+    const line = song.lyrics[songIndex];
     if (!line || !line.chars) return;
     
-    // 计算实际歌词行号（排除 paragraphBreak）
-    let displayLine = 0;
-    for (let i = 0; i <= lineIndex; i++) {
-        if (song.lyrics[i].chars) displayLine++;
-    }
+    // displayLineIndex + 1 就是用户看到的行号
+    const displayLine = displayLineIndex + 1;
     
     const originalText = line.chars.join('');
-    const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
+    const existingEdit = editedLyrics.find(e => e.lineIndex === songIndex);
     const currentText = existingEdit ? existingEdit.newText : originalText;
     
     const newText = prompt(`修改第 ${displayLine} 行歌词：`, currentText);
     if (newText === null) return;
     
     if (newText === originalText) {
-        const idx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+        const idx = editedLyrics.findIndex(e => e.lineIndex === songIndex);
         if (idx > -1) editedLyrics.splice(idx, 1);
     } else if (newText.trim()) {
-        const idx = editedLyrics.findIndex(e => e.lineIndex === lineIndex);
+        const idx = editedLyrics.findIndex(e => e.lineIndex === songIndex);
         if (idx > -1) {
             editedLyrics[idx].newText = newText.trim();
         } else {
-            editedLyrics.push({ lineIndex, originalText, newText: newText.trim() });
+            editedLyrics.push({ lineIndex: songIndex, originalText, newText: newText.trim() });
         }
     }
     
@@ -352,22 +352,14 @@ function handleLineClick(event, lineIndex) {
 }
 
 // 选择插入行
-function selectInsertLine(event, lineIndex) {
+function selectInsertLine(event, displayLineIndex) {
     event.stopPropagation();
     
-    const song = window.currentSong;
-    // 直接从点击的元素获取 data-line，避免 DOM 变化导致索引不匹配
-    const dataIndex = parseInt(event.currentTarget.dataset.line);
-    
-    if (dataIndex >= song.lyrics.length) return;
-    
-    let lineNum = 0;
-    for (let i = 0; i <= dataIndex; i++) {
-        if (song.lyrics[i] && song.lyrics[i].chars) lineNum++;
-    }
+    // data-line 现在是 displayLineIndex（从0开始），+1 就是用户看到的行号
+    const displayLine = displayLineIndex + 1;
     
     const input = document.getElementById('insertLineInput');
-    if (input) input.value = lineNum;
+    if (input) input.value = displayLine;
     
     document.querySelectorAll('.lyric-line').forEach(l => l.style.background = '');
     event.currentTarget.style.background = '#e6f7ff';
