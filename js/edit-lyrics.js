@@ -1,342 +1,408 @@
-// 修改歌词模式模块 - 增强版
-// 支持：逐行纠错、整首替换、插入行
+// 修改歌词模式模块 - 子菜单选择版
 
 let editLyricsMode = false;
-let editLyricsType = 'line'; // 'line', 'full', 'insert'
-let editedLyrics = []; // { lineIndex, originalText, newText }
+let editLyricsType = null; // 'line', 'full', 'insert'
+let editedLyrics = [];
 let fullReplacementLyrics = '';
 let insertData = { position: 'after', line: 1, lyrics: '' };
 
+// 点击改歌词按钮 - 显示子菜单选择
 function toggleEditLyricsMode() {
-    editLyricsMode = !editLyricsMode;
-    const lyricsContent = document.getElementById('lyricsContent');
-
-    if (editLyricsMode) {
-        if (window.CorrectionModule && window.CorrectionModule.isActive()) {
-            window.CorrectionModule.toggle();
-        }
-        lyricsContent.classList.add('edit-lyrics-mode');
-        editedLyrics = [];
-        fullReplacementLyrics = '';
-        insertData = { position: 'after', line: 1, lyrics: '' };
-        showEditLyricsMenu();
-        updateEditLyricsBtn();
-    } else {
-        lyricsContent.classList.remove('edit-lyrics-mode');
-        hideEditLyricsMenu();
-        clearEditLyricsSelection();
-        updateEditLyricsBtn();
-    }
-}
-
-function updateEditLyricsBtn() {
-    const btn = document.querySelector('.toolbar-btn[onclick="EditLyricsModule.toggle()"]');
-    if (!btn) return;
-    if (editLyricsMode) {
-        btn.innerHTML = '<span class="icon">📝</span><span>退出改歌词</span>';
-        btn.style.color = '#28a745';
-    } else {
-        btn.innerHTML = '<span class="icon">📝</span><span>改歌词</span>';
-        btn.style.color = '';
-    }
-}
-
-// 显示改歌词菜单（子菜单形式）
-function showEditLyricsMenu() {
-    hideEditLyricsMenu();
-    
     const song = window.currentSong;
     if (!song) {
         alert('请先选择一首歌曲');
-        toggleEditLyricsMode();
         return;
     }
+    
+    // 如果已经在某种编辑模式中，退出
+    if (editLyricsMode) {
+        exitEditMode();
+        return;
+    }
+    
+    // 显示子菜单选择弹窗
+    showEditTypeSelector();
+}
 
-    const menu = document.createElement('div');
-    menu.className = 'edit-lyrics-menu';
-    menu.id = 'editLyricsMenu';
-    menu.innerHTML = `
-        <div class="edit-lyrics-menu-header">
-            <span>📝 修改歌词 - ${song.title}</span>
-            <button class="edit-lyrics-menu-close" onclick="EditLyricsModule.toggle()">✕</button>
-        </div>
-        <div class="edit-lyrics-menu-tabs">
-            <div class="edit-lyrics-tab active" data-type="line" onclick="switchEditType('line')">
-                <span class="tab-icon">✏️</span>
-                <span class="tab-text">逐行纠错</span>
+// 显示编辑类型选择弹窗
+function showEditTypeSelector() {
+    hideEditTypeSelector();
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'edit-type-overlay';
+    overlay.id = 'editTypeOverlay';
+    overlay.onclick = hideEditTypeSelector;
+    
+    const popup = document.createElement('div');
+    popup.className = 'edit-type-popup';
+    popup.id = 'editTypePopup';
+    popup.innerHTML = `
+        <div class="edit-type-title">选择编辑方式</div>
+        <div class="edit-type-options">
+            <div class="edit-type-option" onclick="selectEditType('line')">
+                <div class="edit-type-icon">✏️</div>
+                <div class="edit-type-name">逐行纠错</div>
+                <div class="edit-type-desc">点击歌词行进行编辑</div>
             </div>
-            <div class="edit-lyrics-tab" data-type="full" onclick="switchEditType('full')">
-                <span class="tab-icon">🔄</span>
-                <span class="tab-text">整首替换</span>
+            <div class="edit-type-option" onclick="selectEditType('full')">
+                <div class="edit-type-icon">🔄</div>
+                <div class="edit-type-name">整首替换</div>
+                <div class="edit-type-desc">粘贴完整歌词替换整首</div>
             </div>
-            <div class="edit-lyrics-tab" data-type="insert" onclick="switchEditType('insert')">
-                <span class="tab-icon">➕</span>
-                <span class="tab-text">插入行</span>
-            </div>
-        </div>
-        <div class="edit-lyrics-content">
-            <!-- 逐行纠错 -->
-            <div class="edit-lyrics-panel active" id="panel-line">
-                <div class="edit-lyrics-hint">点击左侧歌词行进行编辑</div>
-                <div class="edit-lyrics-list" id="editLyricsList"></div>
-                <button class="edit-lyrics-submit" onclick="submitEditLyrics()" disabled id="submitLineBtn">
-                    提交纠错 (${editedLyrics.length}处)
-                </button>
-            </div>
-            <!-- 整首替换 -->
-            <div class="edit-lyrics-panel" id="panel-full">
-                <div class="edit-lyrics-hint">粘贴完整歌词替换整首歌曲</div>
-                <textarea class="edit-lyrics-textarea" id="fullLyricsText" 
-                    placeholder="请粘贴完整的替换歌词&#10;&#10;格式：&#10;- 每句歌词单独一行&#10;- 段落之间空一行"
-                    oninput="updateFullLyrics(this.value)"></textarea>
-                <button class="edit-lyrics-submit" onclick="submitFullReplacement()" disabled id="submitFullBtn">
-                    提交整首替换
-                </button>
-            </div>
-            <!-- 插入行 -->
-            <div class="edit-lyrics-panel" id="panel-insert">
-                <div class="edit-lyrics-insert-config">
-                    <label>插入位置：</label>
-                    <select id="insertPosition" onchange="updateInsertData()">
-                        <option value="after">在第...行后插入</option>
-                        <option value="before">在第...行前插入</option>
-                    </select>
-                    <input type="number" id="insertLineNum" min="1" max="${song.lyrics.filter(l => l.chars).length}" 
-                        value="1" onchange="updateInsertData()">
-                </div>
-                <div class="edit-lyrics-hint">要插入的歌词（每行一句）：</div>
-                <textarea class="edit-lyrics-textarea" id="insertLyricsText" 
-                    placeholder="请粘贴要插入的歌词&#10;可以一次插入多行"
-                    oninput="updateInsertData()"></textarea>
-                <button class="edit-lyrics-submit" onclick="submitInsert()" disabled id="submitInsertBtn">
-                    提交插入
-                </button>
+            <div class="edit-type-option" onclick="selectEditType('insert')">
+                <div class="edit-type-icon">➕</div>
+                <div class="edit-type-name">插入行</div>
+                <div class="edit-type-desc">在指定位置插入新歌词</div>
             </div>
         </div>
+        <button class="edit-type-cancel" onclick="hideEditTypeSelector()">取消</button>
     `;
     
-    document.body.appendChild(menu);
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
     
     // 添加样式
-    if (!document.getElementById('editLyricsStyles')) {
+    if (!document.getElementById('editTypeStyles')) {
         const styles = document.createElement('style');
-        styles.id = 'editLyricsStyles';
+        styles.id = 'editTypeStyles';
         styles.textContent = `
-            .edit-lyrics-menu {
+            .edit-type-overlay {
                 position: fixed;
-                right: 0;
                 top: 0;
-                width: 400px;
-                height: 100vh;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 2000;
+            }
+            .edit-type-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
                 background: #fff;
-                box-shadow: -2px 0 8px rgba(0,0,0,0.15);
-                z-index: 1000;
-                display: flex;
-                flex-direction: column;
+                border-radius: 12px;
+                padding: 24px;
+                width: 360px;
+                max-width: 90vw;
+                z-index: 2001;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             }
-            .edit-lyrics-menu-header {
-                padding: 16px 20px;
-                background: #28a745;
-                color: #fff;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+            .edit-type-title {
+                font-size: 18px;
                 font-weight: 600;
-            }
-            .edit-lyrics-menu-close {
-                background: none;
-                border: none;
-                color: #fff;
-                font-size: 20px;
-                cursor: pointer;
-                padding: 0;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 4px;
-            }
-            .edit-lyrics-menu-close:hover {
-                background: rgba(255,255,255,0.2);
-            }
-            .edit-lyrics-menu-tabs {
-                display: flex;
-                border-bottom: 1px solid #e8e8e8;
-            }
-            .edit-lyrics-tab {
-                flex: 1;
-                padding: 12px 8px;
                 text-align: center;
-                cursor: pointer;
-                border-bottom: 2px solid transparent;
-                transition: all 0.2s;
-                font-size: 13px;
-            }
-            .edit-lyrics-tab:hover {
-                background: #f5f5f5;
-            }
-            .edit-lyrics-tab.active {
-                border-bottom-color: #28a745;
-                color: #28a745;
-                background: #f6ffed;
-            }
-            .edit-lyrics-tab .tab-icon {
-                display: block;
-                font-size: 20px;
-                margin-bottom: 4px;
-            }
-            .edit-lyrics-tab .tab-text {
-                display: block;
-            }
-            .edit-lyrics-content {
-                flex: 1;
-                overflow-y: auto;
-                padding: 16px;
-            }
-            .edit-lyrics-panel {
-                display: none;
-            }
-            .edit-lyrics-panel.active {
-                display: block;
-            }
-            .edit-lyrics-hint {
-                color: #666;
-                font-size: 13px;
-                margin-bottom: 12px;
-                padding: 8px 12px;
-                background: #f5f5f5;
-                border-radius: 4px;
-            }
-            .edit-lyrics-list {
-                max-height: 300px;
-                overflow-y: auto;
-                margin-bottom: 16px;
-            }
-            .edit-lyrics-item {
-                padding: 10px 12px;
-                border: 1px solid #e8e8e8;
-                border-radius: 6px;
-                margin-bottom: 8px;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .edit-lyrics-item:hover {
-                border-color: #28a745;
-                background: #f6ffed;
-            }
-            .edit-lyrics-item .line-num {
-                font-size: 12px;
-                color: #999;
-                margin-bottom: 4px;
-            }
-            .edit-lyrics-item .line-text {
-                font-size: 14px;
-            }
-            .edit-lyrics-textarea {
-                width: 100%;
-                min-height: 200px;
-                padding: 12px;
-                border: 1px solid #d9d9d9;
-                border-radius: 6px;
-                font-family: inherit;
-                font-size: 14px;
-                resize: vertical;
-                margin-bottom: 16px;
-            }
-            .edit-lyrics-textarea:focus {
-                outline: none;
-                border-color: #28a745;
-            }
-            .edit-lyrics-insert-config {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 12px;
-                flex-wrap: wrap;
-            }
-            .edit-lyrics-insert-config label {
-                font-size: 14px;
+                margin-bottom: 20px;
                 color: #333;
             }
-            .edit-lyrics-insert-config select,
-            .edit-lyrics-insert-config input {
-                padding: 8px 12px;
-                border: 1px solid #d9d9d9;
-                border-radius: 4px;
-                font-size: 14px;
+            .edit-type-options {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 20px;
             }
-            .edit-lyrics-submit {
+            .edit-type-option {
+                display: flex;
+                align-items: center;
+                padding: 16px;
+                border: 2px solid #e8e8e8;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .edit-type-option:hover {
+                border-color: #28a745;
+                background: #f6ffed;
+            }
+            .edit-type-icon {
+                font-size: 28px;
+                margin-right: 16px;
+                width: 40px;
+                text-align: center;
+            }
+            .edit-type-name {
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+            }
+            .edit-type-desc {
+                font-size: 13px;
+                color: #999;
+                margin-left: auto;
+            }
+            .edit-type-cancel {
                 width: 100%;
                 padding: 12px;
-                background: #28a745;
-                color: #fff;
+                background: #f5f5f5;
                 border: none;
                 border-radius: 6px;
                 font-size: 15px;
                 cursor: pointer;
-                transition: all 0.2s;
+                color: #666;
             }
-            .edit-lyrics-submit:disabled {
-                background: #ccc;
+            .edit-type-cancel:hover {
+                background: #e8e8e8;
+            }
+            
+            /* 编辑模式样式 */
+            .edit-mode-banner {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #28a745;
+                color: #fff;
+                padding: 12px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 1000;
+            }
+            .edit-mode-banner-title {
+                font-weight: 600;
+            }
+            .edit-mode-banner-actions {
+                display: flex;
+                gap: 12px;
+            }
+            .edit-mode-banner-btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+            }
+            .edit-mode-banner-btn.submit {
+                background: #fff;
+                color: #28a745;
+                font-weight: 600;
+            }
+            .edit-mode-banner-btn.submit:disabled {
+                background: rgba(255,255,255,0.5);
                 cursor: not-allowed;
             }
-            .edit-lyrics-submit:not(:disabled):hover {
-                background: #218838;
+            .edit-mode-banner-btn.cancel {
+                background: rgba(255,255,255,0.2);
+                color: #fff;
+            }
+            
+            /* 插入行配置面板 */
+            .insert-config-panel {
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                width: 300px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+                padding: 16px;
+                z-index: 999;
+            }
+            .insert-config-title {
+                font-weight: 600;
+                margin-bottom: 12px;
+                color: #333;
+            }
+            .insert-config-row {
+                margin-bottom: 12px;
+            }
+            .insert-config-row label {
+                display: block;
+                font-size: 13px;
+                color: #666;
+                margin-bottom: 4px;
+            }
+            .insert-config-row select,
+            .insert-config-row input {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 4px;
+            }
+            .insert-config-textarea {
+                width: 100%;
+                min-height: 120px;
+                padding: 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 4px;
+                resize: vertical;
+                font-family: inherit;
+            }
+            
+            /* 整首替换面板 */
+            .full-replace-panel {
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                width: 350px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+                padding: 16px;
+                z-index: 999;
+            }
+            .full-replace-textarea {
+                width: 100%;
+                min-height: 300px;
+                padding: 12px;
+                border: 1px solid #d9d9d9;
+                border-radius: 4px;
+                resize: vertical;
+                font-family: inherit;
             }
         `;
         document.head.appendChild(styles);
     }
-    
-    // 加载歌词列表（逐行纠错用）
-    loadLyricsList();
 }
 
-function hideEditLyricsMenu() {
-    const menu = document.getElementById('editLyricsMenu');
-    if (menu) menu.remove();
+function hideEditTypeSelector() {
+    const overlay = document.getElementById('editTypeOverlay');
+    const popup = document.getElementById('editTypePopup');
+    if (overlay) overlay.remove();
+    if (popup) popup.remove();
 }
 
-function switchEditType(type) {
+// 选择编辑类型
+function selectEditType(type) {
+    hideEditTypeSelector();
     editLyricsType = type;
+    editLyricsMode = true;
     
-    // 切换标签
-    document.querySelectorAll('.edit-lyrics-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.type === type);
-    });
+    // 更新按钮状态
+    updateEditLyricsBtn();
     
-    // 切换面板
-    document.querySelectorAll('.edit-lyrics-panel').forEach(panel => {
-        panel.classList.remove('active');
-    });
-    document.getElementById('panel-' + type).classList.add('active');
+    // 进入对应编辑模式
+    switch (type) {
+        case 'line':
+            enterLineEditMode();
+            break;
+        case 'full':
+            enterFullReplaceMode();
+            break;
+        case 'insert':
+            enterInsertMode();
+            break;
+    }
 }
 
-function loadLyricsList() {
+// 逐行编辑模式
+function enterLineEditMode() {
+    const lyricsContent = document.getElementById('lyricsContent');
+    lyricsContent.classList.add('edit-lyrics-mode');
+    editedLyrics = [];
+    
+    showEditBanner('逐行纠错', '点击歌词行进行编辑');
+    
+    // 添加点击事件监听
+    document.querySelectorAll('.lyric-line').forEach((line, idx) => {
+        line.onclick = (e) => handleLineClick(e, idx);
+        line.style.cursor = 'pointer';
+    });
+}
+
+// 整首替换模式
+function enterFullReplaceMode() {
+    fullReplacementLyrics = '';
+    
+    showEditBanner('整首替换', '粘贴完整歌词');
+    
+    // 显示替换面板
+    const panel = document.createElement('div');
+    panel.className = 'full-replace-panel';
+    panel.id = 'fullReplacePanel';
+    panel.innerHTML = `
+        <div class="insert-config-title">粘贴完整歌词</div>
+        <textarea class="full-replace-textarea" id="fullLyricsInput" 
+            placeholder="请粘贴完整的替换歌词&#10;&#10;格式：&#10;- 每句歌词单独一行&#10;- 段落之间空一行"
+            oninput="updateFullLyrics(this.value)"></textarea>
+    `;
+    document.body.appendChild(panel);
+}
+
+// 插入行模式
+function enterInsertMode() {
     const song = window.currentSong;
-    if (!song) return;
+    const maxLine = song.lyrics.filter(l => l.chars).length;
     
-    const list = document.getElementById('editLyricsList');
-    if (!list) return;
+    insertData = { position: 'after', line: 1, lyrics: '' };
     
-    let html = '';
-    let lineNum = 0;
-    song.lyrics.forEach((line, idx) => {
-        if (!line.chars) return;
-        lineNum++;
-        const text = line.chars.join('');
-        html += `
-            <div class="edit-lyrics-item" onclick="editLine(${idx}, '${text.replace(/'/g, "\\'")}')">
-                <div class="line-num">第 ${lineNum} 行</div>
-                <div class="line-text">${text}</div>
-            </div>
-        `;
+    showEditBanner('插入行', '选择位置并输入要插入的歌词');
+    
+    // 显示插入配置面板
+    const panel = document.createElement('div');
+    panel.className = 'insert-config-panel';
+    panel.id = 'insertConfigPanel';
+    panel.innerHTML = `
+        <div class="insert-config-title">插入配置</div>
+        <div class="insert-config-row">
+            <label>插入位置</label>
+            <select id="insertPosition" onchange="updateInsertConfig()">
+                <option value="after">在行后插入</option>
+                <option value="before">在行前插入</option>
+            </select>
+        </div>
+        <div class="insert-config-row">
+            <label>行号 (1-${maxLine})</label>
+            <input type="number" id="insertLineNum" min="1" max="${maxLine}" value="1" onchange="updateInsertConfig()">
+        </div>
+        <div class="insert-config-row">
+            <label>要插入的歌词</label>
+            <textarea class="insert-config-textarea" id="insertLyricsInput" 
+                placeholder="每行一句歌词" oninput="updateInsertConfig()"></textarea>
+        </div>
+    `;
+    document.body.appendChild(panel);
+    
+    // 高亮显示可点击的行
+    document.querySelectorAll('.lyric-line').forEach((line, idx) => {
+        line.onclick = (e) => selectInsertLine(e, idx);
+        line.style.cursor = 'pointer';
     });
-    list.innerHTML = html || '<div style="color:#999;padding:20px;text-align:center;">暂无歌词</div>';
 }
 
-function editLine(lineIndex, originalText) {
-    const newText = prompt('修改第 ' + (lineIndex + 1) + ' 行歌词：', originalText);
+// 显示编辑横幅
+function showEditBanner(title, subtitle) {
+    hideEditBanner();
+    
+    const banner = document.createElement('div');
+    banner.className = 'edit-mode-banner';
+    banner.id = 'editModeBanner';
+    banner.innerHTML = `
+        <div>
+            <div class="edit-mode-banner-title">📝 ${title}</div>
+            <div style="font-size:12px;opacity:0.9;">${subtitle}</div>
+        </div>
+        <div class="edit-mode-banner-actions">
+            <span id="editStatusText" style="font-size:13px;margin-right:8px;"></span>
+            <button class="edit-mode-banner-btn submit" id="submitEditBtn" onclick="submitEdit()" disabled>提交反馈</button>
+            <button class="edit-mode-banner-btn cancel" onclick="exitEditMode()">退出</button>
+        </div>
+    `;
+    document.body.appendChild(banner);
+    
+    // 调整页面内容位置
+    document.body.style.paddingTop = '60px';
+}
+
+function hideEditBanner() {
+    const banner = document.getElementById('editModeBanner');
+    if (banner) banner.remove();
+    document.body.style.paddingTop = '';
+}
+
+// 逐行编辑：点击行
+function handleLineClick(event, lineIndex) {
+    event.stopPropagation();
+    
+    const song = window.currentSong;
+    const line = song.lyrics[lineIndex];
+    if (!line.chars) return;
+    
+    const originalText = line.chars.join('');
+    const existingEdit = editedLyrics.find(e => e.lineIndex === lineIndex);
+    const currentText = existingEdit ? existingEdit.newText : originalText;
+    
+    const newText = prompt(`修改第 ${lineIndex + 1} 行歌词：`, currentText);
     if (newText === null) return; // 取消
     
     if (newText === originalText) {
@@ -352,100 +418,147 @@ function editLine(lineIndex, originalText) {
         }
     }
     
-    updateLineSubmitBtn();
+    updateEditStatus();
 }
 
-function updateLineSubmitBtn() {
-    const btn = document.getElementById('submitLineBtn');
-    if (btn) {
-        btn.disabled = editedLyrics.length === 0;
-        btn.textContent = '提交纠错 (' + editedLyrics.length + '处)';
+// 插入行：选择行
+function selectInsertLine(event, lineIndex) {
+    event.stopPropagation();
+    
+    const song = window.currentSong;
+    let lineNum = 0;
+    for (let i = 0; i <= lineIndex; i++) {
+        if (song.lyrics[i].chars) lineNum++;
     }
+    
+    document.getElementById('insertLineNum').value = lineNum;
+    updateInsertConfig();
+    
+    // 高亮选中的行
+    document.querySelectorAll('.lyric-line').forEach(l => l.style.background = '');
+    event.currentTarget.style.background = '#e6f7ff';
 }
 
 function updateFullLyrics(value) {
     fullReplacementLyrics = value.trim();
-    const btn = document.getElementById('submitFullBtn');
-    if (btn) btn.disabled = !fullReplacementLyrics;
+    updateEditStatus();
 }
 
-function updateInsertData() {
+function updateInsertConfig() {
     const position = document.getElementById('insertPosition')?.value || 'after';
     const line = parseInt(document.getElementById('insertLineNum')?.value) || 1;
-    const lyrics = document.getElementById('insertLyricsText')?.value.trim() || '';
+    const lyrics = document.getElementById('insertLyricsInput')?.value.trim() || '';
     
     insertData = { position, line, lyrics };
-    
-    const btn = document.getElementById('submitInsertBtn');
-    if (btn) btn.disabled = !lyrics;
+    updateEditStatus();
 }
 
-// 提交逐行纠错
-function submitEditLyrics() {
-    if (editedLyrics.length === 0) return;
+function updateEditStatus() {
+    const statusText = document.getElementById('editStatusText');
+    const submitBtn = document.getElementById('submitEditBtn');
     
+    let hasData = false;
+    let status = '';
+    
+    switch (editLyricsType) {
+        case 'line':
+            hasData = editedLyrics.length > 0;
+            status = hasData ? `${editedLyrics.length} 处修改` : '';
+            break;
+        case 'full':
+            hasData = !!fullReplacementLyrics;
+            status = hasData ? '已输入歌词' : '';
+            break;
+        case 'insert':
+            hasData = !!insertData.lyrics;
+            status = hasData ? '已输入歌词' : '';
+            break;
+    }
+    
+    if (statusText) statusText.textContent = status;
+    if (submitBtn) submitBtn.disabled = !hasData;
+}
+
+// 提交编辑
+function submitEdit() {
     const song = window.currentSong;
-    const correctionsData = editedLyrics.map(e => ({
-        line: e.lineIndex + 1,
-        originalText: e.originalText,
-        newText: e.newText,
-    }));
+    if (!song) return;
     
-    // 存储到 localStorage，跳转提交页面
-    localStorage.setItem('submitForm', JSON.stringify({
+    let submitData = {
         type: 'lyrics',
         song: song.title,
-        correctionType: 'line',
-        corrections: correctionsData,
-    }));
-    window.open('submit.html?type=lyrics&mode=line', '_blank');
+        correctionType: editLyricsType
+    };
+    
+    switch (editLyricsType) {
+        case 'line':
+            if (editedLyrics.length === 0) return;
+            submitData.corrections = editedLyrics.map(e => ({
+                line: e.lineIndex + 1,
+                originalText: e.originalText,
+                newText: e.newText
+            }));
+            break;
+            
+        case 'full':
+            if (!fullReplacementLyrics) return;
+            submitData.fullLyrics = fullReplacementLyrics;
+            break;
+            
+        case 'insert':
+            if (!insertData.lyrics) return;
+            submitData.insert = insertData;
+            break;
+    }
+    
+    // 存储到 localStorage
+    localStorage.setItem('submitForm', JSON.stringify(submitData));
+    
+    // 打开提交页面
+    window.open('submit.html?type=lyrics', '_blank');
 }
 
-// 提交整首替换
-function submitFullReplacement() {
-    if (!fullReplacementLyrics) return;
-    
-    const song = window.currentSong;
-    
-    localStorage.setItem('submitForm', JSON.stringify({
-        type: 'lyrics',
-        song: song.title,
-        correctionType: 'full',
-        fullLyrics: fullReplacementLyrics,
-    }));
-    window.open('submit.html?type=lyrics&mode=full', '_blank');
-}
-
-// 提交插入行
-function submitInsert() {
-    if (!insertData.lyrics) return;
-    
-    const song = window.currentSong;
-    
-    localStorage.setItem('submitForm', JSON.stringify({
-        type: 'lyrics',
-        song: song.title,
-        correctionType: 'insert',
-        insert: insertData,
-    }));
-    window.open('submit.html?type=lyrics&mode=insert', '_blank');
-}
-
-function clearEditLyricsSelection() {
+// 退出编辑模式
+function exitEditMode() {
+    editLyricsMode = false;
+    editLyricsType = null;
     editedLyrics = [];
     fullReplacementLyrics = '';
     insertData = { position: 'after', line: 1, lyrics: '' };
+    
+    hideEditBanner();
+    
+    // 移除面板
+    document.getElementById('fullReplacePanel')?.remove();
+    document.getElementById('insertConfigPanel')?.remove();
+    
+    // 移除歌词点击事件
+    document.querySelectorAll('.lyric-line').forEach(line => {
+        line.onclick = null;
+        line.style.cursor = '';
+        line.style.background = '';
+    });
+    
+    // 移除编辑模式样式
+    document.getElementById('lyricsContent')?.classList.remove('edit-lyrics-mode');
+    
+    updateEditLyricsBtn();
+}
+
+function updateEditLyricsBtn() {
+    const btn = document.querySelector('.toolbar-btn[onclick="EditLyricsModule.toggle()"]');
+    if (!btn) return;
+    if (editLyricsMode) {
+        btn.innerHTML = '<span class="icon">📝</span><span>退出改歌词</span>';
+        btn.style.color = '#28a745';
+    } else {
+        btn.innerHTML = '<span class="icon">📝</span><span>改歌词</span>';
+        btn.style.color = '';
+    }
 }
 
 // 导出模块
 window.EditLyricsModule = {
     toggle: toggleEditLyricsMode,
-    switchType: switchEditType,
-    editLine: editLine,
-    updateFullLyrics: updateFullLyrics,
-    updateInsertData: updateInsertData,
-    submit: submitEditLyrics,
-    submitFull: submitFullReplacement,
-    submitInsert: submitInsert,
     isActive: () => editLyricsMode
 };
