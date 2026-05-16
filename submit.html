@@ -653,12 +653,17 @@
                         document.querySelector('input[name="correctionType"][value="full"]').checked = true;
                         switchCorrectionType('full');
                         document.getElementById('lc-full-lyrics').value = data.fullLyrics;
-                    } else if (data.correctionType === 'insert' && data.insert) {
+                    } else if (data.correctionType === 'insert') {
                         document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
                         switchCorrectionType('insert');
-                        document.getElementById('lc-insert-position').value = data.insert.position || 'after';
-                        document.getElementById('lc-insert-line').value = data.insert.line || 1;
-                        document.getElementById('lc-insert-lyrics').value = data.insert.lyrics || '';
+                        // 支持多个插入项 (insertions) 或单个 (insert)
+                        const insertions = data.insertions || (data.insert ? [data.insert] : []);
+                        if (insertions.length > 0) {
+                            // 显示第一个插入项
+                            document.getElementById('lc-insert-position').value = insertions[0].position || 'after';
+                            document.getElementById('lc-insert-line').value = insertions[0].line || 1;
+                            document.getElementById('lc-insert-lyrics').value = insertions[0].lyrics || '';
+                        }
                     } else if (data.corrections) {
                         document.getElementById('lc-rows').innerHTML = '';
                         data.corrections.forEach(c => {
@@ -701,12 +706,17 @@
                         document.querySelector('input[name="correctionType"][value="full"]').checked = true;
                         switchCorrectionType('full');
                         document.getElementById('lc-full-lyrics').value = data.fullLyrics;
-                    } else if (data.correctionType === 'insert' && data.insert) {
+                    } else if (data.correctionType === 'insert') {
                         document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
                         switchCorrectionType('insert');
-                        document.getElementById('lc-insert-position').value = data.insert.position || 'after';
-                        document.getElementById('lc-insert-line').value = data.insert.line || 1;
-                        document.getElementById('lc-insert-lyrics').value = data.insert.lyrics || '';
+                        // 支持多个插入项 (insertions) 或单个 (insert)
+                        const insertions = data.insertions || (data.insert ? [data.insert] : []);
+                        if (insertions.length > 0) {
+                            // 显示第一个插入项
+                            document.getElementById('lc-insert-position').value = insertions[0].position || 'after';
+                            document.getElementById('lc-insert-line').value = insertions[0].line || 1;
+                            document.getElementById('lc-insert-lyrics').value = insertions[0].lyrics || '';
+                        }
                     } else if (data.corrections && data.corrections.length > 0) {
                         document.getElementById('lc-rows').innerHTML = '';
                         data.corrections.forEach(c => {

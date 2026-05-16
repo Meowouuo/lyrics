@@ -64,12 +64,13 @@ export default {
             labels = ['歌词纠错'];
             issueBody = buildFullReplacementBody({ songName, fullLyrics });
           } else if (correctionType === 'insert') {
-            if (!insertData || !insertData.lyrics) {
+            const insertions = data.insertions || (data.insert ? [data.insert] : []);
+            if (!insertions || insertions.length === 0) {
               return jsonResponse({ error: '插入行需要填写插入位置和歌词' }, 400);
             }
-            issueTitle = `[歌词纠错-插入行] ${songName}`;
+            issueTitle = `[歌词纠错-插入行] ${songName}（${insertions.length}处）`;
             labels = ['歌词纠错'];
-            issueBody = buildInsertBody({ songName, insertData });
+            issueBody = buildInsertBody({ songName, insertions });
           } else {
             if (!corrections || corrections.length === 0) {
               return jsonResponse({ error: '歌词纠错需要纠错内容' }, 400);
@@ -231,18 +232,25 @@ ${fullLyrics}
 *由网站投稿表单提交*`;
 }
 
-function buildInsertBody({ songName, insertData }) {
-  const posText = insertData.position === 'before' ? '前' : '后';
+function buildInsertBody({ songName, insertions }) {
+  const insertList = insertions.map((ins, i) => {
+    const posText = ins.position === 'before' ? '前' : '后';
+    return `### 插入 ${i + 1}
+- **位置：** 第${ins.line}行${posText}
+- **歌词：**
+\`\`\`
+${ins.lyrics}
+\`\`\``;
+  }).join('
+
+');
+  
   return `## 插入歌词
 
 **歌曲名称：** ${songName}
-**插入位置：** 第${insertData.line}行${posText}
+**插入数量：** ${insertions.length} 处
 
-## 要插入的歌词
-
-\`\`\`
-${insertData.lyrics}
-\`\`\`
+${insertList}
 
 ---
 *由网站投稿表单提交*`;
