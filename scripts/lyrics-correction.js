@@ -122,7 +122,7 @@ function processFullReplacement(content, body, songTitle) {
     const newLyricsStr = lyricsArray.map(item => {
         if (item.isBreak) return '            { paragraphBreak: true }';
         return `            { chars: [${item.chars}], jp: [${item.jp}] }`;
-    }).join(',\\n');
+    }).join(',\n');
 
     const newContent = content.replace(
         /lyrics:\s*\[[\s\S]*?\](?=\s*\};?)/,
