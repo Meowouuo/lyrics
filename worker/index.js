@@ -49,12 +49,35 @@ export default {
           break;
 
         case 'lyrics-correction':
-          if (!songName || !corrections || corrections.length === 0) {
-            return jsonResponse({ error: '歌词纠错需要歌曲名称和纠错内容' }, 400);
+          if (!songName) {
+            return jsonResponse({ error: '歌词纠错需要歌曲名称' }, 400);
           }
-          issueTitle = `[歌词纠错] ${songName}`;
-          labels = ['歌词纠错'];
-          issueBody = buildLyricsCorrectionBody({ songName, corrections });
+          const correctionType = data.correctionType || 'line';
+          const fullLyrics = data.fullLyrics;
+          const insertData = data.insert;
+          
+          if (correctionType === 'full') {
+            if (!fullLyrics) {
+              return jsonResponse({ error: '整首替换需要填写完整歌词' }, 400);
+            }
+            issueTitle = `[歌词纠错-整首替换] ${songName}`;
+            labels = ['歌词纠错'];
+            issueBody = buildFullReplacementBody({ songName, fullLyrics });
+          } else if (correctionType === 'insert') {
+            if (!insertData || !insertData.lyrics) {
+              return jsonResponse({ error: '插入行需要填写插入位置和歌词' }, 400);
+            }
+            issueTitle = `[歌词纠错-插入行] ${songName}`;
+            labels = ['歌词纠错'];
+            issueBody = buildInsertBody({ songName, insertData });
+          } else {
+            if (!corrections || corrections.length === 0) {
+              return jsonResponse({ error: '歌词纠错需要纠错内容' }, 400);
+            }
+            issueTitle = `[歌词纠错] ${songName}（${corrections.length}处）`;
+            labels = ['歌词纠错'];
+            issueBody = buildLyricsCorrectionBody({ songName, corrections });
+          }
           break;
 
         case 'delete-song':
@@ -188,6 +211,38 @@ function buildLyricsCorrectionBody({ songName, corrections }) {
 | 行号 | 原歌词 | 正确歌词 |
 |------|--------|----------|
 ${tableRows}
+
+---
+*由网站投稿表单提交*`;
+}
+
+function buildFullReplacementBody({ songName, fullLyrics }) {
+  return `## 整首歌词替换
+
+**歌曲名称：** ${songName}
+
+## 完整歌词
+
+\`\`\`
+${fullLyrics}
+\`\`\`
+
+---
+*由网站投稿表单提交*`;
+}
+
+function buildInsertBody({ songName, insertData }) {
+  const posText = insertData.position === 'before' ? '前' : '后';
+  return `## 插入歌词
+
+**歌曲名称：** ${songName}
+**插入位置：** 第${insertData.line}行${posText}
+
+## 要插入的歌词
+
+\`\`\`
+${insertData.lyrics}
+\`\`\`
 
 ---
 *由网站投稿表单提交*`;
