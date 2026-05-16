@@ -20,57 +20,96 @@ jobs:
       - name: Batch merge PRs and close Issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "将要合并的 PR: ${{ inputs.pr_numbers }}"
+          REPO="Meowouuo/lyrics"
+          API="https://api.github.com/repos/$REPO"
+          PRS="${{ inputs.pr_numbers }}"
+          
+          echo "将要合并的 PR: $PRS"
           echo ""
-          # 用逗号分隔 PR 编号，逐个合并
-          IFS=',' read -ra PRS <<< "${{ inputs.pr_numbers }}"
-          for pr in "${PRS[@]}"; do
+          
+          IFS=',' read -ra PR_LIST <<< "$PRS"
+          for pr in "${PR_LIST[@]}"; do
             pr=$(echo "$pr" | tr -d ' ')
-            if [ -n "$pr" ]; then
-              echo "正在处理 PR #$pr..."
+            if [ -z "$pr" ]; then continue; fi
               
-              # 获取 PR 信息
-              pr_info=$(gh pr view "$pr" --json title,body,headRefName --jq '.title + "|||" + .body + "|||" + .headRefName' 2>/dev/null || echo "")
-              
-              if [ -n "$pr_info" ]; then
-                pr_title=$(echo "$pr_info" | cut -d'|||' -f1)
-                pr_body=$(echo "$pr_info" | cut -d'|||' -f2)
-                branch_name=$(echo "$pr_info" | cut -d'|||' -f3)
-                
-                echo "  PR 标题: $pr_title"
-                
-                # 从 PR body 中提取 Issue 编号
-                issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
-                
-                # 从分支名中提取 Issue 编号（如 new-song/24-xxx）
-                if [ -z "$issue_number" ]; then
-                  issue_number=$(echo "$branch_name" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
-                fi
-                
-                # 合并 PR
-                echo "  正在合并 PR #$pr..."
-                if gh pr merge "$pr" --squash --delete-branch --auto; then
-                  echo "  ✅ PR #$pr 合并成功"
-                  
-                  # 关闭关联的 Issue
-                  if [ -n "$issue_number" ]; then
-                    echo "  正在关闭 Issue #$issue_number..."
-                    gh issue close "$issue_number" --comment "✅ 已通过 PR #$pr 自动合并并关闭" || echo "  Issue #$issue_number 关闭失败或已关闭"
-                    
-                    # 添加已完成标签
-                    gh issue edit "$issue_number" --add-label "已完成" 2>/dev/null || true
-                  else
-                    echo "  未找到关联的 Issue"
-                  fi
-                else
-                  echo "  ❌ PR #$pr 合并失败"
-                fi
-              else
-                echo "  无法获取 PR #$pr 信息，跳过"
-              fi
-              
+            echo "正在处理 PR #$pr..."
+            
+            # 获取 PR 信息（使用 REST API 替代 gh CLI）
+            pr_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API/pulls/$pr")
+            pr_state=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('state',''))" 2>/dev/null)
+            pr_merged=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
+            pr_title=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('title',''))" 2>/dev/null)
+            pr_body=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('body','') or '')" 2>/dev/null)
+            pr_head=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('head',{}).get('ref',''))" 2>/dev/null)
+            pr_mergeable=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('mergeable',False))" 2>/dev/null)
+            
+            if [ "$pr_state" = "closed" ]; then
+              echo "  ⏭️ PR #$pr 已关闭，跳过"
               echo ""
+              continue
             fi
+            
+            if [ "$pr_merged" = "True" ]; then
+              echo "  ⏭️ PR #$pr 已合并，跳过"
+              echo ""
+              continue
+            fi
+            
+            if [ -z "$pr_title" ]; then
+              echo "  ❌ 无法获取 PR #$pr 信息，跳过"
+              echo ""
+              continue
+            fi
+            
+            echo "  PR 标题: $pr_title"
+            echo "  可合并: $pr_mergeable"
+            
+            # 从 PR body 中提取 Issue 编号
+            issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+            
+            # 从分支名中提取 Issue 编号
+            if [ -z "$issue_number" ]; then
+              issue_number=$(echo "$pr_head" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
+            fi
+            
+            # 合并 PR
+            echo "  正在合并 PR #$pr..."
+            merge_result=$(curl -s -X PUT -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$API/pulls/$pr/merge" \
+              -d '{"merge_method":"squash"}')
+            
+            merge_ok=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
+            
+            if [ "$merge_ok" = "True" ]; then
+              echo "  ✅ PR #$pr 合并成功"
+              
+              # 关闭关联的 Issue
+              if [ -n "$issue_number" ]; then
+                echo "  正在关闭 Issue #$issue_number..."
+                curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "$API/issues/$issue_number" \
+                  -d '{"state":"closed"}' > /dev/null 2>&1
+                
+                # 添加已完成标签
+                curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "$API/issues/$issue_number/labels" \
+                  -d '["已完成"]' > /dev/null 2>&1
+                
+                echo "  📌 Issue #$issue_number 已关闭"
+              else
+                echo "  未找到关联的 Issue"
+              fi
+            else
+              merge_msg=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('message',''))" 2>/dev/null)
+              echo "  ❌ PR #$pr 合并失败: $merge_msg"
+            fi
+            
+            echo ""
           done
+          
           echo "✅ 批量处理完成"
