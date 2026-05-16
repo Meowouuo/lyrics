@@ -251,8 +251,8 @@ function processInsertLine(content, body, songTitle) {
         }).filter(Boolean);
         
         const lines = newContent.split('\n');
-        // 行号计算与前端一致：每个segment算一行（按空格分割）
-        let lineCount = 0;
+        // 行号计算与前端一致：每个segment算一行（按空格分割），从1开始（与用户看到的行号一致）
+        let lineCount = 1;
         let insertIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
@@ -338,9 +338,9 @@ function processLineByLine(content, body, songTitle) {
         }
         
         // 查找并替换歌词
-        // 行号计算与前端一致：每个segment算一行（按空格分割）
+        // 行号计算与前端一致：每个segment算一行（按空格分割），从1开始（与用户看到的行号一致）
         const lines = newContent.split('\n');
-        let lineCount = 0;
+        let lineCount = 1;
         let targetIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
