@@ -302,23 +302,26 @@
                 <!-- 插入行 -->
                 <div id="correction-insert" class="correction-section" style="display:none;">
                     <div id="lc-insert-list" style="margin-bottom:16px;"></div>
-                    <div class="form-group">
-                        <label>添加新的插入</label>
-                        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
-                            <select id="lc-insert-position" style="flex:1;padding:10px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;">
-                                <option value="before">在第...行前插入</option>
-                                <option value="after">在第...行后插入</option>
-                            </select>
-                            <input type="number" id="lc-insert-line" placeholder="行号" min="1" style="flex:0.5;padding:10px;border:1px solid #d9d9d9;border-radius:6px;">
+                    <!-- 手动添加区域（有预填充数据时隐藏） -->
+                    <div id="lc-insert-manual">
+                        <div class="form-group">
+                            <label>添加新的插入</label>
+                            <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                                <select id="lc-insert-position" style="flex:1;padding:10px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;">
+                                    <option value="before">在第...行前插入</option>
+                                    <option value="after">在第...行后插入</option>
+                                </select>
+                                <input type="number" id="lc-insert-line" placeholder="行号" min="1" style="flex:0.5;padding:10px;border:1px solid #d9d9d9;border-radius:6px;">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>要插入的歌词 <span class="required">*</span></label>
-                        <textarea id="lc-insert-lyrics" rows="4" placeholder="请粘贴要插入的歌词&#10;&#10;可以插入多行，每行一句" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
-                        <div style="margin-top:8px;">
-                            <button type="button" onclick="addInsertItem()" style="padding:8px 16px;background:#28a745;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;">+ 添加到列表</button>
+                        <div class="form-group">
+                            <label>要插入的歌词 <span class="required">*</span></label>
+                            <textarea id="lc-insert-lyrics" rows="4" placeholder="请粘贴要插入的歌词&#10;&#10;可以插入多行，每行一句" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
+                            <div style="margin-top:8px;">
+                                <button type="button" onclick="addInsertItem()" style="padding:8px 16px;background:#28a745;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;">+ 添加到列表</button>
+                            </div>
+                            <div class="hint">支持一次插入多行歌词，可多次添加不同位置的插入</div>
                         </div>
-                        <div class="hint">支持一次插入多行歌词，可多次添加不同位置的插入</div>
                     </div>
                 </div>
 
@@ -589,10 +592,17 @@
         // 渲染插入列表
         function renderInsertList() {
             const container = document.getElementById('lc-insert-list');
+            const manualArea = document.getElementById('lc-insert-manual');
+            
             if (insertItems.length === 0) {
                 container.innerHTML = '<div style="color:#999;font-size:13px;">暂无插入项</div>';
+                if (manualArea) manualArea.style.display = 'block';
                 return;
             }
+            
+            // 有插入项时隐藏手动输入区域
+            if (manualArea) manualArea.style.display = 'none';
+            
             container.innerHTML = insertItems.map((item, i) => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:8px;background:#f5f5f5;border-radius:6px;">
                     <div>
@@ -608,6 +618,7 @@
         function removeInsertItem(index) {
             insertItems.splice(index, 1);
             renderInsertList();
+            // renderInsertList 会自动处理手动输入区域的显示/隐藏
         }
 
         // 删除歌曲数据
