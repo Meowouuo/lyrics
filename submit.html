@@ -624,9 +624,11 @@
         addLcRow();
 
         // 优先读取 localStorage（从纠错/改歌词模式跳转过来）
-        const stored = localStorage.getItem('submitForm');
-        if (stored) {
-            localStorage.removeItem('submitForm');
+        // 使用 setTimeout 确保 localStorage 数据已写入
+        setTimeout(() => {
+            const stored = localStorage.getItem('submitForm');
+            if (stored) {
+                localStorage.removeItem('submitForm');
             try {
                 const data = JSON.parse(stored);
                 if (data.type === 'jyutping' && data.corrections) {
@@ -695,7 +697,7 @@
                     document.getElementById('lc-song').value = song;
                 }
             }
-        }
+        }, 100); // 延迟 100ms 确保数据已写入
     </script>
 </body>
 </html>
