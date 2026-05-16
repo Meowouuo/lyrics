@@ -301,8 +301,9 @@
 
                 <!-- 插入行 -->
                 <div id="correction-insert" class="correction-section" style="display:none;">
+                    <div id="lc-insert-list" style="margin-bottom:16px;"></div>
                     <div class="form-group">
-                        <label>插入位置</label>
+                        <label>添加新的插入</label>
                         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
                             <select id="lc-insert-position" style="flex:1;padding:10px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;">
                                 <option value="before">在第...行前插入</option>
@@ -313,8 +314,11 @@
                     </div>
                     <div class="form-group">
                         <label>要插入的歌词 <span class="required">*</span></label>
-                        <textarea id="lc-insert-lyrics" rows="8" placeholder="请粘贴要插入的歌词&#10;&#10;可以插入多行，每行一句" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
-                        <div class="hint">支持一次插入多行歌词</div>
+                        <textarea id="lc-insert-lyrics" rows="4" placeholder="请粘贴要插入的歌词&#10;&#10;可以插入多行，每行一句" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
+                        <div style="margin-top:8px;">
+                            <button type="button" onclick="addInsertItem()" style="padding:8px 16px;background:#28a745;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;">+ 添加到列表</button>
+                        </div>
+                        <div class="hint">支持一次插入多行歌词，可多次添加不同位置的插入</div>
                     </div>
                 </div>
 
@@ -529,16 +533,12 @@
                 payload.fullLyrics = fullLyrics;
 
             } else if (correctionType === 'insert') {
-                // 插入行
-                const position = document.getElementById('lc-insert-position').value;
-                const line = document.getElementById('lc-insert-line').value.trim();
-                const insertLyrics = document.getElementById('lc-insert-lyrics').value.trim();
-                
-                if (!line || !insertLyrics) {
-                    showResult('lc-result', false, '请填写插入位置和歌词');
+                // 插入行 - 收集所有插入项
+                if (insertItems.length === 0) {
+                    showResult('lc-result', false, '请至少添加一个插入项');
                     return;
                 }
-                payload.insert = { position, line: parseInt(line), lyrics: insertLyrics };
+                payload.insertions = insertItems;
             }
 
             const btn = document.querySelector('#panel-lyrics .submit-btn');
@@ -710,12 +710,10 @@
                         document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
                         switchCorrectionType('insert');
                         // 支持多个插入项 (insertions) 或单个 (insert)
-                        const insertions = data.insertions || (data.insert ? [data.insert] : []);
-                        if (insertions.length > 0) {
-                            // 显示第一个插入项
-                            document.getElementById('lc-insert-position').value = insertions[0].position || 'after';
-                            document.getElementById('lc-insert-line').value = insertions[0].line || 1;
-                            document.getElementById('lc-insert-lyrics').value = insertions[0].lyrics || '';
+                        const storedInsertions = data.insertions || (data.insert ? [data.insert] : []);
+                        if (storedInsertions.length > 0) {
+                            insertItems = storedInsertions;
+                            renderInsertList();
                         }
                     } else if (data.corrections && data.corrections.length > 0) {
                         document.getElementById('lc-rows').innerHTML = '';
