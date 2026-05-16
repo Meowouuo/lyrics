@@ -354,9 +354,15 @@ function selectInsertLine(event, lineIndex) {
     event.stopPropagation();
     
     const song = window.currentSong;
+    // lineIndex 是 DOM 元素的索引，需要映射到 song.lyrics 的索引
+    const lyricsLines = document.querySelectorAll('.lyric-line');
+    const dataIndex = parseInt(lyricsLines[lineIndex].dataset.line);
+    
+    if (dataIndex >= song.lyrics.length) return;
+    
     let lineNum = 0;
-    for (let i = 0; i <= lineIndex; i++) {
-        if (song.lyrics[i].chars) lineNum++;
+    for (let i = 0; i <= dataIndex; i++) {
+        if (song.lyrics[i] && song.lyrics[i].chars) lineNum++;
     }
     
     const input = document.getElementById('insertLineInput');
@@ -588,5 +594,6 @@ function addEditStyles() {
 
 window.EditLyricsModule = {
     toggle: toggleEditLyricsMode,
-    isActive: () => editLyricsMode
+    isActive: () => editLyricsMode,
+    handleLineClick: handleLineClick
 };
