@@ -265,7 +265,8 @@ function processInsertLine(content, body, songTitle) {
             `            { chars: [${item.chars}], jp: [${item.jp}] },`
         );
         
-        lines.splice(insertIndex + 1, 0, ...insertContent);
+        const spliceIndex = insertion.position === 'before' ? insertIndex : insertIndex + 1;
+        lines.splice(spliceIndex, 0, ...insertContent);
         newContent = lines.join('\n');
         totalInsertedLines += insertArray.length;
     }
