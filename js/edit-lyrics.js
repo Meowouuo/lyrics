@@ -41,17 +41,17 @@ function showEditTypeSelector() {
         <div class="edit-type-title">选择编辑方式</div>
         <div class="edit-type-options">
             <div class="edit-type-option" onclick="selectEditType('line')">
-                <div class="edit-type-icon">✏️</div>
+                <div class="edit-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
                 <div class="edit-type-name">逐行纠错</div>
                 <div class="edit-type-desc">点击歌词行进行编辑</div>
             </div>
             <div class="edit-type-option" onclick="selectEditType('full')">
-                <div class="edit-type-icon">🔄</div>
+                <div class="edit-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg></div>
                 <div class="edit-type-name">整首替换</div>
                 <div class="edit-type-desc">粘贴完整歌词替换整首</div>
             </div>
             <div class="edit-type-option" onclick="selectEditType('insert')">
-                <div class="edit-type-icon">➕</div>
+                <div class="edit-type-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
                 <div class="edit-type-name">插入行</div>
                 <div class="edit-type-desc">在指定位置插入新歌词</div>
             </div>
@@ -382,7 +382,7 @@ function showEditBanner(title, subtitle) {
     banner.id = 'editModeBanner';
     banner.innerHTML = `
         <div>
-            <div class="edit-mode-banner-title">📝 ${title}</div>
+            <div class="edit-mode-banner-title"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg> ${title}</div>
             <div style="font-size:12px;opacity:0.9;">${subtitle}</div>
         </div>
         <div class="edit-mode-banner-actions">
@@ -671,10 +671,10 @@ function updateEditLyricsBtn() {
     const btn = document.querySelector('.toolbar-btn[onclick="EditLyricsModule.toggle()"]');
     if (!btn) return;
     if (editLyricsMode) {
-        btn.innerHTML = '<span class="icon">📝</span><span>退出改歌词</span>';
+        btn.innerHTML = '<span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg></span><span>退出改歌词</span>';
         btn.style.color = '#28a745';
     } else {
-        btn.innerHTML = '<span class="icon">📝</span><span>改歌词</span>';
+        btn.innerHTML = '<span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg></span><span>改歌词</span>';
         btn.style.color = '';
     }
 }
