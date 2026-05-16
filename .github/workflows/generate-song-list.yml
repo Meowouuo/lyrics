@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths: ['lyrics/**']
 
+# 并发控制：防止多个 Actions 同时操作 git
+concurrency:
+  group: generate-manifest
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -34,4 +39,26 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet songFiles.js || (git add songFiles.js && git commit -m "chore: 自动更新歌曲清单" && git push)
+          
+          # 检查是否有变更
+          if git diff --quiet songFiles.js; then
+            echo "无变更，跳过提交"
+            exit 0
+          fi
+          
+          git add songFiles.js
+          git commit -m "chore: 自动更新歌曲清单"
+          
+          # 重试机制：最多尝试 3 次
+          for i in 1 2 3; do
+            echo "尝试 push (第 $i 次)..."
+            if git pull --rebase origin main && git push; then
+              echo "✅ Push 成功"
+              exit 0
+            fi
+            echo "❌ Push 失败，等待 5 秒后重试..."
+            sleep 5
+          done
+          
+          echo "❌ 重试 3 次后仍失败"
+          exit 1
