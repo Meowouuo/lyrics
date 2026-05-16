@@ -97,12 +97,34 @@ function detectCorrectionType(body) {
 
 // 整首替换
 function processFullReplacement(content, body, songTitle) {
-    const lyricsMatch = body.match(/完整歌词[\\s\\S]*?```\\s*([\\s\\S]*?)\\s*```/);
-    if (!lyricsMatch) {
-        return { success: false, message: '❌ 未找到完整歌词' };
+    // 尝试多种格式匹配歌词
+    let fullLyrics = null;
+    
+    // 格式1: 代码块 ```歌词```
+    const codeBlockMatch = body.match(/完整歌词[\s\S]*?```\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) {
+        fullLyrics = codeBlockMatch[1].trim();
     }
-
-    const fullLyrics = lyricsMatch[1].trim();
+    
+    // 格式2: ## 完整歌词 标题后的内容（直到下一个 ## 或结尾）
+    if (!fullLyrics) {
+        const headingMatch = body.match(/##\s*完整歌词\s*\n([\s\S]*?)(?=\n##\s|$)/);
+        if (headingMatch) {
+            fullLyrics = headingMatch[1].trim();
+        }
+    }
+    
+    // 格式3: 整首歌词替换 后的任意内容
+    if (!fullLyrics) {
+        const simpleMatch = body.match(/整首歌词替换[\s\S]*?\n([\s\S]*?)(?=\n##\s|$)/);
+        if (simpleMatch) {
+            fullLyrics = simpleMatch[1].trim();
+        }
+    }
+    
+    if (!fullLyrics) {
+        return { success: false, message: '❌ 未找到完整歌词，请使用代码块(```)或##完整歌词标题提供歌词' };
+    }
     const dict = loadJyutpingDict();
 
     // 解析歌词为段落
@@ -152,19 +174,33 @@ function processFullReplacement(content, body, songTitle) {
 
 // 插入行
 function processInsertLine(content, body, songTitle) {
-    const lyricsMatch = body.match(/要插入的歌词[\\s\\S]*?```\\s*([\\s\\S]*?)\\s*```/);
-    if (!lyricsMatch) {
-        return { success: false, message: '❌ 未找到要插入的歌词' };
+    // 尝试多种格式匹配要插入的歌词
+    let insertLyrics = null;
+    
+    // 格式1: 代码块 ```歌词```
+    const codeBlockMatch = body.match(/要插入的歌词[\s\S]*?```\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) {
+        insertLyrics = codeBlockMatch[1].trim();
+    }
+    
+    // 格式2: ## 要插入的歌词 标题后的内容
+    if (!insertLyrics) {
+        const headingMatch = body.match(/##\s*要插入的歌词\s*\n([\s\S]*?)(?=\n##\s|$)/);
+        if (headingMatch) {
+            insertLyrics = headingMatch[1].trim();
+        }
+    }
+    
+    if (!insertLyrics) {
+        return { success: false, message: '❌ 未找到要插入的歌词，请使用代码块(```)或##要插入的歌词标题提供歌词' };
     }
 
     // 解析行号
     let insertLine = 1;
     let position = 'after';
-    const lineMatch = body.match(/第\\s*(\\d+)\\s*行/);
+    const lineMatch = body.match(/第\s*(\d+)\s*行/);
     if (lineMatch) insertLine = parseInt(lineMatch[1]);
     if (body.includes('前')) position = 'before';
-
-    const insertLyrics = lyricsMatch[1].trim();
     const dict = loadJyutpingDict();
 
     const insertLines = insertLyrics.split('\\n').filter(l => l.trim());
