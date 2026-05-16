@@ -254,24 +254,74 @@
                     <label>歌曲名称 <span class="required">*</span></label>
                     <input type="text" id="lc-song" placeholder="例如：喜欢你">
                 </div>
+                
+                <!-- 纠错类型选择 -->
                 <div class="form-group">
-                    <label>纠错内容 <span class="required">*</span></label>
-                    <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
-                        <input placeholder="行号" style="flex:0.5;">
-                        <input placeholder="原歌词" style="flex:1;">
-                        <input placeholder="正确歌词" style="flex:1;">
-                        <div style="width:28px;"></div>
+                    <label>纠错类型 <span class="required">*</span></label>
+                    <div class="correction-type" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                        <label class="type-label active" id="type-line-label" onclick="selectCorrectionType('line')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #1890ff;border-radius:6px;background:#e6f7ff;">
+                            <input type="radio" name="correctionType" value="line" checked onchange="switchCorrectionType('line')" style="margin:0;">
+                            <span>逐行修改</span>
+                        </label>
+                        <label class="type-label" id="type-full-label" onclick="selectCorrectionType('full')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;">
+                            <input type="radio" name="correctionType" value="full" onchange="switchCorrectionType('full')" style="margin:0;">
+                            <span>整首替换</span>
+                        </label>
+                        <label class="type-label" id="type-insert-label" onclick="selectCorrectionType('insert')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;">
+                            <input type="radio" name="correctionType" value="insert" onchange="switchCorrectionType('insert')" style="margin:0;">
+                            <span>插入行</span>
+                        </label>
                     </div>
-                    <div id="lc-rows"></div>
-                    <button class="add-row-btn" onclick="addLcRow()">+ 添加一行</button>
-                    <div class="hint">请先在歌词页面找到需要纠错的行号</div>
                 </div>
+
+                <!-- 逐行修改 -->
+                <div id="correction-line" class="correction-section">
+                    <div class="form-group">
+                        <label>纠错内容</label>
+                        <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
+                            <input placeholder="行号" style="flex:0.5;">
+                            <input placeholder="原歌词" style="flex:1;">
+                            <input placeholder="正确歌词" style="flex:1;">
+                            <div style="width:28px;"></div>
+                        </div>
+                        <div id="lc-rows"></div>
+                        <button class="add-row-btn" onclick="addLcRow()">+ 添加一行</button>
+                        <div class="hint">请先在歌词页面找到需要纠错的行号</div>
+                    </div>
+                </div>
+
+                <!-- 整首替换 -->
+                <div id="correction-full" class="correction-section" style="display:none;">
+                    <div class="form-group">
+                        <label>完整歌词 <span class="required">*</span></label>
+                        <textarea id="lc-full-lyrics" rows="15" placeholder="请粘贴完整的替换歌词&#10;&#10;格式说明：&#10;- 每句歌词单独一行&#10;- 段落之间空一行&#10;- 系统会自动匹配粤拼音标" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
+                        <div class="hint">此操作将完全替换原歌曲的所有歌词</div>
+                    </div>
+                </div>
+
+                <!-- 插入行 -->
+                <div id="correction-insert" class="correction-section" style="display:none;">
+                    <div class="form-group">
+                        <label>插入位置</label>
+                        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                            <select id="lc-insert-position" style="flex:1;padding:10px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;">
+                                <option value="before">在第...行前插入</option>
+                                <option value="after">在第...行后插入</option>
+                            </select>
+                            <input type="number" id="lc-insert-line" placeholder="行号" min="1" style="flex:0.5;padding:10px;border:1px solid #d9d9d9;border-radius:6px;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>要插入的歌词 <span class="required">*</span></label>
+                        <textarea id="lc-insert-lyrics" rows="8" placeholder="请粘贴要插入的歌词&#10;&#10;可以插入多行，每行一句" style="width:100%;padding:12px;border:1px solid #d9d9d9;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
+                        <div class="hint">支持一次插入多行歌词</div>
+                    </div>
+                </div>
+
                 <button class="submit-btn" onclick="submitLyricsCorrection()">提交纠错</button>
                 <div class="result" id="lc-result"></div>
             </div>
-        </div>
-
-        <!-- 删除歌曲 -->
+        </div><!-- 删除歌曲 -->
         <div class="panel" id="panel-delete">
             <div class="form-card">
                 <div class="form-group">
@@ -407,7 +457,27 @@
             }
         }
 
-        // 歌词纠错行管理
+        // 歌词纠错类型切换
+        function selectCorrectionType(type) {
+            document.querySelectorAll('.type-label').forEach(label => {
+                label.style.borderColor = '#e0e0e0';
+                label.style.background = '#fff';
+                label.classList.remove('active');
+            });
+            document.getElementById('type-' + type + '-label').style.borderColor = '#1890ff';
+            document.getElementById('type-' + type + '-label').style.background = '#e6f7ff';
+            document.getElementById('type-' + type + '-label').classList.add('active');
+        }
+
+        function switchCorrectionType(type) {
+            document.querySelectorAll('.correction-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById('correction-' + type).style.display = 'block';
+            selectCorrectionType(type);
+        }
+
+        // 原有的歌词纠错行管理
         function addLcRow() {
             const container = document.getElementById('lc-rows');
             const row = document.createElement('div');
@@ -428,20 +498,47 @@
                 return;
             }
 
-            const rows = document.querySelectorAll('#lc-rows .correction-row');
-            const corrections = [];
-            rows.forEach(row => {
-                const line = row.querySelector('.lc-line')?.value.trim();
-                const originalText = row.querySelector('.lc-original')?.value.trim();
-                const newText = row.querySelector('.lc-new')?.value.trim();
-                if (line && newText) {
-                    corrections.push({ line, originalText, newText });
-                }
-            });
+            const correctionType = document.querySelector('input[name="correctionType"]:checked').value;
+            let payload = { type: 'lyrics-correction', songName, correctionType };
 
-            if (corrections.length === 0) {
-                showResult('lc-result', false, '请至少添加一行纠错');
-                return;
+            if (correctionType === 'line') {
+                // 逐行修改
+                const rows = document.querySelectorAll('#lc-rows .correction-row');
+                const corrections = [];
+                rows.forEach(row => {
+                    const line = row.querySelector('.lc-line')?.value.trim();
+                    const originalText = row.querySelector('.lc-original')?.value.trim();
+                    const newText = row.querySelector('.lc-new')?.value.trim();
+                    if (line && newText) {
+                        corrections.push({ line, originalText, newText });
+                    }
+                });
+                if (corrections.length === 0) {
+                    showResult('lc-result', false, '请至少添加一行纠错');
+                    return;
+                }
+                payload.corrections = corrections;
+
+            } else if (correctionType === 'full') {
+                // 整首替换
+                const fullLyrics = document.getElementById('lc-full-lyrics').value.trim();
+                if (!fullLyrics) {
+                    showResult('lc-result', false, '请填写完整歌词');
+                    return;
+                }
+                payload.fullLyrics = fullLyrics;
+
+            } else if (correctionType === 'insert') {
+                // 插入行
+                const position = document.getElementById('lc-insert-position').value;
+                const line = document.getElementById('lc-insert-line').value.trim();
+                const insertLyrics = document.getElementById('lc-insert-lyrics').value.trim();
+                
+                if (!line || !insertLyrics) {
+                    showResult('lc-result', false, '请填写插入位置和歌词');
+                    return;
+                }
+                payload.insert = { position, line: parseInt(line), lyrics: insertLyrics };
             }
 
             const btn = document.querySelector('#panel-lyrics .submit-btn');
@@ -452,7 +549,7 @@
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'lyrics-correction', songName, corrections }),
+                    body: JSON.stringify(payload),
                 });
                 const data = await res.json();
                 if (data.success) {
