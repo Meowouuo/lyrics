@@ -54,7 +54,7 @@ function processNewSong() {
             if (previewLines.length < 5) {
                 previewLines.push({
                     text: matched.map(m => m.char).join(''),
-                    jp: matched.map(m => m.jp || '?').join(' '),
+                    jp: matched.map(m => m.jp || '?').filter(jp => jp !== '').join(' '),
                 });
             }
         });
