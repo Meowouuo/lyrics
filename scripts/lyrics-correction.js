@@ -119,7 +119,7 @@ function processFullReplacement(content, body, songTitle) {
                 jp: matched.map(m => {
                     // 汉字、字母、数字保留粤拼，符号设为空字符串
                     if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
-                        return `"${m.jp || '?'}"`;
+                        return `"${m.jp}"`;
                     }
                     return `""`;
                 }).join(', ')
@@ -238,7 +238,7 @@ function processInsertLine(content, body, songTitle) {
                 chars: matched.map(m => `"${m.char}"`).join(', '),
                 jp: matched.map(m => {
                     if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
-                        return `"${m.jp || '?'}"`;
+                        return `"${m.jp}"`;
                     }
                     return `""`;
                 }).join(', ')
@@ -379,7 +379,7 @@ function processLineByLine(content, body, songTitle) {
         const newChars = matched.map(m => `"${m.char}"`).join(', ');
         const newJp = matched.map(m => {
             if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
-                return `"${m.jp || '?'}"`;
+                return `"${m.jp}"`;
             }
             return `""`;
         }).join(', ');

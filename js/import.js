@@ -53,7 +53,7 @@ function previewImport() {
                 matched.forEach(m => {
                     const jpClass = m.jp ? '' : 'style="color:#dc3545;"'; // 没有匹配到的字显示红色
                     previewHtml += `<span class="import-preview-char">
-                        <span class="import-preview-jp" ${jpClass}>${m.jp || '?'}</span>
+                        <span class="import-preview-jp" ${jpClass}>${m.jp}</span>
                         <span class="import-preview-hanzi">${m.char}</span>
                     </span>`;
                 });
