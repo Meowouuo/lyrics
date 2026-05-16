@@ -4,10 +4,8 @@ on:
   push:
     branches: [main]
     paths: ['lyrics/**']
-  # 也支持手动触发
   workflow_dispatch:
 
-# 并发控制：防止多个 Actions 同时操作
 concurrency:
   group: generate-manifest
   cancel-in-progress: false
@@ -26,10 +24,8 @@ jobs:
 
       - name: Scan lyrics directory and generate manifest
         run: |
-          # 扫描 lyrics 目录下所有 .js 文件，生成 JSON 数组
           files=$(find lyrics -maxdepth 1 -name '*.js' -type f | sort)
           
-          # 生成 JSON
           echo "// 歌曲清单（自动生成，请勿手动修改）" > songFiles.js
           echo "const songFiles = [" >> songFiles.js
           for f in $files; do
@@ -47,30 +43,27 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 检查是否有变更
           if git diff --quiet songFiles.js; then
             echo "无变更，跳过提交"
             exit 0
           fi
           
-          # 创建分支
           branch="auto/update-songfiles-$(date +%Y%m%d-%H%M%S)"
           git checkout -b "$branch"
           git add songFiles.js
           git commit -m "chore: 自动更新歌曲清单"
           git push origin "$branch"
           
-          # 创建 PR 并自动合并
-          pr_url=$(gh pr create \
+          # 创建 PR（不使用 --json）
+          gh pr create \
             --title "chore: 自动更新歌曲清单" \
             --body "此 PR 由 Actions 自动生成，更新 \`songFiles.js\` 以包含最新的歌曲文件。" \
             --base main \
-            --head "$branch" \
-            --json url --jq '.url')
+            --head "$branch"
           
-          echo "PR 已创建: $pr_url"
+          echo "PR 已创建"
           
           # 等待几秒后自动合并
           sleep 3
-          gh pr merge --squash --delete-branch
-          echo "✅ PR 已自动合并"
+          gh pr merge --squash --delete-branch || echo "合并失败，请手动合并"
+          echo "✅ 完成"
