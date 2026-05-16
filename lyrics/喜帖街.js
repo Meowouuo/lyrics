@@ -51,7 +51,7 @@
             { chars: ["阶","砖","不","会","拒","绝","磨","蚀"], jp: ["gaai1","zyun1","bat1","wui6","keoi5","zyut6","mo4","sik6"] },
             { chars: ["窗","花","不","可","幽","禁","落","霞"], jp: ["coeng1","faa1","bat1","ho2","jau1","gam3","lok6","haa4"] },
             { chars: ["有","感","情","就","会","一","生","一","世","吗","？"], jp: ["jau5","gam2","cing4","zau6","wui6","jat1","sang1","jat1","sai3","maa1",""] },
-            { chars: ["又","再","惋","惜","有","用","吗","？"], jp: ["jau6","zoi3","wun2","sik1","jau5","jung6","maa1",""] },
+            { chars: ["又","再","惋","惜","有","用","吗","？"], jp: ["jau6", "zoi3", "jyun2", "sik1", "jau5", "jung6", "maa1", ""] },
             { paragraphBreak: true },
             { chars: ["忘","掉","爱","过","的","他"], jp: ["mong4","diu6","ngoi3","gwo3","dik1","taa1"] },
             { chars: ["当","初","的","囍","帖","金","箔","印","着","那","位","他"], jp: ["dong1","co1","dik1","hei2","tip3","gam1","bok6","jan3","zoek6","naa5","wai6","taa1"] },
@@ -65,7 +65,7 @@
             { chars: ["到","期","拿","回","吗","？"], jp: ["dou3","kei4","naa4","wui4","maa1",""] },
             { chars: ["终","须","会","时","辰","到","别","怕"], jp: ["zung1","seoi1","wui6","si4","san4","dou3","bit6","paa3"] },
             { paragraphBreak: true },
-            { chars: ["请","放","下","手","里","那","锁","匙","好","吗","？"], jp: ["cing2","fong3","haa6","sau2","lei5","naa5","so2","ci4","hou2","maa1",""] }
+            { chars: ["请","放","下","手","里","那","锁","匙","好","吗","？"], jp: ["cing2", "fong3", "haa6", "sau2", "leoi5", "naa5", "so2", "si4", "hou2", "maa1", ""] }
         ]
     };
     if (typeof window !== 'undefined' && window.__songs) {
