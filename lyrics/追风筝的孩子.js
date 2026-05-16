@@ -2,7 +2,7 @@
 
 (function() {
     const song = {
-        id: 31,
+        id: 36,
         title: "追风筝的孩子",
         titleJyutping: ["zeoi1","fung1","zang1","dik1","haai4","zi2"],
         artist: "张敬轩",
