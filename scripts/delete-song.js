@@ -104,7 +104,7 @@ ${notFound.length > 0 ? `\n### ⚠️ 未找到的歌曲\n${notFound.map(n => `-
 `;
 
     const prTitle = `chore: 删除 ${deletedFiles.length} 首歌曲`;
-    createPR(prTitle, prBody, branchName);
+    createPR(prTitle, prBody, branchName, issue.number);
 
     addComment(issue.number, `✅ 已自动删除 ${deletedFiles.length} 首歌曲并创建 [Pull Request](${prTitle})。
 

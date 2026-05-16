@@ -141,7 +141,7 @@ ${previewMarkdown}
 `;
 
     const prTitle = `feat: 新增歌曲《${title}》- ${artist}`;
-    createPR(prTitle, prBody, branchName);
+    createPR(prTitle, prBody, branchName, issue.number);
 
     // 在 Issue 中评论
     addComment(issue.number, `✅ 已自动生成歌曲文件并创建 [Pull Request](${prTitle})。
