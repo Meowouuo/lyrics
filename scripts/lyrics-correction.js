@@ -292,6 +292,13 @@ function processInsertLine(content, body, songTitle) {
         });
         
         const spliceIndex = insertion.position === 'before' ? insertIndex : insertIndex + 1;
+        // 如果是 after 插入，检查目标行末尾是否有逗号，没有则补上（避免在数组末尾插入时语法错误）
+        if (insertion.position === 'after' && insertIndex < lines.length) {
+            const targetLine = lines[insertIndex].trimEnd();
+            if (targetLine.endsWith('}') && !targetLine.endsWith('},')) {
+                lines[insertIndex] = targetLine.slice(0, -1) + '},';
+            }
+        }
         lines.splice(spliceIndex, 0, ...insertContent);
         newContent = lines.join('\n');
         totalInsertedLines += insertArray.length;
