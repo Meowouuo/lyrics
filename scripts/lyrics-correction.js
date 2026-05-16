@@ -45,7 +45,7 @@ function matchJyutping(text, dict) {
 function processLyricsCorrection() {
     const issue = getIssueInfo();
 
-    const songTitle = parseField(issue.body, '歌曲名称').replace(/\\*+/g, '').trim();
+    const songTitle = parseField(issue.body, '歌曲名称').replace(/\*+/g, '').trim();
     if (!songTitle) {
         addComment(issue.number, '❌ 未找到歌曲名称');
         return;
