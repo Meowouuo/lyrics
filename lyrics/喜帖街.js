@@ -23,7 +23,7 @@
             { chars: ["永","远","也","不","差"], jp: ["wing5","jyun5","jaa5","bat1","caa1"] },
             { paragraphBreak: true },
             { chars: ["就","似","这","一","区"], jp: ["zau6","ci5","ze5","jat1","keoi1"] },
-            { chars: ["曾","经","称","得","上","美","满","甲","天","下"], jp: ["zang1","ging1","cing1","dak1","soeng6","mei5","mun5","gaap3","tin1","haa6"] },
+            { chars: ["曾","经","称","得","上","美","满","甲","天","下"], jp: ["cang4", "ging1", "cing1", "dak1", "soeng6", "mei5", "mun5", "gaap3", "tin1", "haa6"] },
             { chars: ["但","霎","眼"], jp: ["daan6","saap3","ngaan5"] },
             { chars: ["全","街","的","单","位","快","要","住","满","乌","鸦"], jp: ["cyun4","gaai1","dik1","daan1","wai6","faai3","jiu3","zyu6","mun5","wu1","aa1"] },
             { paragraphBreak: true },
