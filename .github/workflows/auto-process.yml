@@ -2,7 +2,7 @@ name: Auto Process Issues
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, reopened]
 
 jobs:
   process-issue:
