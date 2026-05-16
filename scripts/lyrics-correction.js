@@ -125,8 +125,8 @@ function processFullReplacement(content, body, songTitle) {
     }).join(',\\n');
 
     const newContent = content.replace(
-        /lyrics:\s*\\[[\\s\\S]*?\\](?=\\s*\\};?)/,
-        `lyrics: [\\n${newLyricsStr}\\n        ]`
+        /lyrics:\s*\[[\s\S]*?\](?=\s*\};?)/,
+        `lyrics: [\n${newLyricsStr}\n        ]`
     );
 
     if (newContent === content) {
