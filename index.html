@@ -1565,6 +1565,12 @@
         renderSongList();
         renderLyrics();
 
+        // 滚动歌词到顶部
+        const lyricsView = document.getElementById('lyricsView');
+        if (lyricsView) {
+            lyricsView.scrollTop = 0;
+        }
+
         // Mobile: switch to lyrics view
         if (window.innerWidth < 1024) {
             document.getElementById('appContainer').classList.add('view-lyrics');
