@@ -128,7 +128,16 @@ function enterInsertMode() {
     const lyricsContent = document.getElementById('lyricsContent');
     lyricsContent.classList.add('edit-lyrics-mode');
     const song = window.currentSong;
-    const maxLine = song.lyrics.filter(l => l.chars).length;
+    // 计算最大显示行号（考虑segment分割）
+    let maxLine = 0;
+    song.lyrics.forEach(l => {
+        if (!l.chars) return;
+        let segments = 1;
+        for (const c of l.chars) {
+            if (c === ' ') segments++;
+        }
+        maxLine += segments;
+    });
     
     showEditBanner('插入行', '选择位置并输入歌词，确认后添加到列表');
     enableTitleEditing();
@@ -265,11 +274,18 @@ function updateEditList() {
     // 逐行纠错
     const song = window.currentSong;
     editedLyrics.forEach((item, idx) => {
-        // 计算实际歌词行号（排除 paragraphBreak）
+        // 计算 displayLine（segment-based，与渲染逻辑一致）
         let displayLine = 0;
-        for (let i = 0; i <= item.lineIndex; i++) {
-            if (song.lyrics[i].chars) displayLine++;
+        for (let i = 0; i < item.lineIndex; i++) {
+            if (song.lyrics[i].paragraphBreak) continue;
+            if (!song.lyrics[i].chars) continue;
+            let segments = 1;
+            for (const c of song.lyrics[i].chars) {
+                if (c === ' ') segments++;
+            }
+            displayLine += segments;
         }
+        displayLine += 1; // 1-based
         html += `<div class="edit-list-item"><span class="edit-list-tag line">第${displayLine}行</span> ${item.newText.substring(0, 20)}${item.newText.length > 20 ? '...' : ''} <button onclick="removeLineEdit(${idx})" class="edit-list-remove">删除</button></div>`;
         count++;
     });
@@ -466,10 +482,18 @@ function submitEdit() {
         case 'line':
             if (editedLyrics.length === 0) return;
             submitData.corrections = editedLyrics.map(e => {
+                // 计算 displayLine（segment-based，与渲染逻辑一致）
                 let displayLine = 0;
-                for (let i = 0; i <= e.lineIndex; i++) {
-                    if (song.lyrics[i].chars) displayLine++;
+                for (let i = 0; i < e.lineIndex; i++) {
+                    if (song.lyrics[i].paragraphBreak) continue;
+                    if (!song.lyrics[i].chars) continue;
+                    let segments = 1;
+                    for (const c of song.lyrics[i].chars) {
+                        if (c === ' ') segments++;
+                    }
+                    displayLine += segments;
                 }
+                displayLine += 1; // 1-based
                 return {
                     line: displayLine,
                     originalText: e.originalText,
