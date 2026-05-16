@@ -4,8 +4,10 @@ on:
   push:
     branches: [main]
     paths: ['lyrics/**']
+  # 也支持手动触发
+  workflow_dispatch:
 
-# 并发控制：防止多个 Actions 同时操作 git
+# 并发控制：防止多个 Actions 同时操作
 concurrency:
   group: generate-manifest
   cancel-in-progress: false
@@ -15,14 +17,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Scan lyrics directory and generate manifest
         run: |
           # 扫描 lyrics 目录下所有 .js 文件，生成 JSON 数组
-          files=$(find lyrics -maxdepth 1 -name '*.js' -type f | sort | sed 's|^|lyrics/|')
+          files=$(find lyrics -maxdepth 1 -name '*.js' -type f | sort)
           
           # 生成 JSON
           echo "// 歌曲清单（自动生成，请勿手动修改）" > songFiles.js
@@ -35,7 +40,9 @@ jobs:
           echo "生成完成，共 $(echo "$files" | wc -l) 首歌曲"
           cat songFiles.js
 
-      - name: Commit and push if changed
+      - name: Create PR if changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -46,19 +53,24 @@ jobs:
             exit 0
           fi
           
+          # 创建分支
+          branch="auto/update-songfiles-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$branch"
           git add songFiles.js
           git commit -m "chore: 自动更新歌曲清单"
+          git push origin "$branch"
           
-          # 重试机制：最多尝试 3 次
-          for i in 1 2 3; do
-            echo "尝试 push (第 $i 次)..."
-            if git pull --rebase origin main && git push; then
-              echo "✅ Push 成功"
-              exit 0
-            fi
-            echo "❌ Push 失败，等待 5 秒后重试..."
-            sleep 5
-          done
+          # 创建 PR 并自动合并
+          pr_url=$(gh pr create \
+            --title "chore: 自动更新歌曲清单" \
+            --body "此 PR 由 Actions 自动生成，更新 \`songFiles.js\` 以包含最新的歌曲文件。" \
+            --base main \
+            --head "$branch" \
+            --json url --jq '.url')
           
-          echo "❌ 重试 3 次后仍失败"
-          exit 1
+          echo "PR 已创建: $pr_url"
+          
+          # 等待几秒后自动合并
+          sleep 3
+          gh pr merge --squash --delete-branch
+          echo "✅ PR 已自动合并"
