@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Save Issue data to file
         env:
           ISSUE_TITLE: ${{ github.event.issue.title }}
