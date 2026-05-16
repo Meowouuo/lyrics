@@ -150,17 +150,29 @@ function processInsertLine(content, body, songTitle) {
     // 解析多处插入（支持新格式：多处 **位置：** 和 **歌词：**）
     const insertions = [];
     
-    // 新格式：多处 **位置：** 第X行前/后 和 **歌词：** XXX
-    const positionMatches = [...body.matchAll(/\*\*位置：\*\*\s*第\s*(\d+)\s*行\s*(前|后)/g)];
-    const lyricsMatches = [...body.matchAll(/\*\*歌词：\*\*\s*(.+)/g)];
+    // 新格式：多处 - **位置：** 第X行前/后 和 - **歌词：** XXX（支持代码块）
+    const positionMatches = [...body.matchAll(/-\s*\*\*位置：\*\*\s*第\s*(\d+)\s*行\s*(前|后)/g)];
     
-    if (positionMatches.length > 0 && lyricsMatches.length > 0) {
-        for (let i = 0; i < positionMatches.length && i < lyricsMatches.length; i++) {
-            insertions.push({
-                line: parseInt(positionMatches[i][1]),
-                position: positionMatches[i][2] === '前' ? 'before' : 'after',
-                lyrics: lyricsMatches[i][1].trim()
-            });
+    if (positionMatches.length > 0) {
+        for (let i = 0; i < positionMatches.length; i++) {
+            const line = parseInt(positionMatches[i][1]);
+            const position = positionMatches[i][2] === '前' ? 'before' : 'after';
+            
+            // 查找对应的歌词（在位置匹配之后的代码块或行内文本）
+            const posIndex = positionMatches[i].index;
+            const afterPos = body.slice(posIndex + positionMatches[i][0].length);
+            
+            // 尝试匹配代码块 ```歌词```
+            const codeBlockMatch = afterPos.match(/[\s\S]*?```\s*([\s\S]*?)\s*```/);
+            if (codeBlockMatch) {
+                insertions.push({ line, position, lyrics: codeBlockMatch[1].trim() });
+            } else {
+                // 尝试匹配 - **歌词：** XXX
+                const lyricsMatch = afterPos.match(/-\s*\*\*歌词：\*\*\s*(.+?)(?=\n|$)/);
+                if (lyricsMatch) {
+                    insertions.push({ line, position, lyrics: lyricsMatch[1].trim() });
+                }
+            }
         }
     }
     
