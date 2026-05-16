@@ -258,16 +258,16 @@
                 <!-- 纠错类型选择 -->
                 <div class="form-group">
                     <label>纠错类型 <span class="required">*</span></label>
-                    <div class="correction-type" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
-                        <label class="type-label active" id="type-line-label" onclick="selectCorrectionType('line')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #1890ff;border-radius:6px;background:#e6f7ff;">
+                    <div class="correction-type" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:nowrap;">
+                        <label class="type-label active" id="type-line-label" onclick="selectCorrectionType('line')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #1890ff;border-radius:6px;background:#e6f7ff;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="line" checked onchange="switchCorrectionType('line')" style="margin:0;">
                             <span>逐行修改</span>
                         </label>
-                        <label class="type-label" id="type-full-label" onclick="selectCorrectionType('full')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;">
+                        <label class="type-label" id="type-full-label" onclick="selectCorrectionType('full')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="full" onchange="switchCorrectionType('full')" style="margin:0;">
                             <span>整首替换</span>
                         </label>
-                        <label class="type-label" id="type-insert-label" onclick="selectCorrectionType('insert')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;">
+                        <label class="type-label" id="type-insert-label" onclick="selectCorrectionType('insert')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="insert" onchange="switchCorrectionType('insert')" style="margin:0;">
                             <span>插入行</span>
                         </label>
