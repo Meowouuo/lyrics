@@ -66,7 +66,7 @@ function processLyricsCorrection() {
 
 function detectCorrectionType(body) {
     if (body.includes('完整歌词') || body.includes('整首替换')) return 'full';
-    if (body.includes('插入位置') || body.includes('在第')) return 'insert';
+    if (body.includes('插入位置') || body.includes('在第') || body.includes('**位置：**')) return 'insert';
     return 'line';
 }
 
@@ -125,7 +125,7 @@ function processFullReplacement(content, body, songTitle) {
     }).join(',\\n');
 
     const newContent = content.replace(
-        /lyrics:\\s*\\[[\\s\\S]*?\\](?=\\s*\\};?)/,
+        /lyrics:\s*\\[[\\s\\S]*?\\](?=\\s*\\};?)/,
         `lyrics: [\\n${newLyricsStr}\\n        ]`
     );
 
@@ -145,80 +145,115 @@ function processFullReplacement(content, body, songTitle) {
     };
 }
 
-// 插入行
+// 插入行 - 支持多处插入
 function processInsertLine(content, body, songTitle) {
-    // 尝试多种格式匹配要插入的歌词
-    let insertLyrics = null;
+    // 解析多处插入（支持新格式：多处 **位置：** 和 **歌词：**）
+    const insertions = [];
     
-    // 格式1: 代码块 ```歌词```
-    const codeBlockMatch = body.match(/要插入的歌词[\s\S]*?```\s*([\s\S]*?)\s*```/);
-    if (codeBlockMatch) {
-        insertLyrics = codeBlockMatch[1].trim();
-    }
+    // 新格式：多处 **位置：** 第X行前/后 和 **歌词：** XXX
+    const positionMatches = [...body.matchAll(/\*\*位置：\*\*\s*第\s*(\d+)\s*行\s*(前|后)/g)];
+    const lyricsMatches = [...body.matchAll(/\*\*歌词：\*\*\s*(.+)/g)];
     
-    // 格式2: ## 要插入的歌词 标题后的内容
-    if (!insertLyrics) {
-        const headingMatch = body.match(/##\s*要插入的歌词\s*\n([\s\S]*?)(?=\n##\s|$)/);
-        if (headingMatch) {
-            insertLyrics = headingMatch[1].trim();
+    if (positionMatches.length > 0 && lyricsMatches.length > 0) {
+        for (let i = 0; i < positionMatches.length && i < lyricsMatches.length; i++) {
+            insertions.push({
+                line: parseInt(positionMatches[i][1]),
+                position: positionMatches[i][2] === '前' ? 'before' : 'after',
+                lyrics: lyricsMatches[i][1].trim()
+            });
         }
     }
     
-    if (!insertLyrics) {
-        return { success: false, message: '❌ 未找到要插入的歌词，请使用代码块(```)或##要插入的歌词标题提供歌词' };
-    }
-
-    // 解析行号
-    let insertLine = 1;
-    let position = 'after';
-    const lineMatch = body.match(/第\s*(\d+)\s*行/);
-    if (lineMatch) insertLine = parseInt(lineMatch[1]);
-    if (body.includes('前')) position = 'before';
-
-    const insertLines = insertLyrics.split('\n').filter(l => l.trim());
-    const insertArray = insertLines.map(line => {
-        const matched = matchJyutping(line.trim());
-        return {
-            chars: matched.map(m => `"${m.char}"`).join(', '),
-            jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
-        };
-    });
-
-    const lines = content.split('\\n');
-    let lyricsLineCount = 0;
-    let insertIndex = -1;
-
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
-            lyricsLineCount++;
-            if (lyricsLineCount === insertLine) {
-                insertIndex = i;
-                if (position === 'after') {
-                    while (i < lines.length && !lines[i].includes('}')) i++;
-                    insertIndex = i;
-                }
-                break;
+    // 旧格式：单处插入
+    if (insertions.length === 0) {
+        // 尝试多种格式匹配要插入的歌词
+        let insertLyrics = null;
+        
+        // 格式1: 代码块 ```歌词```
+        const codeBlockMatch = body.match(/要插入的歌词[\s\S]*?```\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch) {
+            insertLyrics = codeBlockMatch[1].trim();
+        }
+        
+        // 格式2: ## 要插入的歌词 标题后的内容
+        if (!insertLyrics) {
+            const headingMatch = body.match(/##\s*要插入的歌词\s*\n([\s\S]*?)(?=\n##\s|$)/);
+            if (headingMatch) {
+                insertLyrics = headingMatch[1].trim();
             }
         }
+        
+        if (insertLyrics) {
+            // 解析行号
+            let insertLine = 1;
+            let position = 'after';
+            const lineMatch = body.match(/第\s*(\d+)\s*行/);
+            if (lineMatch) insertLine = parseInt(lineMatch[1]);
+            if (body.includes('前')) position = 'before';
+            
+            insertions.push({ line: insertLine, position, lyrics: insertLyrics });
+        }
     }
-
-    if (insertIndex === -1) {
-        return { success: false, message: `❌ 未找到第 ${insertLine} 行歌词` };
+    
+    if (insertions.length === 0) {
+        return { success: false, message: '❌ 未找到要插入的歌词，请使用 **位置：** 第X行前/后 和 **歌词：** XXX 格式' };
     }
-
-    const insertContent = insertArray.map(item => 
-        `            { chars: [${item.chars}], jp: [${item.jp}] },`
-    );
-
-    lines.splice(insertIndex + 1, 0, ...insertContent);
-
+    
+    // 处理所有插入（从后往前插入，避免行号变化）
+    const sortedInsertions = [...insertions].sort((a, b) => b.line - a.line);
+    let newContent = content;
+    let totalInsertedLines = 0;
+    
+    for (const insertion of sortedInsertions) {
+        const insertLines = insertion.lyrics.split('\n').filter(l => l.trim());
+        const insertArray = insertLines.map(line => {
+            const matched = matchJyutping(line.trim());
+            return {
+                chars: matched.map(m => `"${m.char}"`).join(', '),
+                jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
+            };
+        });
+        
+        const lines = newContent.split('\\n');
+        let lyricsLineCount = 0;
+        let insertIndex = -1;
+        
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
+                lyricsLineCount++;
+                if (lyricsLineCount === insertion.line) {
+                    insertIndex = i;
+                    if (insertion.position === 'after') {
+                        while (i < lines.length && !lines[i].includes('}')) i++;
+                        insertIndex = i;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        if (insertIndex === -1) {
+            return { success: false, message: `❌ 未找到第 ${insertion.line} 行歌词` };
+        }
+        
+        const insertContent = insertArray.map(item => 
+            `            { chars: [${item.chars}], jp: [${item.jp}] },`
+        );
+        
+        lines.splice(insertIndex + 1, 0, ...insertContent);
+        newContent = lines.join('\\n');
+        totalInsertedLines += insertArray.length;
+    }
+    
+    const insertionsDesc = insertions.map(ins => `第${ins.line}行${ins.position === 'before' ? '前' : '后'}`).join('、');
+    
     return {
         success: true,
-        content: lines.join('\\n'),
+        content: newContent,
         commitMsg: `fix: 插入歌词《${songTitle}》`,
         prTitle: `fix: 插入歌词《${songTitle}》`,
-        prBody: `## 插入歌词\\n\\n**歌曲：** ${songTitle}\\n**插入位置：** 第 ${insertLine} 行${position === 'before' ? '前' : '后'}\\n**插入行数：** ${insertArray.length} 行`,
-        comment: `✅ 已创建插入歌词的 Pull Request，在第 ${insertLine} 行${position === 'before' ? '前' : '后'}插入 ${insertArray.length} 行歌词。`
+        prBody: `## 插入歌词\\n\\n**歌曲：** ${songTitle}\\n**插入位置：** ${insertionsDesc}\\n**插入行数：** ${totalInsertedLines} 行`,
+        comment: `✅ 已创建插入歌词的 Pull Request，在 ${insertionsDesc} 插入 ${totalInsertedLines} 行歌词。`
     };
 }
 
