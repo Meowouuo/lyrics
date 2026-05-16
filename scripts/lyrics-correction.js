@@ -16,7 +16,7 @@ const {
 
 // 加载粤拼字典和匹配函数
 const { matchJyutping } = require('../jyutping-dict');
-const { toSimplified } = require('./t2s-converter');
+const { toSimplified, countSegments } = require('./t2s-converter');
 
 function processLyricsCorrection() {
     const issue = getIssueInfo();
@@ -263,15 +263,12 @@ function processInsertLine(content, body, songTitle) {
                     }
                     break;
                 }
-                // 计算这行歌词有多少个segment（按空格分割）
+                // 计算这行歌词有多少个segment（书名号和括号内的空格不分割）
                 const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
                 if (charsMatch) {
                     const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
-                    let segments = 1;
-                    for (const c of chars) {
-                        if (c === '" "') segments++;
-                    }
-                    lineCount += segments;
+                    const charsArray = chars.map(c => c.replace(/"/g, ''));
+                    lineCount += countSegments(charsArray);
                 } else {
                     lineCount++;
                 }
@@ -340,15 +337,12 @@ function processLineByLine(content, body, songTitle) {
                     targetIndex = i;
                     break;
                 }
-                // 计算这行歌词有多少个segment（按空格分割）
+                // 计算这行歌词有多少个segment（书名号和括号内的空格不分割）
                 const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
                 if (charsMatch) {
                     const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
-                    let segments = 1;
-                    for (const c of chars) {
-                        if (c === '" "') segments++;
-                    }
-                    lineCount += segments;
+                    const charsArray = chars.map(c => c.replace(/"/g, ''));
+                    lineCount += countSegments(charsArray);
                 } else {
                     lineCount++;
                 }

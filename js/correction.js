@@ -291,10 +291,13 @@ function songIndexToDisplayLine(songIndex) {
     for (let i = 0; i < songIndex; i++) {
         if (song.lyrics[i].paragraphBreak) continue;
         if (!song.lyrics[i].chars) continue;
-        // 计算这行有多少个 segment（按空格分割）
+        // 计算这行有多少个 segment（书名号和括号内的空格不分割）
         let segments = 1;
+        let inBrackets = 0;
         for (const c of song.lyrics[i].chars) {
-            if (c === ' ') segments++;
+            if (c === '《' || c === '(' || c === '（') inBrackets++;
+            if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
+            if (c === ' ' && inBrackets === 0) segments++;
         }
         displayLine += segments;
     }

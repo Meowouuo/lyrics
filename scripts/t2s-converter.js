@@ -14,4 +14,21 @@ function toSimplified(text) {
     return converter.convertSync(text);
 }
 
-module.exports = { toSimplified };
+module.exports = { toSimplified, countSegments };
+
+/**
+ * 计算一行歌词被分割成多少个 segment
+ * 空格作为分割点，但书名号《》和括号（）()内的空格不分割
+ * @param {string[]} charsArray - 字符数组（从歌词文件中解析的 chars）
+ * @returns {number} segment 数量
+ */
+function countSegments(charsArray) {
+    let segments = 1;
+    let inBrackets = 0;
+    for (const c of charsArray) {
+        if (c === '《' || c === '(' || c === '（') inBrackets++;
+        if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
+        if (c === ' ' && inBrackets === 0) segments++;
+    }
+    return segments;
+}

@@ -128,13 +128,16 @@ function enterInsertMode() {
     const lyricsContent = document.getElementById('lyricsContent');
     lyricsContent.classList.add('edit-lyrics-mode');
     const song = window.currentSong;
-    // 计算最大显示行号（考虑segment分割）
+    // 计算最大显示行号（考虑segment分割，书名号和括号内的空格不分割）
     let maxLine = 0;
     song.lyrics.forEach(l => {
         if (!l.chars) return;
         let segments = 1;
+        let inBrackets = 0;
         for (const c of l.chars) {
-            if (c === ' ') segments++;
+            if (c === '《' || c === '(' || c === '（') inBrackets++;
+            if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
+            if (c === ' ' && inBrackets === 0) segments++;
         }
         maxLine += segments;
     });
@@ -280,8 +283,11 @@ function updateEditList() {
             if (song.lyrics[i].paragraphBreak) continue;
             if (!song.lyrics[i].chars) continue;
             let segments = 1;
+            let inBrackets = 0;
             for (const c of song.lyrics[i].chars) {
-                if (c === ' ') segments++;
+                if (c === '《' || c === '(' || c === '（') inBrackets++;
+                if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
+                if (c === ' ' && inBrackets === 0) segments++;
             }
             displayLine += segments;
         }
@@ -490,8 +496,11 @@ function submitEdit() {
                     if (song.lyrics[i].paragraphBreak) continue;
                     if (!song.lyrics[i].chars) continue;
                     let segments = 1;
+                    let inBrackets = 0;
                     for (const c of song.lyrics[i].chars) {
-                        if (c === ' ') segments++;
+                        if (c === '《' || c === '(' || c === '（') inBrackets++;
+                        if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
+                        if (c === ' ' && inBrackets === 0) segments++;
                     }
                     displayLine += segments;
                 }
