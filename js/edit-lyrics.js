@@ -332,6 +332,8 @@ function removeInsert(idx) {
 
 // 逐行编辑点击处理
 function handleLineClick(event, displayLineIndex) {
+    if (!editLyricsMode) return false; // 未进入编辑模式，不处理
+    
     event.stopPropagation();
     
     const song = window.currentSong;
