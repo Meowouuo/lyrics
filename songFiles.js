@@ -1,6 +1,5 @@
 // 歌曲清单（自动生成，请勿手动修改）
 const songFiles = [
-    'lyrics/Medley_再见我的初恋_痛爱_逃避你_谁来爱我_损友_抱抱_想得太远_习惯失恋_一拍两散_心淡_Live.js',
     'lyrics/Medley：密友+损友+心甘命抵+早有预谋+罪魁+借过+我也不想这样(Live).js',
     'lyrics/Medley：赤子+愿(Live).js',
     'lyrics/一生何求(live).js',
