@@ -60,22 +60,33 @@ function processJyutpingCorrection() {
 
         // 在文件中查找对应的行并替换粤拼
         // 查找包含原粤拼的 lyrics 行
-        // 行号计算与前端一致：paragraphBreak 也算一行
+        // 行号计算与前端一致：每个segment算一行（按空格分割）
         let lines = content.split('\n');
         let lyricsLineIndex = -1;
         let lineCount = 0;
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('paragraphBreak')) {
-                lineCount++;
-                continue;
+                continue; // paragraphBreak 不算行
             }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
                 if (lineCount === lineNum) {
                     lyricsLineIndex = i;
                     break;
                 }
-                lineCount++;
+                // 计算这行歌词有多少个segment（按空格分割）
+                const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
+                if (charsMatch) {
+                    const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
+                    // 计算空格数量（连续空格算一个分隔点）
+                    let segments = 1;
+                    for (const c of chars) {
+                        if (c === '" "') segments++;
+                    }
+                    lineCount += segments;
+                } else {
+                    lineCount++;
+                }
             }
         }
 

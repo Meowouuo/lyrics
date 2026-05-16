@@ -1619,6 +1619,7 @@
 
         // Render lyrics with font size, letter spacing and line height
         let lyricsHtml = '';
+        let displayLineIndex = 0; // 用户可见的行号（每个segment算一行）
         currentSong.lyrics.forEach((line, index) => {
             if (line.paragraphBreak) {
                 lyricsHtml += '<div class="lyric-paragraph-break"></div>';
@@ -1643,7 +1644,7 @@
             // 渲染每个分段为一个独立的 lyric-line
             segments.forEach((segment, segIdx) => {
                 const segmentHtml = segment.map(({ char, jp, index: charIndex }) => `
-                    <span class="char-group" data-line="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${charIndex})" style="margin-right:${letterSpacing}px">
+                    <span class="char-group" data-line="${displayLineIndex}" data-song-index="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${displayLineIndex}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
@@ -1651,7 +1652,8 @@
                 // 每个分段都添加播放按钮（只播放该分段的语音）
                 const segJp = segment.map(s => s.jp).filter(j => j).map(j => "'" + j.replace(/'/g, "\\'") + "'").join(',');
                 const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); TTSModule.playSegment([${segJp}], this)" title="播放语音"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg></button>`;
-                lyricsHtml += `<div class="lyric-line" data-line="${index}" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
+                lyricsHtml += `<div class="lyric-line" data-line="${displayLineIndex}" data-song-index="${index}" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${displayLineIndex})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
+                displayLineIndex++;
             });
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
