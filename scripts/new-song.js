@@ -17,15 +17,16 @@ const {
 // 加载粤拼字典和匹配函数
 const dictContent = fs.readFileSync(path.join(__dirname, '..', 'jyutping-dict.js'), 'utf8');
 eval(dictContent);
+const { toSimplified } = require('./t2s-converter');
 
 function processNewSong() {
     const issue = getIssueInfo();
 
     // 提取信息（清理 markdown 格式符号）
-    const title = parseField(issue.body, '歌曲名称').replace(/\*+/g, '').trim();
-    const artist = parseField(issue.body, '歌手').replace(/\*+/g, '').trim();
-    const lyricist = parseField(issue.body, '填词').replace(/\*+/g, '').trim();
-    const composer = parseField(issue.body, '作曲').replace(/\*+/g, '').trim();
+    const title = toSimplified(parseField(issue.body, '歌曲名称').replace(/\*+/g, '').trim());
+    const artist = toSimplified(parseField(issue.body, '歌手').replace(/\*+/g, '').trim());
+    const lyricist = toSimplified(parseField(issue.body, '填词').replace(/\*+/g, '').trim());
+    const composer = toSimplified(parseField(issue.body, '作曲').replace(/\*+/g, '').trim());
     const lyricsText = parseCodeBlock(issue.body);
 
     if (!title || !artist) {
@@ -37,8 +38,11 @@ function processNewSong() {
         return;
     }
 
+    // 繁体→简体转换
+    const simplifiedLyrics = toSimplified(lyricsText);
+
     // 生成粤拼
-    const paragraphs = lyricsText.replace(/\r\n/g, '\n').split(/\n{2,}/);
+    const paragraphs = simplifiedLyrics.replace(/\r\n/g, '\n').split(/\n{2,}/);
     const lyrics = [];
     let previewLines = [];
 
