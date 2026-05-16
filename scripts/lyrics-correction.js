@@ -240,13 +240,17 @@ function processInsertLine(content, body, songTitle) {
         }).filter(Boolean);
         
         const lines = newContent.split('\n');
-        let lyricsLineCount = 0;
+        // 行号计算与前端一致：paragraphBreak 也算一行
+        let lineCount = 0;
         let insertIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('paragraphBreak')) {
+                lineCount++;
+                continue;
+            }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
-                lyricsLineCount++;
-                if (lyricsLineCount === insertion.line) {
+                if (lineCount === insertion.line) {
                     insertIndex = i;
                     if (insertion.position === 'after') {
                         while (i < lines.length && !lines[i].includes('}')) i++;
@@ -254,6 +258,7 @@ function processInsertLine(content, body, songTitle) {
                     }
                     break;
                 }
+                lineCount++;
             }
         }
         
@@ -305,17 +310,22 @@ function processLineByLine(content, body, songTitle) {
         }
         
         // 查找并替换歌词
+        // 行号计算与前端一致：paragraphBreak 也算一行
         const lines = newContent.split('\n');
-        let lyricsLineCount = 0;
+        let lineCount = 0;
         let targetIndex = -1;
         
         for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('paragraphBreak')) {
+                lineCount++;
+                continue;
+            }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
-                lyricsLineCount++;
-                if (lyricsLineCount === lineNum) {
+                if (lineCount === lineNum) {
                     targetIndex = i;
                     break;
                 }
+                lineCount++;
             }
         }
         
