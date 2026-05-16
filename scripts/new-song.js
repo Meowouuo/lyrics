@@ -68,7 +68,7 @@ function processNewSong() {
     }
 
     // 生成歌曲 ID
-    const songId = getNextSongId();
+    const songId = issue.number;
 
     // 匹配标题、歌手、填词、作曲的粤拼
     const titleJyutping = matchJyutping(title).map(m => m.jp);
