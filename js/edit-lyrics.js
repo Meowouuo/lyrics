@@ -137,8 +137,10 @@ function enterInsertMode() {
     showEditListPanel();
     
     // 高亮显示可点击的行
-    document.querySelectorAll('.lyric-line').forEach((line, idx) => {
-        line.onclick = (e) => selectInsertLine(e, idx);
+    document.querySelectorAll('.lyric-line').forEach((line) => {
+        const lineIndex = parseInt(line.dataset.line);
+        if (isNaN(lineIndex)) return;
+        line.onclick = (e) => selectInsertLine(e, lineIndex);
         line.style.cursor = 'pointer';
     });
 }
@@ -354,9 +356,8 @@ function selectInsertLine(event, lineIndex) {
     event.stopPropagation();
     
     const song = window.currentSong;
-    // lineIndex 是 DOM 元素的索引，需要映射到 song.lyrics 的索引
-    const lyricsLines = document.querySelectorAll('.lyric-line');
-    const dataIndex = parseInt(lyricsLines[lineIndex].dataset.line);
+    // 直接从点击的元素获取 data-line，避免 DOM 变化导致索引不匹配
+    const dataIndex = parseInt(event.currentTarget.dataset.line);
     
     if (dataIndex >= song.lyrics.length) return;
     
