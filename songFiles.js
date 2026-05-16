@@ -1,5 +1,6 @@
 // 歌曲清单（自动生成，请勿手动修改）
 const songFiles = [
+    'lyrics/Medley：密友+损友+心甘命抵+早有预谋+罪魁+借过+我也不想这样（live）.js',
     'lyrics/Medley：赤子+愿(Live).js',
     'lyrics/一生何求(live).js',
     'lyrics/一生何求.js',
