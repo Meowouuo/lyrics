@@ -13,7 +13,7 @@ const {
     addComment,
 } = require('./utils');
 
-const { toSimplified } = require('./t2s-converter');
+const { toSimplified, countSegments } = require('./t2s-converter');
 
 function processJyutpingCorrection() {
     const issue = getIssueInfo();
@@ -76,16 +76,12 @@ function processJyutpingCorrection() {
                     lyricsLineIndex = i;
                     break;
                 }
-                // 计算这行歌词有多少个segment（按空格分割）
+                // 计算这行歌词有多少个segment（书名号和括号内的空格不分割）
                 const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
                 if (charsMatch) {
                     const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
-                    // 计算空格数量（连续空格算一个分隔点）
-                    let segments = 1;
-                    for (const c of chars) {
-                        if (c === '" "') segments++;
-                    }
-                    lineCount += segments;
+                    const charsArray = chars.map(c => c.replace(/"/g, ''));
+                    lineCount += countSegments(charsArray);
                 } else {
                     lineCount++;
                 }

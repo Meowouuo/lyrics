@@ -1626,15 +1626,20 @@
                 return;
             }
             // 按空格分割成多行，确保每行行高一致
+            // 但书名号《》和括号（）()内的空格不分割
             const segments = [];
             let currentSegment = [];
+            let inBrackets = 0; // 括号/书名号嵌套层级
             line.chars.forEach((char, i) => {
-                if (char === ' ') {
+                if (char === ' ' && inBrackets === 0) {
                     if (currentSegment.length > 0) {
                         segments.push(currentSegment);
                         currentSegment = [];
                     }
                 } else {
+                    // 跟踪书名号和括号的嵌套
+                    if (char === '《' || char === '(' || char === '（') inBrackets++;
+                    if (char === '》' || char === ')' || char === '）') inBrackets = Math.max(0, inBrackets - 1);
                     currentSegment.push({ char, jp: line.jp[i] || '', index: i });
                 }
             });
