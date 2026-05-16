@@ -565,6 +565,51 @@
             }
         }
 
+        // 插入行数据
+        let insertItems = [];
+
+        // 添加插入项
+        function addInsertItem() {
+            const position = document.getElementById('lc-insert-position').value;
+            const line = parseInt(document.getElementById('lc-insert-line').value) || 1;
+            const lyrics = document.getElementById('lc-insert-lyrics').value.trim();
+            
+            if (!lyrics) {
+                alert('请填写要插入的歌词');
+                return;
+            }
+            
+            insertItems.push({ position, line, lyrics });
+            renderInsertList();
+            
+            // 清空输入
+            document.getElementById('lc-insert-lyrics').value = '';
+        }
+
+        // 渲染插入列表
+        function renderInsertList() {
+            const container = document.getElementById('lc-insert-list');
+            if (insertItems.length === 0) {
+                container.innerHTML = '<div style="color:#999;font-size:13px;">暂无插入项</div>';
+                return;
+            }
+            container.innerHTML = insertItems.map((item, i) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:8px;background:#f5f5f5;border-radius:6px;">
+                    <div>
+                        <span style="font-weight:500;">在第${item.line}行${item.position === 'before' ? '前' : '后'}插入：</span>
+                        <span style="color:#666;">${item.lyrics.substring(0, 30)}${item.lyrics.length > 30 ? '...' : ''}</span>
+                    </div>
+                    <button onclick="removeInsertItem(${i})" style="border:none;background:#ff4d4f;color:#fff;padding:2px 8px;border-radius:4px;cursor:pointer;">移除</button>
+                </div>
+            `).join('');
+        }
+
+        // 移除插入项
+        function removeInsertItem(index) {
+            insertItems.splice(index, 1);
+            renderInsertList();
+        }
+
         // 删除歌曲数据
         let deleteSongs = [];
 
@@ -622,6 +667,7 @@
         // 初始化：各添加一行空行
         addJpRow();
         addLcRow();
+        renderInsertList();
 
                 // 优先读取 localStorage（从纠错/改歌词模式跳转过来）
         function loadFromStorage() {
