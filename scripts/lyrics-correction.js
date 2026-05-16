@@ -176,12 +176,12 @@ function processInsertLine(content, body, songTitle) {
             // 尝试匹配代码块 ```歌词```
             const codeBlockMatch = afterPos.match(/[\s\S]*?```\s*([\s\S]*?)\s*```/);
             if (codeBlockMatch) {
-                insertions.push({ line, position, lyrics: codeBlockMatch[1].trim() });
+                insertions.push({ line, position, lyrics: codeBlockMatch[1] });
             } else {
                 // 尝试匹配 - **歌词：** XXX
                 const lyricsMatch = afterPos.match(/-\s*\*\*歌词：\*\*\s*(.+?)(?=\n|$)/);
                 if (lyricsMatch) {
-                    insertions.push({ line, position, lyrics: lyricsMatch[1].trim() });
+                    insertions.push({ line, position, lyrics: lyricsMatch[1] });
                 }
             }
         }
@@ -195,14 +195,14 @@ function processInsertLine(content, body, songTitle) {
         // 格式1: 代码块 ```歌词```
         const codeBlockMatch = body.match(/要插入的歌词[\s\S]*?```\s*([\s\S]*?)\s*```/);
         if (codeBlockMatch) {
-            insertLyrics = codeBlockMatch[1].trim();
+            insertLyrics = codeBlockMatch[1];
         }
         
         // 格式2: ## 要插入的歌词 标题后的内容
         if (!insertLyrics) {
             const headingMatch = body.match(/##\s*要插入的歌词\s*\n([\s\S]*?)(?=\n##\s|$)/);
             if (headingMatch) {
-                insertLyrics = headingMatch[1].trim();
+                insertLyrics = headingMatch[1];
             }
         }
         
@@ -230,8 +230,13 @@ function processInsertLine(content, body, songTitle) {
     for (const insertion of sortedInsertions) {
         // 繁体→简体转换
         const simplifiedLyrics = toSimplified(insertion.lyrics);
-        const insertLines = simplifiedLyrics.split('\n').filter(l => l.trim());
-        const insertArray = insertLines.map(line => {
+        // 按换行分割，保留空行用于段落分隔
+        const rawLines = simplifiedLyrics.split('\n');
+        const insertArray = rawLines.map(line => {
+            if (!line.trim()) {
+                // 空行转为段落分隔
+                return { isBreak: true };
+            }
             const matched = matchJyutping(line.trim());
             if (matched.length === 0) return null;
             return {
@@ -279,9 +284,12 @@ function processInsertLine(content, body, songTitle) {
             return { success: false, message: `❌ 未找到第 ${insertion.line} 行歌词` };
         }
         
-        const insertContent = insertArray.map(item => 
-            `            { chars: [${item.chars}], jp: [${item.jp}] },`
-        );
+        const insertContent = insertArray.map(item => {
+            if (item.isBreak) {
+                return '            { paragraphBreak: true },';
+            }
+            return `            { chars: [${item.chars}], jp: [${item.jp}] },`;
+        });
         
         const spliceIndex = insertion.position === 'before' ? insertIndex : insertIndex + 1;
         lines.splice(spliceIndex, 0, ...insertContent);

@@ -575,10 +575,10 @@
         function addInsertItem() {
             const position = document.getElementById('lc-insert-position').value;
             const line = parseInt(document.getElementById('lc-insert-line').value) || 1;
-            const lyrics = document.getElementById('lc-insert-lyrics').value.trim();
+            const lyrics = document.getElementById('lc-insert-lyrics').value;
             
             if (!lyrics) {
-                alert('请填写要插入的歌词');
+                alert('请填写要插入的歌词或空行');
                 return;
             }
             
