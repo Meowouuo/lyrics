@@ -13,7 +13,7 @@
         composerJyutping: ["lo4","daai6","jau6","","wong4","wai5","nin4","","heoi2","jyun6"],
         lyrics: [
             { chars: ["《", "赤", "子", "》"], jp: ["", "cek3", "zi2", ""] },
-            { chars: ["远", "远", "近", "近", "里"], jp: ["jyun5", "jyun5", "gan6", "gan6", "lei5"] },
+            { chars: ["远", "远", "近", "近", "里"], jp: ["jyun5", "jyun5", "gan6", "gan6", "leoi5"] },
             { chars: ["城","市","高","高","低","低","间"], jp: ["sing4","si5","gou1","gou1","dai1","dai1","gaan1"] },
             { chars: ["沿","路","断","断","折","折","哪","有","终","站"], jp: ["jyun4","lou6","dyun6","dyun6","zit3","zit3","naa5","jau5","zung1","zaam6"] },
             { chars: ["跌","跌","碰","碰","里"], jp: ["dit3", "dit3", "pung3", "pung3", "leoi5"] },
