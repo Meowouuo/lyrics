@@ -60,20 +60,22 @@ function processJyutpingCorrection() {
 
         // 在文件中查找对应的行并替换粤拼
         // 查找包含原粤拼的 lyrics 行
+        // 行号计算与前端一致：paragraphBreak 也算一行
         let lines = content.split('\n');
         let lyricsLineIndex = -1;
-        let charCount = 0;
+        let lineCount = 0;
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('paragraphBreak')) {
+                lineCount++;
                 continue;
             }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
-                if (charCount === lineNum) {
+                if (lineCount === lineNum) {
                     lyricsLineIndex = i;
                     break;
                 }
-                charCount++;
+                lineCount++;
             }
         }
 
