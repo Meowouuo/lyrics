@@ -467,8 +467,8 @@ function submitEdit() {
             
         case 'insert':
             if (insertions.length === 0) return;
-            // 如果有多个插入，取最后一个（或合并）
-            submitData.insert = insertions[insertions.length - 1];
+            // 传递所有插入项
+            submitData.insertions = insertions;
             break;
     }
     
