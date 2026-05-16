@@ -4,6 +4,7 @@ let editLyricsMode = false;
 let editLyricsType = null; // 'line', 'full', 'insert'
 let editedLyrics = [];
 let fullReplacementLyrics = '';
+let editedMeta = {}; // { title, artist, lyricist, composer }
 let insertData = { position: 'after', line: 1, lyrics: '' };
 
 // 点击改歌词按钮 - 显示子菜单选择
@@ -290,8 +291,12 @@ function enterLineEditMode() {
     const lyricsContent = document.getElementById('lyricsContent');
     lyricsContent.classList.add('edit-lyrics-mode');
     editedLyrics = [];
+    editedMeta = {};
     
-    showEditBanner('逐行纠错', '点击歌词行进行编辑');
+    showEditBanner('逐行纠错', '点击标题或歌词行进行编辑');
+    
+    // 标题行可编辑
+    enableTitleEditing();
     
     // 添加点击事件监听
     document.querySelectorAll('.lyric-line').forEach((line, idx) => {
@@ -303,8 +308,12 @@ function enterLineEditMode() {
 // 整首替换模式
 function enterFullReplaceMode() {
     fullReplacementLyrics = '';
+    editedMeta = {};
     
-    showEditBanner('整首替换', '粘贴完整歌词');
+    showEditBanner('整首替换', '粘贴完整歌词，也可点击标题编辑');
+    
+    // 标题行可编辑
+    enableTitleEditing();
     
     // 显示替换面板
     const panel = document.createElement('div');
@@ -325,8 +334,12 @@ function enterInsertMode() {
     const maxLine = song.lyrics.filter(l => l.chars).length;
     
     insertData = { position: 'after', line: 1, lyrics: '' };
+    editedMeta = {};
     
-    showEditBanner('插入行', '选择位置并输入要插入的歌词');
+    showEditBanner('插入行', '选择位置并输入要插入的歌词，也可点击标题编辑');
+    
+    // 标题行可编辑
+    enableTitleEditing();
     
     // 显示插入配置面板
     const panel = document.createElement('div');
@@ -388,6 +401,92 @@ function hideEditBanner() {
     const banner = document.getElementById('editModeBanner');
     if (banner) banner.remove();
     document.body.style.paddingTop = '';
+}
+
+// 标题行可编辑
+function enableTitleEditing() {
+    const song = window.currentSong;
+    
+    // 歌名可编辑
+    const titleEl = document.getElementById('songTitle');
+    if (titleEl) {
+        titleEl.style.cursor = 'pointer';
+        titleEl.title = '点击编辑歌名';
+        titleEl.onclick = (e) => {
+            e.stopPropagation();
+            const newTitle = prompt('修改歌名：', song.title);
+            if (newTitle !== null && newTitle.trim()) {
+                editedMeta.title = newTitle.trim();
+                titleEl.style.outline = '2px solid #28a745';
+                titleEl.style.borderRadius = '4px';
+                updateEditStatus();
+            }
+        };
+    }
+    
+    // 歌手可编辑
+    const artistEl = document.getElementById('songArtist');
+    if (artistEl) {
+        artistEl.style.cursor = 'pointer';
+        artistEl.title = '点击编辑歌手';
+        artistEl.onclick = (e) => {
+            e.stopPropagation();
+            const newArtist = prompt('修改歌手：', song.artist);
+            if (newArtist !== null && newArtist.trim()) {
+                editedMeta.artist = newArtist.trim();
+                artistEl.style.outline = '2px solid #28a745';
+                artistEl.style.borderRadius = '4px';
+                updateEditStatus();
+            }
+        };
+    }
+    
+    // 填词可编辑
+    const lyricistEl = document.getElementById('songLyricist');
+    if (lyricistEl) {
+        lyricistEl.style.cursor = 'pointer';
+        lyricistEl.title = '点击编辑填词';
+        lyricistEl.onclick = (e) => {
+            e.stopPropagation();
+            const newLyricist = prompt('修改填词：', song.lyricist || '');
+            if (newLyricist !== null) {
+                editedMeta.lyricist = newLyricist.trim();
+                lyricistEl.style.outline = '2px solid #28a745';
+                lyricistEl.style.borderRadius = '4px';
+                updateEditStatus();
+            }
+        };
+    }
+    
+    // 作曲可编辑
+    const composerEl = document.getElementById('songComposer');
+    if (composerEl) {
+        composerEl.style.cursor = 'pointer';
+        composerEl.title = '点击编辑作曲';
+        composerEl.onclick = (e) => {
+            e.stopPropagation();
+            const newComposer = prompt('修改作曲：', song.composer || '');
+            if (newComposer !== null) {
+                editedMeta.composer = newComposer.trim();
+                composerEl.style.outline = '2px solid #28a745';
+                composerEl.style.borderRadius = '4px';
+                updateEditStatus();
+            }
+        };
+    }
+}
+
+// 移除标题行编辑
+function disableTitleEditing() {
+    ['songTitle', 'songArtist', 'songLyricist', 'songComposer'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.cursor = '';
+            el.title = '';
+            el.onclick = null;
+            el.style.outline = '';
+        }
+    });
 }
 
 // 逐行编辑：点击行
@@ -458,23 +557,37 @@ function updateEditStatus() {
     const submitBtn = document.getElementById('submitEditBtn');
     
     let hasData = false;
-    let status = '';
+    let statusParts = [];
+    
+    // 标题修改
+    const metaCount = Object.keys(editedMeta).length;
+    if (metaCount > 0) {
+        hasData = true;
+        statusParts.push(`${metaCount} 处标题`);
+    }
     
     switch (editLyricsType) {
         case 'line':
-            hasData = editedLyrics.length > 0;
-            status = hasData ? `${editedLyrics.length} 处修改` : '';
+            if (editedLyrics.length > 0) {
+                hasData = true;
+                statusParts.push(`${editedLyrics.length} 处歌词`);
+            }
             break;
         case 'full':
-            hasData = !!fullReplacementLyrics;
-            status = hasData ? '已输入歌词' : '';
+            if (fullReplacementLyrics) {
+                hasData = true;
+                statusParts.push('已输入歌词');
+            }
             break;
         case 'insert':
-            hasData = !!insertData.lyrics;
-            status = hasData ? '已输入歌词' : '';
+            if (insertData.lyrics) {
+                hasData = true;
+                statusParts.push('已输入歌词');
+            }
             break;
     }
     
+    const status = statusParts.join('，');
     if (statusText) statusText.textContent = status;
     if (submitBtn) submitBtn.disabled = !hasData;
 }
@@ -511,6 +624,11 @@ function submitEdit() {
             break;
     }
     
+    // 标题修改
+    if (Object.keys(editedMeta).length > 0) {
+        submitData.meta = editedMeta;
+    }
+    
     // 存储到 localStorage
     localStorage.setItem('submitForm', JSON.stringify(submitData));
     
@@ -523,6 +641,7 @@ function exitEditMode() {
     editLyricsMode = false;
     editLyricsType = null;
     editedLyrics = [];
+    editedMeta = {};
     fullReplacementLyrics = '';
     insertData = { position: 'after', line: 1, lyrics: '' };
     
@@ -538,6 +657,9 @@ function exitEditMode() {
         line.style.cursor = '';
         line.style.background = '';
     });
+    
+    // 移除标题行编辑
+    disableTitleEditing();
     
     // 移除编辑模式样式
     document.getElementById('lyricsContent')?.classList.remove('edit-lyrics-mode');
