@@ -683,8 +683,64 @@
             return false;
         }
         
-        // 立即读取，如果失败则使用 URL 参数
-        if (!loadFromStorage()) {
+        // 立即读取 localStorage
+        const stored = localStorage.getItem('submitForm');
+        if (stored) {
+            localStorage.removeItem('submitForm');
+            try {
+                const data = JSON.parse(stored);
+                console.log('Loaded submitForm:', data);
+                
+                if (data.type === 'lyrics') {
+                    // 先切换到歌词纠错标签页
+                    switchTab('lyrics');
+                    document.getElementById('lc-song').value = data.song || '';
+                    
+                    // 再根据纠错类型填充数据
+                    if (data.correctionType === 'full' && data.fullLyrics) {
+                        document.querySelector('input[name="correctionType"][value="full"]').checked = true;
+                        switchCorrectionType('full');
+                        document.getElementById('lc-full-lyrics').value = data.fullLyrics;
+                    } else if (data.correctionType === 'insert' && data.insert) {
+                        document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
+                        switchCorrectionType('insert');
+                        document.getElementById('lc-insert-position').value = data.insert.position || 'after';
+                        document.getElementById('lc-insert-line').value = data.insert.line || 1;
+                        document.getElementById('lc-insert-lyrics').value = data.insert.lyrics || '';
+                    } else if (data.corrections && data.corrections.length > 0) {
+                        document.getElementById('lc-rows').innerHTML = '';
+                        data.corrections.forEach(c => {
+                            addLcRow();
+                            const rows = document.querySelectorAll('#lc-rows .correction-row');
+                            const lastRow = rows[rows.length - 1];
+                            lastRow.querySelector('.lc-line').value = c.line || '';
+                            lastRow.querySelector('.lc-original').value = c.originalText || '';
+                            lastRow.querySelector('.lc-new').value = c.newText || '';
+                        });
+                    }
+                } else if (data.type === 'jyutping' && data.corrections) {
+                    switchTab('jyutping');
+                    document.getElementById('jp-song').value = data.song || '';
+                    document.getElementById('jp-rows').innerHTML = '';
+                    data.corrections.forEach(c => {
+                        addJpRow();
+                        const rows = document.querySelectorAll('#jp-rows .correction-row');
+                        const lastRow = rows[rows.length - 1];
+                        lastRow.querySelector('.jp-line').value = c.line || '';
+                        lastRow.querySelector('.jp-char').value = c.char || '';
+                        lastRow.querySelector('.jp-original').value = c.originalJp || '';
+                        lastRow.querySelector('.jp-new').value = c.newJp || '';
+                    });
+                } else if (data.type === 'delete' && data.songs) {
+                    switchTab('delete');
+                    deleteSongs = data.songs;
+                    renderDeleteList();
+                }
+            } catch (e) {
+                console.error('Failed to parse submitForm data:', e);
+            }
+        } else {
+            // 没有 localStorage 数据，检查 URL 参数
             const params = new URLSearchParams(window.location.search);
             const type = params.get('type');
             const song = params.get('song');
