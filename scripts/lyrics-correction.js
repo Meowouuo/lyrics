@@ -109,9 +109,12 @@ function processFullReplacement(content, body, songTitle) {
         const lines = para.split('\n').filter(l => l.trim());
         lines.forEach(line => {
             const matched = matchJyutping(line.trim());
+            // 过滤掉符号字符（只保留汉字、字母、数字）
+            const filtered = matched.filter(m => /[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char));
+            if (filtered.length === 0) return;
             lyricsArray.push({
-                chars: matched.map(m => `"${m.char}"`).join(', '),
-                jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
+                chars: filtered.map(m => `"${m.char}"`).join(', '),
+                jp: filtered.map(m => `"${m.jp || '?'}"`).join(', ')
             });
         });
         if (pIdx < paragraphs.length - 1) {
@@ -220,11 +223,13 @@ function processInsertLine(content, body, songTitle) {
         const insertLines = insertion.lyrics.split('\n').filter(l => l.trim());
         const insertArray = insertLines.map(line => {
             const matched = matchJyutping(line.trim());
+            const filtered = matched.filter(m => /[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char));
+            if (filtered.length === 0) return null;
             return {
-                chars: matched.map(m => `"${m.char}"`).join(', '),
-                jp: matched.map(m => `"${m.jp || '?'}"`).join(', ')
+                chars: filtered.map(m => `"${m.char}"`).join(', '),
+                jp: filtered.map(m => `"${m.jp || '?'}"`).join(', ')
             };
-        });
+        }).filter(Boolean);
         
         const lines = newContent.split('\n');
         let lyricsLineCount = 0;
@@ -328,8 +333,9 @@ function processLineByLine(content, body, songTitle) {
         
         // 替换歌词并重新匹配粤拼
         const matched = matchJyutping(newText.toString().trim());
-        const newChars = matched.map(m => `"${m.char}"`).join(', ');
-        const newJp = matched.map(m => `"${m.jp || '?'}"`).join(', ');
+        const filtered = matched.filter(m => /[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char));
+        const newChars = filtered.map(m => `"${m.char}"`).join(', ');
+        const newJp = filtered.map(m => `"${m.jp || '?'}"`).join(', ');
         
         // 替换行内容
         lines[targetIndex] = line.replace(
