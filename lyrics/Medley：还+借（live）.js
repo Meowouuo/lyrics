@@ -90,6 +90,7 @@
             { chars: ["才", "想", "到", "让", "我", "借", "用", "时", "间", " ", "借", "用", "完", "没", "法", "还"], jp: ["coi4", "soeng2", "dou3", "joeng6", "ngo5", "ze3", "jung6", "si4", "gaan1", "", "ze3", "jung6", "jyun4", "mut6", "faat3", "waan4"] },
             { chars: ["如", "果", "破", "掉", "灯", "泡", "借", "烛", "光", "用", "一", "晚", " ", "是", "你", "是", "你", "大", "贪"], jp: ["jyu4", "gwo2", "po3", "diu6", "dang1", "paau1", "ze3", "zuk1", "gwong1", "jung6", "jat1", "maan5", "", "si6", "nei5", "si6", "nei5", "daai6", "taam1"] },
             { chars: ["大", "贪", "得", "竟", "搅", "错", "我", "是", "哪", "种", "人", " ", "接", "吻", "就", "能", "合", "眼"], jp: ["daai6", "taam1", "dak1", "ging2", "gaau2", "co3", "ngo5", "si6", "naa5", "zung2", "jan4", "", "zip3", "man5", "zau6", "nang4", "hap6", "ngaan5"] },
+            { paragraphBreak: true },
             { chars: ["有", "雨", "没", "提", "著", "伞"], jp: ["jau5", "jyu5", "mut6", "tai4", "zyu3", "saan3"] },
             { paragraphBreak: true },
         ]
