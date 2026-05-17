@@ -1648,7 +1648,7 @@
                 const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
                     // 空格字符：保留空格间距，但不创建 char-group（不匹配粤拼、不显示粤拼列）
                     if (char === ' ' || char === '\u3000') {
-                        return '<span style="display:inline-block;width:0.3em;"></span>';
+                        return '<span style="display:inline-block;width:1em;"></span>';
                     }
                     // 非空格字符：正常创建 char-group（显示粤拼+汉字）
                     return `
