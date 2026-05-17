@@ -6,7 +6,6 @@ const songFiles = [
     'lyrics/Medley：还+借（live）.js',
     'lyrics/一生何求(live).js',
     'lyrics/一生何求.js',
-    'lyrics/世上只有.js',
     'lyrics/习惯失恋.js',
     'lyrics/借.js',
     'lyrics/十面埋伏.js',
