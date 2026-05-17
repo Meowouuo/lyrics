@@ -12,7 +12,7 @@
         composer: "周治平",
         composerJyutping: ["zau1","zi6","ping4"],
         lyrics: [
-            { chars: ["泪","滴","染","湿","了","迷","蒙","两","眼"], jp: ["leoi6","dik6","jim5","sap1","liu5","mai4","mung4","loeng5","ngaan5"] },
+            { chars: ["泪", "滴", "染", "湿", "着", "迷", "蒙", "两", "眼"], jp: ["leoi6", "dik6", "jim5", "sap1", "zoek6", "mai4", "mung4", "loeng5", "ngaan5"] },
             { chars: ["让","万","缕","思","念","长","怀","心","间"], jp: ["joeng6","maan6","leoi5","si1","nim6","coeng4","waai4","sam1","gaan1"] },
             { chars: ["想","转","身"," ","偏","要","依","恋","多","一","眼"], jp: ["soeng2","zyun2","san1","","pin1","jiu3","ji1","lyun2","do1","jat1","ngaan5"] },
             { paragraphBreak: true },
