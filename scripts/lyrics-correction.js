@@ -18,6 +18,83 @@ const {
 const { matchJyutping } = require('../jyutping-dict');
 const { toSimplified, countSegments } = require('./t2s-converter');
 
+// 智能分割歌词行
+// 规则1：连续重复词（如"等 等 等"），中间空格保留不换行，重复序列之后的空格换行
+// 规则2：非重复序列，空格前的词字数 >= 3 则换行，< 3 则保留空格不换行
+// 规则3：空格保留，不消除；空格不匹配粤拼
+function smartSplitLines(text) {
+    const rawLines = text.split('\n').filter(l => l.trim());
+    const result = [];
+    
+    rawLines.forEach(line => {
+        // 按空格分割为词和空格的数组
+        const segments = [];
+        let buf = '';
+        let inSpace = false;
+        for (const ch of line) {
+            if (/\s/.test(ch)) {
+                if (!inSpace) {
+                    if (buf) segments.push({ type: 'word', value: buf });
+                    buf = '';
+                    inSpace = true;
+                }
+                buf += ch;
+            } else {
+                if (inSpace) {
+                    if (buf) segments.push({ type: 'space', value: buf });
+                    buf = '';
+                    inSpace = false;
+                }
+                buf += ch;
+            }
+        }
+        if (buf) segments.push({ type: inSpace ? 'space' : 'word', value: buf });
+        
+        // 提取词的数组
+        const words = segments.filter(s => s.type === 'word').map(s => s.value);
+        
+        // 对每个空格位置，判断是否换行
+        let currentLine = '';
+        for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i];
+            
+            if (seg.type === 'word') {
+                currentLine += seg.value;
+            } else if (seg.type === 'space') {
+                const prevWordIdx = segments.slice(0, i).filter(s => s.type === 'word').length - 1;
+                const nextWordIdx = prevWordIdx + 1;
+                const prevWord = words[prevWordIdx] || '';
+                const nextWord = words[nextWordIdx] || '';
+                
+                // 规则1：连续重复词
+                if (nextWord && prevWord === nextWord) {
+                    // 连续重复，空格保留不换行
+                    currentLine += seg.value;
+                } else if (prevWordIdx >= 1 && words[prevWordIdx] === words[prevWordIdx - 1]) {
+                    // 在连续重复序列之后，换行
+                    result.push(currentLine);
+                    currentLine = '';
+                } else {
+                    // 规则2：非重复序列
+                    const prevLen = prevWord.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, '').length;
+                    if (prevLen >= 3) {
+                        result.push(currentLine);
+                        currentLine = '';
+                    } else {
+                        currentLine += seg.value;
+                    }
+                }
+            }
+        }
+        
+        if (currentLine.trim()) {
+            result.push(currentLine);
+        }
+    });
+    
+    return result.filter(l => l.trim());
+}
+
 function processLyricsCorrection() {
     const issue = getIssueInfo();
 
