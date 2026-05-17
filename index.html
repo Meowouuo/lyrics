@@ -1648,11 +1648,14 @@
             }
             // 渲染每个分段为一个独立的 lyric-line
             segments.forEach((segment, segIdx) => {
-                // 跳过空格字符：空格保留在 chars 数组中但不渲染为独立的显示列
-                // 这样英文句子如 "You make me cry" 会正确显示，空格不会占据一列
+                // 渲染每个字符：空格保留间距但不创建 char-group（不显示粤拼）
+                // 这样英文句子如 "You make me cry" 正确显示，空格有间距但不占独立列
                 const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
-                    // 跳过空格字符（半角空格和全角空格）
-                    if (char === ' ' || char === '\u3000') return '';
+                    // 空格字符：保留空格间距，但不创建 char-group（不匹配粤拼、不显示粤拼列）
+                    if (char === ' ' || char === '\u3000') {
+                        return '<span style="display:inline-block;width:0.3em;"></span>';
+                    }
+                    // 非空格字符：正常创建 char-group（显示粤拼+汉字）
                     return `
                     <span class="char-group" data-line="${displayLineIndex}" data-song-index="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${displayLineIndex}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
