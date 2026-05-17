@@ -200,9 +200,9 @@ function processFullReplacement(content, body, songTitle) {
     
     const lyricsArray = [];
     
-    rawParagraphs.forEach((para) => {
+    // 遍历每个段落，使用 pIdx 追踪段落索引
+    rawParagraphs.forEach((para, pIdx) => {
         // 智能分割行：处理"等 等 等 等不到月圆"这种情况
-        // 如果一行中有连续3个以上相同汉字用空格连接，不分割
         const lines = smartSplitLines(para);
         lines.forEach(line => {
             const matched = matchJyutping(line.trim());
@@ -220,7 +220,8 @@ function processFullReplacement(content, body, songTitle) {
                 }).join(', ')
             });
         });
-        if (pIdx < paragraphs.length - 1) {
+        // 在段落之间添加段落分隔符（最后一个段落除外）
+        if (pIdx < rawParagraphs.length - 1) {
             lyricsArray.push({ isBreak: true });
         }
     });
