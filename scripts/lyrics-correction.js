@@ -206,10 +206,12 @@ function processFullReplacement(content, body, songTitle) {
         const lines = smartSplitLines(para);
         lines.forEach(line => {
             const matched = matchJyutping(line.trim());
+            // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
+            const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
             // 保留所有字符，但符号的粤拼设为空字符串
             lyricsArray.push({
-                chars: matched.map(m => `"${m.char}"`).join(', '),
-                jp: matched.map(m => {
+                chars: filtered.map(m => `"${m.char}"`).join(', '),
+                jp: filtered.map(m => {
                     // 汉字、字母、数字保留粤拼，符号设为空字符串
                     if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
                         return `"${m.jp}"`;
@@ -331,10 +333,12 @@ function processInsertLine(content, body, songTitle) {
                 return { isBreak: true };
             }
             const matched = matchJyutping(line.trim());
-            if (matched.length === 0) return null;
+            // 过滤掉空格字符
+            const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
+            if (filtered.length === 0) return null;
             return {
-                chars: matched.map(m => `"${m.char}"`).join(', '),
-                jp: matched.map(m => {
+                chars: filtered.map(m => `"${m.char}"`).join(', '),
+                jp: filtered.map(m => {
                     if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
                         return `"${m.jp}"`;
                     }
@@ -484,8 +488,10 @@ function processLineByLine(content, body, songTitle) {
         
         // 替换歌词并重新匹配粤拼（使用简体）
         const matched = matchJyutping(simplifiedNew);
-        const newChars = matched.map(m => `"${m.char}"`).join(', ');
-        const newJp = matched.map(m => {
+        // 过滤掉空格字符
+        const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
+        const newChars = filtered.map(m => `"${m.char}"`).join(', ');
+        const newJp = filtered.map(m => {
             if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
                 return `"${m.jp}"`;
             }

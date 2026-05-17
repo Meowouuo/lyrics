@@ -137,9 +137,12 @@ function processNewSong() {
         const lines = smartSplitLines(para);
         lines.forEach((line) => {
             const matched = matchJyutping(line.trim());
+            // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
+            // 这样前端显示时不会为空格创建单独的列
+            const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
             lyrics.push({
-                chars: matched.map(m => m.char),
-                jp: matched.map(m => m.jp),
+                chars: filtered.map(m => m.char),
+                jp: filtered.map(m => m.jp),
             });
             // 收集预览行（前5行）
             if (previewLines.length < 5) {
