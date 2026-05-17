@@ -76,12 +76,21 @@ function smartSplitLines(text) {
                     currentLine = '';
                 } else {
                     // 规则2：非重复序列
-                    const prevLen = prevWord.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, '').length;
-                    if (prevLen >= 3) {
-                        result.push(currentLine);
-                        currentLine = '';
-                    } else {
+                    // 规则2.1：英文句子间的空格不换行
+                    const isPrevEnglish = /^[a-zA-Z]/.test(prevWord);
+                    const isNextEnglish = /^[a-zA-Z]/.test(nextWord);
+                    if (isPrevEnglish && isNextEnglish) {
+                        // 英文单词之间的空格，保留不换行
                         currentLine += seg.value;
+                    } else {
+                        // 规则2.2：中文词，按字数判断
+                        const prevLen = prevWord.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, '').length;
+                        if (prevLen >= 3) {
+                            result.push(currentLine);
+                            currentLine = '';
+                        } else {
+                            currentLine += seg.value;
+                        }
                     }
                 }
             }
