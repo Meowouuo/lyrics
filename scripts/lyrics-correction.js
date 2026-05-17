@@ -105,12 +105,19 @@ function processFullReplacement(content, body, songTitle) {
     // 繁体→简体转换
     fullLyrics = toSimplified(fullLyrics);
 
-    // 解析歌词为段落
-    const paragraphs = fullLyrics.replace(/\r\n/g, '\n').split(/\n{2,}/).filter(p => p.trim());
+    // 解析歌词为段落 - 智能换行逻辑
+    // 规则：超过3个相同字的连续重复，中间空格不视为换行
+    const normalizedLyrics = fullLyrics.replace(/\r\n/g, '\n');
+    
+    // 先按段落分割（两个以上换行）
+    const rawParagraphs = normalizedLyrics.split(/\n{2,}/).filter(p => p.trim());
     
     const lyricsArray = [];
-    paragraphs.forEach((para, pIdx) => {
-        const lines = para.split('\n').filter(l => l.trim());
+    
+    rawParagraphs.forEach((para) => {
+        // 智能分割行：处理"等 等 等 等不到月圆"这种情况
+        // 如果一行中有连续3个以上相同汉字用空格连接，不分割
+        const lines = smartSplitLines(para);
         lines.forEach(line => {
             const matched = matchJyutping(line.trim());
             // 保留所有字符，但符号的粤拼设为空字符串

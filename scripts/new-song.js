@@ -1,6 +1,22 @@
 // 处理新歌投稿：解析 Issue → 生成歌词文件 → 创建 PR
 
 const fs = require('fs');
+// 智能分割歌词行
+// 规则：超过3个相同字的连续重复，中间空格不视为换行
+function smartSplitLinesNewSong(text) {
+    const rawLines = text.split('\n').filter(l => l.trim());
+    
+    return rawLines.map(line => {
+        // 检查是否包含连续3个以上相同字的模式（如"等 等 等"）
+        // 这种模式的空格不视为换行，而是合并为一行
+        return line.replace(/([一-龥])\s+\1\s+\1(\s+\1)*/g, (match, char) => {
+            // 将 "等 等 等 等" 合并为 "等等等等"
+            return match.replace(/\s+/g, '');
+        });
+    }).filter(l => l.trim());
+}
+
+
 const path = require('path');
 const {
     getIssueInfo,
