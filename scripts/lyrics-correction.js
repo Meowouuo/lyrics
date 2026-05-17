@@ -334,13 +334,13 @@ function processInsertLine(content, body, songTitle) {
                 return { isBreak: true };
             }
             const matched = matchJyutping(line.trim());
-            // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
-            // 这样前端显示时不会为空格创建单独的列
-            const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
-            if (filtered.length === 0) return null;
+            // 空格保留在 chars 数组中，粤拼为空字符串
+            // 前端渲染时会跳过空格字符，不为其创建显示列
+            if (matched.length === 0) return null;
             return {
-                chars: filtered.map(m => `"${m.char}"`).join(', '),
-                jp: filtered.map(m => {
+                chars: matched.map(m => `"${m.char}"`).join(', '),
+                jp: matched.map(m => {
+                    // 汉字、字母、数字保留粤拼，空格和符号设为空字符串
                     if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
                         return `"${m.jp}"`;
                     }
@@ -490,11 +490,11 @@ function processLineByLine(content, body, songTitle) {
         
         // 替换歌词并重新匹配粤拼（使用简体）
         const matched = matchJyutping(simplifiedNew);
-        // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
-        // 这样前端显示时不会为空格创建单独的列
-        const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
-        const newChars = filtered.map(m => `"${m.char}"`).join(', ');
-        const newJp = filtered.map(m => {
+        // 空格保留在 chars 数组中，粤拼为空字符串
+        // 前端渲染时会跳过空格字符，不为其创建显示列
+        const newChars = matched.map(m => `"${m.char}"`).join(', ');
+        const newJp = matched.map(m => {
+            // 汉字、字母、数字保留粤拼，空格和符号设为空字符串
             if (/[\u4e00-\u9fff\u3400-\u4dbfa-zA-Z0-9]/.test(m.char)) {
                 return `"${m.jp}"`;
             }
