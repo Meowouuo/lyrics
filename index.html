@@ -1625,23 +1625,18 @@
                 lyricsHtml += '<div class="lyric-paragraph-break"></div>';
                 return;
             }
-            // 按空格分割成多行，确保每行行高一致
-            // 但书名号《》和括号（）()内的空格不分割
+            // 将所有字符放入同一个 segment（不再按空格分割）
+            // 空格保留在 segment 中，渲染时会跳过空格字符不创建 char-group
+            // 这样英文句子如 "You make me cry" 会在同一个 segment 中正确显示
             const segments = [];
-            let currentSegment = [];
-            let inBrackets = 0; // 括号/书名号嵌套层级
+            const currentSegment = [];
+            let inBrackets = 0; // 括号/书名号嵌套层级（保留用于未来扩展）
             line.chars.forEach((char, i) => {
-                if (char === ' ' && inBrackets === 0) {
-                    if (currentSegment.length > 0) {
-                        segments.push(currentSegment);
-                        currentSegment = [];
-                    }
-                } else {
-                    // 跟踪书名号和括号的嵌套
-                    if (char === '《' || char === '(' || char === '（') inBrackets++;
-                    if (char === '》' || char === ')' || char === '）') inBrackets = Math.max(0, inBrackets - 1);
-                    currentSegment.push({ char, jp: line.jp[i] || '', index: i });
-                }
+                // 跟踪书名号和括号的嵌套
+                if (char === '《' || char === '(' || char === '（') inBrackets++;
+                if (char === '》' || char === ')' || char === '）') inBrackets = Math.max(0, inBrackets - 1);
+                // 所有字符（包括空格）都放入同一个 segment
+                currentSegment.push({ char, jp: line.jp[i] || '', index: i });
             });
             if (currentSegment.length > 0) {
                 segments.push(currentSegment);
