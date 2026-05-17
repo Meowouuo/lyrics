@@ -334,7 +334,8 @@ function processInsertLine(content, body, songTitle) {
                 return { isBreak: true };
             }
             const matched = matchJyutping(line.trim());
-            // 过滤掉空格字符
+            // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
+            // 这样前端显示时不会为空格创建单独的列
             const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
             if (filtered.length === 0) return null;
             return {
@@ -489,7 +490,8 @@ function processLineByLine(content, body, songTitle) {
         
         // 替换歌词并重新匹配粤拼（使用简体）
         const matched = matchJyutping(simplifiedNew);
-        // 过滤掉空格字符
+        // 过滤掉空格字符：空格保留在歌词文本中，但不作为独立的 chars/jp 元素
+        // 这样前端显示时不会为空格创建单独的列
         const filtered = matched.filter(m => m.char !== ' ' && m.char !== '\t');
         const newChars = filtered.map(m => `"${m.char}"`).join(', ');
         const newJp = filtered.map(m => {
