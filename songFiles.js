@@ -17,6 +17,7 @@ const songFiles = [
     'lyrics/喜欢你.js',
     'lyrics/圆.js',
     'lyrics/天之骄女.js',
+    'lyrics/嫁妆.js',
     'lyrics/富士山下.js',
     'lyrics/心跳回忆.js',
     'lyrics/必杀技.js',
