@@ -175,7 +175,10 @@ function countSegments(chars) {
                 charCountSinceLastSpace++;
             }
             // 累积 prevWord（非空格字符）
-            if (char !== ' ' && char !== '\u3000') {
+            // 如果前一个字符是空格，重置 prevWord 开始新词
+            if (i > 0 && (chars[i - 1] === ' ' || chars[i - 1] === '\u3000')) {
+                prevWord = char;
+            } else {
                 prevWord += char;
             }
         }
