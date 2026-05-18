@@ -7,6 +7,7 @@
 const fs = require('fs');          // 文件系统模块
 const path = require('path');      // 路径处理模块
 const { execSync } = require('child_process');  // 子进程模块，用于执行 git 命令
+const { matchJyutping } = require("../jyutping-dict");  // 粤拼匹配函数
 
 // ============================================
 // 获取 Issue 信息
@@ -323,6 +324,7 @@ function addLabel(issueNumber, label) {
 // 导出所有工具函数供其他脚本使用
 // ============================================
 module.exports = {
+    matchJyutping,     // 粤拼匹配函数
     getIssueInfo,        // 获取 Issue 信息
     parseTable,          // 解析 Markdown 表格
     parseCodeBlock,     // 解析代码块
