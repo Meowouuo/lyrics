@@ -1,32 +1,49 @@
+# 工作流名称：自动处理 Issue
+# 功能说明：当有新的 Issue 被打开、编辑或重新打开时，自动运行处理脚本
+# 处理流程：提取 Issue 信息 -> 保存到临时文件 -> 调用 Node.js 脚本进行自动化处理（如生成粤拼、创建 PR 等）
+
 name: Auto Process Issues
 
+# 触发条件：监听 Issue 的打开、编辑、重新打开事件
 on:
   issues:
     types: [opened, edited, reopened]
 
 jobs:
+  # 任务：处理 Issue
   process-issue:
+    # 运行环境：最新版 Ubuntu
     runs-on: ubuntu-latest
+    # 权限设置：需要写入代码仓库、管理 PR 和 Issue 的权限
     permissions:
       contents: write
       pull-requests: write
       issues: write
 
     steps:
+      # 步骤1：拉取代码仓库
       - uses: actions/checkout@v4
 
+      # 步骤2：安装 Node.js 运行环境（版本 20）
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # 步骤3：安装项目依赖
       - name: Install dependencies
         run: npm install
 
+      # 步骤4：将 Issue 的标题、正文、编号、标签等信息保存到临时文件
+      # 这些临时文件供后续的处理脚本读取使用
       - name: Save Issue data to file
         env:
+          # Issue 标题
           ISSUE_TITLE: ${{ github.event.issue.title }}
+          # Issue 正文内容
           ISSUE_BODY: ${{ github.event.issue.body }}
+          # Issue 编号
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          # Issue 标签（多个标签用逗号分隔）
           ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
         run: |
           echo "$ISSUE_TITLE" > /tmp/issue_title.txt
@@ -34,7 +51,10 @@ jobs:
           echo "$ISSUE_NUMBER" > /tmp/issue_number.txt
           echo "$ISSUE_LABELS" > /tmp/issue_labels.txt
 
+      # 步骤5：执行 Issue 处理脚本
+      # 根据 Issue 类型和内容，自动完成对应的操作（如新歌投稿生成粤拼文件、纠错修改等）
       - name: Process Issue
         env:
+          # GitHub API 认证令牌，用于创建 PR 等操作
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/process-issue.js
