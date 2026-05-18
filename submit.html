@@ -367,6 +367,9 @@
                     <input type="text" id="lc-song" placeholder="例如：喜欢你">
                 </div>
 
+                <!-- 歌名/元信息修改提示（从编辑页面跳转时显示） -->
+                <div id="lc-meta-info" style="display:none;padding:10px 14px;background:#fff7e6;border:1px solid #ffd591;border-radius:6px;font-size:13px;color:#874d00;margin-bottom:10px;"></div>
+
                 <!-- 纠错类型选择 - 三选一 -->
                 <div class="form-group">
                     <label>纠错类型 <span class="required">*</span></label>
@@ -1213,6 +1216,19 @@
                             lastRow.querySelector('.lc-original').value = c.originalText || '';
                             lastRow.querySelector('.lc-new').value = c.newText || '';
                         });
+                    }
+
+                    // 处理歌名/元信息修改
+                    if (data.meta && Object.keys(data.meta).length > 0) {
+                        const metaInfo = document.getElementById('lc-meta-info');
+                        if (metaInfo) {
+                            const metaParts = [];
+                            if (data.meta.title) metaParts.push('歌名: ' + data.meta.title.original + ' → ' + data.meta.title.new);
+                            if (data.meta.artist) metaParts.push('歌手: ' + data.meta.artist.original + ' → ' + data.meta.artist.new);
+                            if (data.meta.album) metaParts.push('专辑: ' + data.meta.album.original + ' → ' + data.meta.album.new);
+                            metaInfo.textContent = metaParts.join('；');
+                            metaInfo.style.display = 'block';
+                        }
                     }
                 }
 

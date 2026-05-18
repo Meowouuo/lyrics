@@ -179,14 +179,35 @@ export default {
 
           } else {
             // ----- 逐行修改模式（默认） -----
-            if (!corrections || corrections.length === 0) {
+            // 支持只有歌名/元信息修改的情况
+            const meta = data.meta;
+            if ((!corrections || corrections.length === 0) && (!meta || Object.keys(meta).length === 0)) {
               return jsonResponse({
                 error: '歌词纠错需要纠错内容'
               }, 400);
             }
-            issueTitle = `[歌词纠错] ${songName}（${corrections.length}处）`;
+            // 构建标题和正文
+            const metaParts = [];
+            if (meta) {
+              if (meta.title) metaParts.push('歌名: ' + meta.title.original + ' → ' + meta.title.new);
+              if (meta.artist) metaParts.push('歌手: ' + meta.artist.original + ' → ' + meta.artist.new);
+              if (meta.album) metaParts.push('专辑: ' + meta.album.original + ' → ' + meta.album.new);
+            }
+            const count = (corrections ? corrections.length : 0) + metaParts.length;
+            issueTitle = `[歌词纠错] ${songName}（${count}处）`;
             labels = ['歌词纠错'];
-            issueBody = buildLyricsCorrectionBody({ songName, corrections });
+            // 如果有逐行纠错，使用标准格式；否则只提交 meta 信息
+            if (corrections && corrections.length > 0) {
+              issueBody = buildLyricsCorrectionBody({ songName, corrections, meta });
+            } else {
+              issueBody = `## 歌曲名称
+${songName}
+
+## 纠错内容
+
+${metaParts.map(p => '- ' + p).join('
+')}`;
+            }
           }
           break;
 
