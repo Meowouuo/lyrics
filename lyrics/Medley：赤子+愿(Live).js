@@ -13,6 +13,7 @@
         composerJyutping: ["lo4","daai6","jau6","","wong4","wai5","nin4","","heoi2","jyun6"],
         lyrics: [
             { chars: ["《", "赤", "子", "》"], jp: ["", "cek3", "zi2", ""] },
+            { paragraphBreak: true },
             { chars: ["远", "远", "近", "近", "里"], jp: ["jyun5", "jyun5", "gan6", "gan6", "leoi5"] },
             { chars: ["城","市","高","高","低","低","间"], jp: ["sing4","si5","gou1","gou1","dai1","dai1","gaan1"] },
             { chars: ["沿","路","断","断","折","折","哪","有","终","站"], jp: ["jyun4","lou6","dyun6","dyun6","zit3","zit3","naa5","jau5","zung1","zaam6"] },
@@ -38,6 +39,7 @@
             { chars: ["世","界","太","阔","了"], jp: ["sai3","gaai3","taai3","fut3","liu5"] },
             { chars: ["由","你","出","生","当","天","起"], jp: ["jau4","nei5","ceot1","sang1","dong1","tin1","hei2"] },
             { chars: ["童","稚","已","每","年","渐","远","离"], jp: ["tung4","zi6","ji5","mui5","nin4","zim6","jyun5","lei4"] },
+            { paragraphBreak: true },
             { chars: ["《", "愿", "》"], jp: ["", "jyun6", ""] },
             { paragraphBreak: true },
             { chars: ["最","美","一","幕"," ","还","未","闭","幕"], jp: ["zeoi3","mei5","jat1","mok6","","waan4","mei6","bai3","mok6"] },
