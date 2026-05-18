@@ -631,13 +631,35 @@ function processLineByLine(content, body, songTitle) {
         const simplifiedNew = toSimplified(newText.toString().trim());
         
         // 检查原歌词是否匹配（简体比较）
-        if (currentChars !== simplifiedOriginal) {
+        // 支持两种模式：整行匹配 或 segment 匹配
+        let isSegmentEdit = false;
+        let segmentStart = -1;
+        let segmentEnd = -1;
+        
+        if (currentChars === simplifiedOriginal) {
+            // 整行匹配
+            isSegmentEdit = false;
+        } else if (currentChars.includes(simplifiedOriginal)) {
+            // 可能是 segment 编辑：originalText 是某行的一部分
+            segmentStart = currentChars.indexOf(simplifiedOriginal);
+            segmentEnd = segmentStart + simplifiedOriginal.length;
+            isSegmentEdit = true;
+        } else {
+            // 完全不匹配
             failedRows.push(row);
             continue;
         }
         
         // 替换歌词并重新匹配粤拼（使用简体）
-        const matched = matchJyutping(simplifiedNew);
+        let finalText;
+        if (isSegmentEdit) {
+            // segment 编辑：只替换 segment 部分
+            finalText = currentChars.substring(0, segmentStart) + simplifiedNew + currentChars.substring(segmentEnd);
+        } else {
+            // 整行编辑
+            finalText = simplifiedNew;
+        }
+        const matched = matchJyutping(finalText);
         // 空格保留在 chars 数组中，粤拼为空字符串
         // 前端渲染时会跳过空格字符，不为其创建显示列
         const newChars = matched.map(m => `"${m.char}"`).join(', ');
