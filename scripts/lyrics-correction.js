@@ -3,8 +3,8 @@
 // 功能：处理用户通过 Issue 提交的歌词纠错请求
 // ============================================
 
-const { toSimplified } = require('./t2s-converter');
-const { matchJyutping, countSegments } = require('./utils');
+const { toSimplified, countSegments } = require('./t2s-converter');
+const { matchJyutping } = require('./utils');
 
 // ============================================
 // 解析表格数据
