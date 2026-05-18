@@ -877,7 +877,7 @@ function submitEdit() {
     switch (editLyricsType) {
         case 'line':
             // 逐行纠错模式：添加纠错列表
-            if (editedLyrics.length === 0) return;  // 没有修改则不提交
+            if (editedLyrics.length === 0 && Object.keys(editedMeta).length === 0) return;  // 没有修改则不提交
             
             // 将编辑记录转换为提交格式
             submitData.corrections = editedLyrics.map(e => {
@@ -973,14 +973,14 @@ function submitEdit() {
             
         case 'full':
             // 整首替换模式：添加完整歌词
-            if (fullReplacements.length === 0) return;  // 没有修改则不提交
+            if (fullReplacements.length === 0 && Object.keys(editedMeta).length === 0) return;  // 没有修改则不提交
             // 如果有多个整首替换，取最后一个（覆盖之前的）
             submitData.fullLyrics = fullReplacements[fullReplacements.length - 1].lyrics;
             break;
             
         case 'insert':
             // 插入行模式：添加插入列表
-            if (insertions.length === 0) return;  // 没有修改则不提交
+            if (insertions.length === 0 && Object.keys(editedMeta).length === 0) return;  // 没有修改则不提交
             // 传递所有插入项
             submitData.insertions = insertions;
             break;
