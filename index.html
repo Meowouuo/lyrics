@@ -2527,24 +2527,81 @@
                 return;
             }
 
-            // 将同一行的所有字符放入一个 segment（处理括号内跨行情况）
+            // ========== 智能分割 segment ==========
+            // 空格根据规则决定：分割（换行）或保留（显示间距）
+            // 规则1：连续重复词中间的空格 → 保留不分割
+            // 规则2：英文单词间的空格 → 保留不分割
+            // 规则3：空格前累积汉字数 < 3 → 保留不分割
+            // 规则4：其他空格 → 分割（换行）
+            // 规则5：书名号《》和括号（）内的空格 → 保留不分割
             const segments = [];
-            const currentSegment = [];
+            let currentSegment = [];                   // 当前正在构建的 segment
             let inBrackets = 0;                        // 括号嵌套层级计数
+            let prevWord = '';                         // 空格前累积的词（用于判断重复）
+            let charCountSinceLastSpace = 0;           // 自上次空格以来的汉字计数
 
             // 遍历当前行的每个字符
             line.chars.forEach((char, i) => {
-                // 跟踪书名号和括号的嵌套层级（用于跨行合并）
+                // 跟踪书名号和括号的嵌套层级
                 if (char === '《' || char === '(' || char === '（') inBrackets++;
                 if (char === '》' || char === ')' || char === '）') inBrackets = Math.max(0, inBrackets - 1);
-                // 将字符及其粤拼、原始索引存入当前 segment
-                // 所有字符都放入同一个 segment（括号内的跨行内容会合并显示）
-                currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+
+                if ((char === ' ' || char === '\u3000') && inBrackets === 0) {
+                    // ===== 遇到空格字符，判断是否分割 =====
+
+                    // 收集空格后的下一个词（用于判断是否重复/英文）
+                    let nextWord = '';
+                    for (let j = i + 1; j < line.chars.length; j++) {
+                        if (line.chars[j] === ' ' || line.chars[j] === '\u3000') break;
+                        nextWord += line.chars[j];
+                    }
+
+                    // 规则1：连续重复词 → 保留空格不分割
+                    if (nextWord && prevWord === nextWord) {
+                        // 重复序列中间的空格，保留在当前 segment
+                        currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+                        charCountSinceLastSpace = 0;
+                    }
+                    // 规则2：英文单词间的空格 → 保留不分割
+                    else if (/^[a-zA-Z]/.test(prevWord) && /^[a-zA-Z]/.test(nextWord)) {
+                        currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+                        charCountSinceLastSpace = 0;
+                    }
+                    // 规则3：空格前累积汉字数 < 3 → 保留不分割
+                    else if (charCountSinceLastSpace < 3) {
+                        currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+                        charCountSinceLastSpace = 0;
+                    }
+                    // 规则4：其他情况 → 分割（换行）
+                    else {
+                        if (currentSegment.length > 0) {
+                            segments.push(currentSegment);
+                            currentSegment = [];
+                        }
+                        charCountSinceLastSpace = 0;
+                    }
+                } else {
+                    // ===== 非空格字符，存入当前 segment =====
+                    currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+                    // 累积汉字计数（用于规则3判断）
+                    if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(char)) {
+                        charCountSinceLastSpace++;
+                    }
+                }
             });
 
-            // 如果有字符，添加到 segments
+            // 如果有剩余字符，添加到 segments
             if (currentSegment.length > 0) {
                 segments.push(currentSegment);
+            }
+
+            // 更新 prevWord 用于下一行判断（当前行最后一个词）
+            // 从当前行的 chars 中提取最后一个连续非空格词
+            prevWord = '';
+            for (let k = line.chars.length - 1; k >= 0; k--) {
+                const c = line.chars[k];
+                if (c === ' ' || c === '\u3000') break;
+                prevWord = c + prevWord;
             }
 
             // 渲染每个分段
