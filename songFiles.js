@@ -1,3 +1,42 @@
+/**
+ * @file songFiles.js
+ * @description 粤拼歌词项目的歌曲清单文件
+ *
+ * 本文件存储了项目中所有可用的歌曲文件路径列表，作为歌词列表页面的数据源。
+ * 该文件由构建脚本自动生成，请勿手动修改。如需添加或删除歌曲，
+ * 请通过投稿页面（submit.html）提交请求，由管理员审核后通过脚本重新生成。
+ *
+ * 数组格式说明：
+ * - 数组名称：songFiles
+ * - 数组元素类型：字符串（String）
+ * - 每个元素是一个相对路径，指向 lyrics/ 目录下的歌曲数据文件（.js 格式）
+ * - 路径格式：'lyrics/歌曲名称.js'
+ * - 歌曲名称中可能包含特殊字符（如中文冒号、括号等），需保持原样
+ * - 包含 live 版本的歌曲以 '(live)' 标识
+ * - 包含 Medley（串烧）的歌曲以 'Medley：' 开头，多首歌用 '+' 连接
+ *
+ * 使用方法：
+ * 1. 在 HTML 页面中通过 <script src="songFiles.js"> 引入本文件
+ * 2. 引入后即可通过全局变量 songFiles 访问歌曲列表数组
+ * 3. 遍历 songFiles 数组可获取所有歌曲文件路径
+ * 4. 配合动态加载脚本（如 import() 或动态 <script>）加载具体歌曲数据
+ *
+ * @example
+ * // 遍历所有歌曲文件路径
+ * songFiles.forEach(file => {
+ *     console.log('歌曲文件:', file);
+ * });
+ *
+ * @example
+ * // 动态加载某首歌曲的数据
+ * const songPath = songFiles[0]; // 获取第一首歌曲的路径
+ * const script = document.createElement('script');
+ * script.src = songPath;
+ * document.body.appendChild(script);
+ *
+ * @global songFiles - 全局数组，包含所有歌曲文件路径
+ */
+
 // 歌曲清单（自动生成，请勿手动修改）
 const songFiles = [
     'lyrics/Medley：再见我的初恋+痛爱+逃避你+谁来爱我+损友+抱抱+想得太远+习惯失恋+一拍两散+心淡（live）.js',
