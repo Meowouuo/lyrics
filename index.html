@@ -2553,7 +2553,7 @@
                 const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
                     // 空格字符：保留间距但不创建 char-group（不可点击）
                     if (char === ' ' || char === '\u3000') {
-                        return '<span style="display:inline-block;width:1em;"></span>';
+                        return '<span style="display:inline-block;width:1em;">&nbsp;</span>';
                     }
                     // 非空格字符：创建可点击的 char-group
                     return `
