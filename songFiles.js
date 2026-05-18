@@ -1,5 +1,14 @@
 // 歌曲清单（自动生成，请勿手动修改）
 const songFiles = [
+    'lyrics/Medley:',
+    '垃圾',
+    '+',
+    '绝',
+    '+',
+    '失乐园',
+    '+',
+    '大开眼戒',
+    '(Live).js',
     'lyrics/Medley：再见我的初恋+痛爱+逃避你+谁来爱我+损友+抱抱+想得太远+习惯失恋+一拍两散+心淡（live）.js',
     'lyrics/Medley：密友+损友+心甘命抵+早有预谋+罪魁+借过+我也不想这样（live）.js',
     'lyrics/Medley：赤子+愿(Live).js',
