@@ -39,18 +39,19 @@ jobs:
 
       # 步骤2：扫描 lyrics 目录并生成歌曲清单文件 songFiles.js
       # 遍历 lyrics 目录下所有 .js 文件，按文件名排序后写入清单
+      # 注意：使用 while read 处理包含空格的文件名
       - name: Scan lyrics directory and generate manifest
         run: |
-          files=$(find lyrics -maxdepth 1 -name '*.js' -type f | sort)
-
           echo "// 歌曲清单（自动生成，请勿手动修改）" > songFiles.js
           echo "const songFiles = [" >> songFiles.js
-          for f in $files; do
+          count=0
+          while IFS= read -r f; do
               echo "    '$f'," >> songFiles.js
-          done
+              count=$((count + 1))
+          done < <(find lyrics -maxdepth 1 -name '*.js' -type f | sort)
           echo "];" >> songFiles.js
 
-          echo "生成完成，共 $(echo "$files" | wc -l) 首歌曲"
+          echo "生成完成，共 $count 首歌曲"
           cat songFiles.js
 
       # 步骤3：检测清单文件是否有变更，如有变更则创建 PR 并自动合并
