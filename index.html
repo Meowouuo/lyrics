@@ -2641,9 +2641,14 @@
                 </button>`;
 
                 // 生成歌词行 HTML
+                // 记录该 segment 的字符范围（用于编辑时提取对应文字）
+                const segStart = segment[0] ? segment[0].index : 0;
+                const segEnd = segment[segment.length - 1] ? segment[segment.length - 1].index : 0;
                 lyricsHtml += `<div class="lyric-line"
                     data-line="${displayLineIndex}"
                     data-song-index="${index}"
+                    data-segment-start="${segStart}"
+                    data-segment-end="${segEnd}"
                     style="line-height:${lineHeight}"
                     onclick="onLyricLineClick(event, ${displayLineIndex})">
                     ${playBtn}
