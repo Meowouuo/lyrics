@@ -446,13 +446,60 @@ function updateEditList() {
             if (song.lyrics[i].paragraphBreak) continue;
             if (!song.lyrics[i].chars) continue;
             
-            // 统计这行的segment数
+            // 统计这行的segment数（与前端渲染逻辑一致）
+            // 规则1：连续重复词中间空格 → 不分割
+            // 规则2：英文单词间空格 → 不分割
+            // 规则3：空格前汉字数<3 → 不分割
+            // 规则4：其他空格 → 分割
+            // 规则5：括号内空格 → 不分割
             let segments = 1;
             let inBrackets = 0;
-            for (const c of song.lyrics[i].chars) {
+            let charCountSinceLastSpace = 0;
+            let prevWord = '';
+            // 提取上一个词（用于规则1判断）
+            let lastWord = '';
+            for (let ci = song.lyrics[i].chars.length - 1; ci >= 0; ci--) {
+                const ch = song.lyrics[i].chars[ci];
+                if (ch === ' ' || ch === '\u3000') break;
+                lastWord = ch + lastWord;
+            }
+            for (let ci = 0; ci < song.lyrics[i].chars.length; ci++) {
+                const c = song.lyrics[i].chars[ci];
                 if (c === '《' || c === '(' || c === '（') inBrackets++;
                 if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
-                if (c === ' ' && inBrackets === 0) segments++;
+                if ((c === ' ' || c === '\u3000') && inBrackets === 0) {
+                    // 收集空格后的下一个词
+                    let nextWord = '';
+                    for (let ni = ci + 1; ni < song.lyrics[i].chars.length; ni++) {
+                        if (song.lyrics[i].chars[ni] === ' ' || song.lyrics[i].chars[ni] === '\u3000') break;
+                        nextWord += song.lyrics[i].chars[ni];
+                    }
+                    // 规则1：连续重复词 → 不分割
+                    if (nextWord && prevWord === nextWord) { /* 不分割 */ }
+                    // 规则2：英文间空格 → 不分割
+                    else if (/^[a-zA-Z]/.test(prevWord) && /^[a-zA-Z]/.test(nextWord)) { /* 不分割 */ }
+                    // 规则3：空格前汉字数<3 → 不分割
+                    else if (charCountSinceLastSpace < 3) { /* 不分割 */ }
+                    // 规则4：其他 → 分割
+                    else { segments++; }
+                    charCountSinceLastSpace = 0;
+                    prevWord = '';
+                    // 收集空格后的词作为新的 prevWord
+                    for (let ni = ci + 1; ni < song.lyrics[i].chars.length; ni++) {
+                        if (song.lyrics[i].chars[ni] === ' ' || song.lyrics[i].chars[ni] === '\u3000') break;
+                        prevWord += song.lyrics[i].chars[ni];
+                    }
+                } else {
+                    if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(c)) charCountSinceLastSpace++;
+                    // 累积 prevWord（非空格字符）
+                    if (c !== ' ' && c !== '\u3000') {
+                        if (!prevWord || song.lyrics[i].chars[ci - 1] === ' ' || song.lyrics[i].chars[ci - 1] === '\u3000') {
+                            prevWord = c;
+                        } else {
+                            prevWord += c;
+                        }
+                    }
+                }
             }
             displayLine += segments;
         }
