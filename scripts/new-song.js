@@ -19,6 +19,7 @@ const {
     createPR,          // 创建 Pull Request
     addComment,         // 添加 Issue 评论
     closeIssue,         // 关闭 Issue
+    matchJyutping,     // 粤拼匹配函数
 } = require('./utils');
 
 // 加载繁简转换工具
