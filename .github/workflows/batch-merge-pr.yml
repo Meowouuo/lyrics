@@ -1,41 +1,57 @@
+# 工作流名称：批量合并 PR
+# 功能说明：手动触发的工作流，用于批量合并指定的 PR 并自动关闭关联的 Issue
+# 使用方式：在 Actions 页面手动运行，输入需要合并的 PR 编号（逗号分隔）
+# 处理流程：逐个合并 PR -> 关闭关联 Issue -> 添加"已完成"标签 -> 触发歌曲清单更新
+
 name: Batch Merge PRs
 
+# 触发条件：手动触发（workflow_dispatch），需要输入 PR 编号列表
 on:
   workflow_dispatch:
     inputs:
+      # 输入参数：要合并的 PR 编号列表，多个编号用逗号分隔
       pr_numbers:
         description: 'PR 编号列表（用逗号分隔，如: 16,18,20）'
         required: true
         type: string
 
 jobs:
+  # 任务：批量合并 PR
   batch-merge:
+    # 运行环境：最新版 Ubuntu
     runs-on: ubuntu-latest
+    # 权限设置：需要写入代码仓库、管理 PR 和 Issue 的权限
     permissions:
       contents: write
       pull-requests: write
       issues: write
 
     steps:
+      # 步骤1：批量合并 PR 并关闭关联的 Issue
+      # 对每个 PR：检查状态 -> 提取关联 Issue 编号 -> 执行 squash 合并 -> 关闭 Issue 并添加标签
       - name: Batch merge PRs and close Issues
         env:
+          # GitHub CLI 和 API 认证令牌
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 仓库标识和 API 地址
           REPO="Meowouuo/lyrics"
           API="https://api.github.com/repos/$REPO"
+          # 获取用户输入的 PR 编号列表
           PRS="${{ inputs.pr_numbers }}"
-          
+
           echo "将要合并的 PR: $PRS"
           echo ""
-          
+
+          # 按逗号分隔 PR 编号，逐个处理
           IFS=',' read -ra PR_LIST <<< "$PRS"
           for pr in "${PR_LIST[@]}"; do
             pr=$(echo "$pr" | tr -d ' ')
             if [ -z "$pr" ]; then continue; fi
-              
+
             echo "正在处理 PR #$pr..."
-            
+
             # 获取 PR 信息（使用 REST API 替代 gh CLI）
             pr_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API/pulls/$pr")
             pr_state=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('state',''))" 2>/dev/null)
@@ -44,76 +60,83 @@ jobs:
             pr_body=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('body','') or '')" 2>/dev/null)
             pr_head=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('head',{}).get('ref',''))" 2>/dev/null)
             pr_mergeable=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('mergeable',False))" 2>/dev/null)
-            
+
+            # 跳过已关闭的 PR
             if [ "$pr_state" = "closed" ]; then
               echo "  ⏭️ PR #$pr 已关闭，跳过"
               echo ""
               continue
             fi
-            
+
+            # 跳过已合并的 PR
             if [ "$pr_merged" = "True" ]; then
               echo "  ⏭️ PR #$pr 已合并，跳过"
               echo ""
               continue
             fi
-            
+
+            # 无法获取 PR 信息时跳过
             if [ -z "$pr_title" ]; then
               echo "  ❌ 无法获取 PR #$pr 信息，跳过"
               echo ""
               continue
             fi
-            
+
             echo "  PR 标题: $pr_title"
             echo "  可合并: $pr_mergeable"
-            
-            # 从 PR body 中提取 Issue 编号
+
+            # 从 PR body 中提取关联的 Issue 编号（格式如 #123）
             issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
-            
-            # 从分支名中提取 Issue 编号
+
+            # 如果 body 中没有找到，则从分支名中提取 Issue 编号（格式如 123-xxx）
             if [ -z "$issue_number" ]; then
               issue_number=$(echo "$pr_head" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
             fi
-            
-            # 合并 PR
+
+            # 使用 squash 方式合并 PR
             echo "  正在合并 PR #$pr..."
             merge_result=$(curl -s -X PUT -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github+json" \
               "$API/pulls/$pr/merge" \
               -d '{"merge_method":"squash"}')
-            
+
             merge_ok=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
-            
+
             if [ "$merge_ok" = "True" ]; then
               echo "  ✅ PR #$pr 合并成功"
-              
+
               # 关闭关联的 Issue
               if [ -n "$issue_number" ]; then
                 echo "  正在关闭 Issue #$issue_number..."
+                # 将 Issue 状态设为已关闭
                 curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
                   -H "Accept: application/vnd.github+json" \
                   "$API/issues/$issue_number" \
                   -d '{"state":"closed"}' > /dev/null 2>&1
-                
-                # 添加已完成标签
+
+                # 为 Issue 添加"已完成"标签
                 curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
                   -H "Accept: application/vnd.github+json" \
                   "$API/issues/$issue_number/labels" \
                   -d '["已完成"]' > /dev/null 2>&1
-                
+
                 echo "  📌 Issue #$issue_number 已关闭"
               else
                 echo "  未找到关联的 Issue"
               fi
             else
+              # 合并失败时输出错误信息
               merge_msg=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('message',''))" 2>/dev/null)
               echo "  ❌ PR #$pr 合并失败: $merge_msg"
             fi
-            
+
             echo ""
           done
-          
+
           echo "✅ 批量处理完成"
 
+      # 步骤2：触发歌曲清单更新工作流
+      # 由于 GITHUB_TOKEN 产生的 push 事件不会自动触发其他 workflow，因此需要手动调用 API 触发
       - name: Trigger song list update
         if: success()
         env:
