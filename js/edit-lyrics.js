@@ -923,7 +923,7 @@ function addEditStyles() {
             position: fixed; 
             top: 50%; left: 50%; 
             transform: translate(-50%, -50%); 
-            background: #fff; 
+            background: var(--bg-primary); 
             border-radius: 12px; 
             padding: 24px; 
             width: 360px; 
@@ -938,7 +938,7 @@ function addEditStyles() {
             font-weight: 600; 
             text-align: center; 
             margin-bottom: 20px; 
-            color: #333; 
+            color: var(--text-primary); 
         }
         
         /* 选项容器：垂直排列 */
@@ -954,7 +954,7 @@ function addEditStyles() {
             display: flex; 
             align-items: center; 
             padding: 16px; 
-            border: 2px solid #e8e8e8; 
+            border: 2px solid var(--border-color); 
             border-radius: 8px; 
             cursor: pointer; 
             transition: all 0.2s;  /* 过渡动画 */
@@ -963,7 +963,7 @@ function addEditStyles() {
         /* 选项悬停效果 */
         .edit-type-option:hover { 
             border-color: #28a745; 
-            background: #f6ffed; 
+            background: rgba(40, 167, 69, 0.1); 
         }
         
         /* 选项图标 */
@@ -981,13 +981,13 @@ function addEditStyles() {
         .edit-type-name { 
             font-size: 16px; 
             font-weight: 600; 
-            color: #333; 
+            color: var(--text-primary); 
         }
         
         /* 选项描述 */
         .edit-type-desc { 
             font-size: 13px; 
-            color: #999; 
+            color: var(--text-tertiary); 
             margin-left: auto;  /* 靠右对齐 */
         }
         
@@ -995,16 +995,16 @@ function addEditStyles() {
         .edit-type-cancel { 
             width: 100%; 
             padding: 12px; 
-            background: #f5f5f5; 
+            background: var(--bg-secondary); 
             border: none; 
             border-radius: 6px; 
             font-size: 15px; 
             cursor: pointer; 
-            color: #666; 
+            color: var(--text-secondary); 
         }
         
         .edit-type-cancel:hover { 
-            background: #e8e8e8; 
+            background: var(--bg-tertiary); 
         }
         
         /* ============================================ */
@@ -1049,7 +1049,7 @@ function addEditStyles() {
         
         /* 提交按钮：白色背景 */
         .edit-mode-banner-btn.submit { 
-            background: #fff; 
+            background: var(--bg-primary); 
             color: #28a745; 
             font-weight: 600; 
         }
@@ -1077,7 +1077,7 @@ function addEditStyles() {
             right: 20px; 
             width: 320px; 
             max-height: calc(100vh - 100px);  /* 最大高度限制 */
-            background: #fff; 
+            background: var(--bg-primary); 
             border-radius: 8px; 
             box-shadow: 0 4px 16px rgba(0,0,0,0.15); 
             padding: 16px; 
@@ -1089,8 +1089,8 @@ function addEditStyles() {
         .edit-list-title { 
             font-weight: 600; 
             margin-bottom: 12px; 
-            color: #333; 
-            border-bottom: 1px solid #e8e8e8; 
+            color: var(--text-primary); 
+            border-bottom: 1px solid var(--border-color); 
             padding-bottom: 8px; 
         }
         
@@ -1101,7 +1101,7 @@ function addEditStyles() {
         
         /* 空状态提示 */
         .edit-list-empty { 
-            color: #999; 
+            color: var(--text-tertiary); 
             text-align: center; 
             padding: 20px; 
         }
@@ -1109,7 +1109,7 @@ function addEditStyles() {
         /* 列表项 */
         .edit-list-item { 
             padding: 8px 12px; 
-            background: #f5f5f5; 
+            background: var(--bg-secondary); 
             border-radius: 4px; 
             margin-bottom: 8px; 
             display: flex; 
@@ -1154,7 +1154,7 @@ function addEditStyles() {
             top: 70px; 
             right: 360px;  /* 在列表面板左侧 */
             width: 300px; 
-            background: #fff; 
+            background: var(--bg-primary); 
             border-radius: 8px; 
             box-shadow: 0 4px 16px rgba(0,0,0,0.15); 
             padding: 16px; 
@@ -1165,7 +1165,7 @@ function addEditStyles() {
         .edit-input-title { 
             font-weight: 600; 
             margin-bottom: 12px; 
-            color: #333; 
+            color: var(--text-primary); 
         }
         
         /* 输入行（位置+行号） */
