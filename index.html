@@ -1,34 +1,59 @@
 <!DOCTYPE html>
+<!--
+    ========================================
+    粤拼歌词 | Cantonese Lyrics with Jyutping
+    ========================================
+    一个支持粤语拼音对照的歌词展示应用
+    功能包括：歌词浏览、粤拼显示、语音朗读(TTS)、纠错模式、歌词导入等
+-->
 <html lang="zh-Hant">
 <head>
+    <!-- ===== 基础元数据 ===== -->
     <meta charset="UTF-8">
+    <!-- 视口设置：禁止缩放，适配移动端 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- iOS PWA 配置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>粤拼歌词 | Cantonese Lyrics with Jyutping</title>
+    
+    <!-- ===== Favicon 图标配置 ===== -->
     <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
+
+    <!-- ===== CSS 样式开始 ===== -->
     <style>
+        /* ========================================
+           CSS 变量定义（主题色彩系统）
+           ======================================== */
         :root {
-            --bg-primary: #fff;
-            --bg-secondary: #f5f5f5;
-            --bg-tertiary: #f0f0f0;
-            --text-primary: #333;
-            --text-secondary: #666;
-            --text-tertiary: #999;
-            --border-color: #eee;
-            --border-dark: #e8e8e8;
-            --accent: #000;
-            --accent-hover: #333;
-            --danger: #dc2626;
-            --success: #4CAF50;
-            --info: #4a9eff;
+            /* 背景色 */
+            --bg-primary: #fff;        /* 主背景色 */
+            --bg-secondary: #f5f5f5;   /* 次背景色 */
+            --bg-tertiary: #f0f0f0;    /* 第三背景色 */
+            /* 文字色 */
+            --text-primary: #333;      /* 主文字色 */
+            --text-secondary: #666;    /* 次文字色 */
+            --text-tertiary: #999;     /* 辅助文字色 */
+            /* 边框色 */
+            --border-color: #eee;      /* 边框颜色 */
+            --border-dark: #e8e8e8;    /* 深色边框 */
+            /* 强调色 */
+            --accent: #000;            /* 强调色（黑） */
+            --accent-hover: #333;      /* 悬停强调色 */
+            /* 状态色 */
+            --danger: #dc2626;         /* 危险/删除色 */
+            --success: #4CAF50;        /* 成功色 */
+            --info: #4a9eff;           /* 信息色 */
         }
+
+        /* 全局重置样式 */
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
             background: var(--bg-secondary);
@@ -37,7 +62,9 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ===== Mobile: Single Column Layout ===== */
+        /* ========================================
+           布局系统 - 移动端：单列布局
+           ======================================== */
         .app-container {
             max-width: 100%;
             margin: 0 auto;
@@ -45,7 +72,9 @@
             min-height: 100vh;
         }
 
-        /* ===== Desktop: Split Layout ===== */
+        /* ========================================
+           布局系统 - 桌面端：左右分栏布局
+           ======================================== */
         @media (min-width: 1024px) {
             body { background: var(--bg-tertiary); }
             .app-container {
@@ -57,7 +86,10 @@
             }
         }
 
-        /* ===== Sidebar (Left) ===== */
+        /* ========================================
+           侧边栏样式（左侧）
+           包含：Logo、搜索框、歌手筛选、歌曲列表
+           ======================================== */
         .sidebar {
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border-color);
@@ -76,6 +108,7 @@
             }
         }
 
+        /* 侧边栏头部：Logo区域 */
         .sidebar-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
@@ -84,6 +117,7 @@
             .sidebar-header { padding: 24px 28px; }
         }
 
+        /* Logo 主标题 */
         .logo {
             font-size: 22px;
             font-weight: 700;
@@ -94,11 +128,13 @@
             .logo { font-size: 24px; }
         }
 
+        /* Logo 副标题 */
         .logo-sub {
             font-size: 13px;
             color: var(--text-tertiary);
         }
 
+        /* 搜索框区域 */
         .search-box {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border-color);
@@ -115,6 +151,7 @@
             position: relative;
         }
 
+        /* 管理按钮（删除模式切换） */
         .manage-btn {
             flex-shrink: 0;
             padding: 8px 14px;
@@ -133,6 +170,7 @@
             color: #fff;
         }
 
+        /* 搜索输入框 */
         .search-input {
             color: var(--text-primary);
             width: 100%;
@@ -149,6 +187,7 @@
             background: var(--bg-primary);
         }
 
+        /* 搜索图标 */
         .search-icon {
             position: absolute;
             left: 14px;
@@ -159,7 +198,9 @@
 
         .search-wrapper { position: relative; }
 
-        /* Artist Filter */
+        /* ========================================
+           歌手筛选区域
+           ======================================== */
         .artist-filter {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border-color);
@@ -179,6 +220,7 @@
 
         .artist-filter::-webkit-scrollbar { display: none; }
 
+        /* 筛选按钮 */
         .filter-btn {
             display: inline-block;
             padding: 6px 14px;
@@ -202,13 +244,16 @@
             border-color: var(--accent);
         }
 
-        /* Song List */
+        /* ========================================
+           歌曲列表区域
+           ======================================== */
         .song-list {
             padding: 8px 0;
             overflow-y: auto;
             flex: 1;
         }
         
+        /* 加载更多按钮 */
         .load-more-btn {
             padding: 12px 24px;
             text-align: center;
@@ -222,6 +267,7 @@
             background: var(--bg-secondary);
         }
 
+        /* 歌曲列表项 */
         .song-item {
             display: flex;
             align-items: center;
@@ -240,6 +286,7 @@
             border-left-color: var(--accent);
         }
 
+        /* 删除模式相关样式 */
         .song-delete-btn { display: none; }
         .delete-mode .song-item { cursor: pointer; }
         .delete-mode .song-item.delete-selected {
@@ -251,6 +298,7 @@
             font-weight: bold;
         }
 
+        /* 删除操作栏（底部固定） */
         .delete-bar {
             display: flex;
             align-items: center;
@@ -279,6 +327,7 @@
         }
         .delete-submit-btn:not(:disabled):hover { opacity: 0.85; }
 
+        /* 歌曲序号 */
         .song-number {
             width: 28px;
             font-size: 13px;
@@ -286,6 +335,7 @@
             flex-shrink: 0;
         }
 
+        /* 歌曲信息（紧凑模式） */
         .song-info-compact {
             flex: 1;
             min-width: 0;
@@ -306,7 +356,9 @@
             color: var(--text-tertiary);
         }
 
-        /* ===== Main Content (Right) ===== */
+        /* ========================================
+           主内容区域（右侧）
+           ======================================== */
         .main-content {
             flex: 1;
             min-width: 0;
@@ -319,7 +371,9 @@
             }
         }
 
-        /* Empty State */
+        /* ========================================
+           空状态（未选择歌曲时）
+           ======================================== */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -348,7 +402,9 @@
             color: var(--text-tertiary);
         }
 
-        /* Lyrics View */
+        /* ========================================
+           歌词展示区域
+           ======================================== */
         .lyrics-view {
             padding: 24px;
         }
@@ -360,7 +416,7 @@
             }
         }
 
-        /* Song Header */
+        /* 歌曲头部信息 */
         .song-header {
             margin-bottom: 32px;
             padding-bottom: 24px;
@@ -384,6 +440,7 @@
             .song-title-main { gap: 6px; }
         }
 
+        /* 标题字符组（汉字+粤拼） */
         .title-char-group {
             display: inline-flex;
             flex-direction: column;
@@ -411,6 +468,7 @@
             .title-char-hanzi { font-size: 36px; }
         }
 
+        /* 歌曲元数据行 */
         .song-meta-row {
             display: flex;
             flex-direction: column;
@@ -468,16 +526,20 @@
             color: var(--text-secondary);
         }
 
-        /* Lyrics Content */
+        /* ========================================
+           歌词内容样式
+           ======================================== */
         .lyrics-content {
             line-height: 2;
             padding-bottom: 60px;
         }
 
+        /* 段落分隔 */
         .lyric-paragraph-break {
             height: 20px;
         }
 
+        /* 歌词行淡入动画 */
         .lyric-line:nth-child(1) { animation-delay: 0.02s; }
         .lyric-line:nth-child(2) { animation-delay: 0.04s; }
         .lyric-line:nth-child(3) { animation-delay: 0.06s; }
@@ -499,6 +561,7 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
         }
 
+        /* 字符组（汉字+粤拼） */
         .char-group {
             display: inline-flex;
             flex-direction: column;
@@ -532,7 +595,9 @@
             .char-hanzi { font-size: 24px; }
         }
 
-        /* TTS Play Button */
+        /* ========================================
+           TTS 语音播放按钮样式
+           ======================================== */
         .tts-play-btn {
             display: inline-flex;
             align-items: center;
@@ -566,7 +631,8 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        /* 播放模式样式 */
+        
+        /* TTS 播放模式下的字符样式 */
         .tts-mode .char-group {
             cursor: pointer;
             border-radius: 4px;
@@ -589,6 +655,7 @@
         .toolbar-btn.tts-active:hover {
             background: #43a047;
         }
+        
         /* TTS 加载动画 */
         .tts-loading {
             position: relative;
@@ -612,6 +679,8 @@
         .tts-mode .char-group.tts-loading {
             background: rgba(76, 175, 80, 0.05);
         }
+
+        /* 歌词行容器 */
         .lyric-line {
             display: flex;
             align-items: center;
@@ -624,7 +693,9 @@
             flex: 1;
         }
 
-        /* Toolbar */
+        /* ========================================
+           底部工具栏样式
+           ======================================== */
         .toolbar {
             position: fixed;
             bottom: 0;
@@ -658,6 +729,7 @@
             }
         }
 
+        /* 工具栏按钮 */
         .toolbar-btn {
             background: none;
             border: none;
@@ -699,6 +771,7 @@
             background: var(--accent-hover);
         }
 
+        /* 工具栏下拉选择 */
         .toolbar-select {
             background: none;
             border: none;
@@ -714,6 +787,7 @@
         }
         .toolbar-select:focus { outline: none; }
 
+        /* 工具栏展开/收起按钮（仅移动端） */
         .toolbar-toggle {
             display: none;
             background: none;
@@ -745,7 +819,9 @@
             }
         }
 
-        /* Mobile Header (only on mobile) */
+        /* ========================================
+           移动端头部（仅移动端显示）
+           ======================================== */
         .mobile-header {
             display: flex;
             align-items: center;
@@ -773,7 +849,7 @@
             padding: 4px;
         }
 
-        /* Mobile View Toggle */
+        /* 移动端/桌面端显示控制 */
         .mobile-only { display: block; }
         .desktop-only { display: none; }
 
@@ -782,7 +858,7 @@
             .desktop-only { display: block; }
         }
 
-        /* View States */
+        /* 视图状态控制 */
         .view-lyrics .sidebar {
             display: none;
         }
@@ -790,12 +866,15 @@
             .view-lyrics .sidebar { display: flex; }
         }
 
+        /* 滚动条样式 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #ccc; }
 
-        /* ===== Correction Mode ===== */
+        /* ========================================
+           纠错模式样式
+           ======================================== */
         .correction-mode .char-group {
             cursor: pointer;
             border-radius: 4px;
@@ -825,7 +904,7 @@
             font-weight: 600;
         }
 
-        /* Correction banner */
+        /* 纠错模式顶部提示条 */
         .correction-banner {
             position: fixed;
             top: 0;
@@ -869,7 +948,7 @@
         }
         .correction-banner-btn.cancel:hover { background: var(--bg-secondary); }
 
-        /* Edit popup */
+        /* 纠错编辑弹窗 */
         .edit-popup {
             position: fixed;
             z-index: 200;
@@ -934,14 +1013,14 @@
         }
         .edit-popup-btn.dismiss:hover { background: var(--bg-tertiary); }
 
-        /* Overlay */
+        /* 遮罩层 */
         .edit-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 150;
         }
 
-        /* Correction count badge */
+        /* 纠错数量徽章 */
         .correction-count {
             background: var(--danger);
             color: #fff;
@@ -952,7 +1031,9 @@
             margin-left: 4px;
         }
 
-        /* ===== 修改歌词模式 ===== */
+        /* ========================================
+           修改歌词模式样式
+           ======================================== */
         .edit-lyrics-mode .lyric-line {
             cursor: pointer;
             border-radius: 4px;
@@ -969,7 +1050,7 @@
             outline: 2px solid var(--info);
         }
 
-        /* Edit lyrics popup */
+        /* 修改歌词弹窗 */
         .edit-lyrics-popup {
             position: fixed;
             z-index: 200;
@@ -1037,7 +1118,9 @@
         }
         .edit-lyrics-popup-btn.dismiss:hover { background: var(--bg-tertiary); }
 
-        /* Import Modal */
+        /* ========================================
+           导入歌词模态框样式
+           ======================================== */
         .import-modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -1117,6 +1200,8 @@
             color: #fff;
         }
         .import-btn.confirm:hover { background: #3a8bee; }
+        
+        /* 导入预览区域 */
         .import-preview {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -1159,6 +1244,9 @@
             margin-top: 8px;
         }
 
+        /* ========================================
+           设置菜单样式
+           ======================================== */
         .settings-btn {
             background: none;
             border: none;
@@ -1198,25 +1286,36 @@
         .settings-dropdown-item:hover {
             background: var(--bg-secondary);
         }
-            .settings-dropdown-divider {
-                height: 1px;
-                background: var(--border-color);
-                margin: 4px 0;
-            }
-            .settings-submenu {
-                margin-left: 12px;
-                border-left: 1px solid var(--border-color);
-            }
+        .settings-dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 4px 0;
+        }
+        .settings-submenu {
+            margin-left: 12px;
+            border-left: 1px solid var(--border-color);
+        }
     </style>
 </head>
+
+<!-- ========================================
+     HTML 主体内容
+     ======================================== -->
 <body>
+    <!-- 应用主容器 -->
     <div class="app-container" id="appContainer">
-        <!-- Sidebar: Song List -->
+        
+        <!-- ========================================
+             侧边栏：歌曲列表区域
+             ======================================== -->
         <aside class="sidebar">
+            <!-- 侧边栏头部：Logo和设置按钮 -->
             <div class="sidebar-header" style="position: relative;">
+                <!-- 设置按钮 -->
                 <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                 </button>
+                <!-- 设置下拉菜单 -->
                 <div class="settings-dropdown" id="settingsDropdown" style="display:none;">
                     <div class="settings-dropdown-item" id="themeToggleBtn" onclick="cycleThemeMode();">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> 日间模式
@@ -1225,49 +1324,55 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> 管理歌曲
                     </div>
                 </div>
+                <!-- Logo -->
                 <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5H3"/><path d="M11 12H3"/><path d="M11 19H3"/><path d="M21 16V5"/><circle cx="18" cy="16" r="3"/></svg> 粤拼歌词</div>
                 <div class="logo-sub">粤语歌词 · 粤拼对照</div>
             </div>
 
+            <!-- 搜索框 -->
             <div class="search-box">
                 <div class="search-wrapper">
                     <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
                     <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
-
             </div>
 
+            <!-- 歌手筛选标签 -->
             <div class="artist-filter" id="artistFilter">
                 <span class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</span>
             </div>
 
+            <!-- 歌曲列表容器 -->
             <div class="song-list" id="songList"></div>
 
-            <!-- 删除操作栏 -->
+            <!-- 删除操作栏（删除模式下显示） -->
             <div class="delete-bar" id="deleteBar" style="display:none;">
                 <span id="deleteCount">请选择要删除的歌曲</span>
                 <button class="delete-submit-btn" id="deleteSubmitBtn" onclick="DeleteModule.submit()" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> 提交删除</button>
             </div>
         </aside>
 
-        <!-- Main Content: Lyrics -->
+        <!-- ========================================
+             主内容区域：歌词展示
+             ======================================== -->
         <main class="main-content">
-            <!-- Mobile Header -->
+            <!-- 移动端头部（返回按钮+标题） -->
             <div class="mobile-header" id="mobileHeader" style="display:none;">
                 <button class="mobile-back-btn" onclick="showSongList()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
                 <span class="mobile-header-title" id="mobileTitle">粤拼歌词</span>
                 <span style="width:28px;"></span>
             </div>
 
-            <!-- Empty State -->
+            <!-- 空状态（未选择歌曲时显示） -->
             <div class="empty-state" id="emptyState">
                 <div class="empty-icon">🎵</div>
                 <div class="empty-title">选择一首歌</div>
                 <div class="empty-desc">从左侧列表选择歌曲查看歌词</div>
             </div>
 
-            <!-- Lyrics View -->
+            <!-- 歌词视图容器 -->
             <div class="lyrics-view" id="lyricsView" style="display:none;">
+                <!-- 歌曲头部信息 -->
                 <div class="song-header">
                     <div class="song-title-row">
                         <h1 class="song-title-main" id="songTitle"></h1>
@@ -1301,86 +1406,103 @@
                     </div>
                 </div>
 
+                <!-- 歌词内容容器 -->
                 <div class="lyrics-content" id="lyricsContent"></div>
 
+                <!-- 底部工具栏 -->
                 <div class="toolbar" id="toolbar">
                     <div class="toolbar-left" id="toolbarLeft">
+                        <!-- TTS 播放模式按钮 -->
                         <button class="toolbar-btn" id="ttsModeBtn" onclick="TTSModule.toggleMode()">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span>
                             <span>播放</span>
                         </button>
+                        <!-- 字号调整 -->
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
                             <option value="">A</option>
                             <option value="adjustFontSize(1)">A+ 放大</option>
                             <option value="adjustFontSize(-1)">A- 缩小</option>
                         </select>
+                        <!-- 字距调整 -->
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
                             <option value="">↔ 字距</option>
                             <option value="adjustLetterSpacing(1)">字距 +</option>
                             <option value="adjustLetterSpacing(-1)">字距 -</option>
                         </select>
+                        <!-- 行距调整 -->
                         <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
                             <option value="">↕ 行距</option>
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
+                        <!-- 纠错模式按钮 -->
                         <button class="toolbar-btn" onclick="CorrectionModule.submitFeedback()">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
                             <span>纠错</span>
                         </button>
+                        <!-- 修改歌词按钮 -->
                         <button class="toolbar-btn" onclick="EditLyricsModule.toggle()">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg></span>
                             <span>改歌词</span>
                         </button>
+                        <!-- 投稿按钮 -->
                         <button class="toolbar-btn" onclick="window.open('submit.html','_blank')">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
                             <span>投稿</span>
                         </button>
+                        <!-- 导入按钮 -->
                         <button class="toolbar-btn" onclick="ImportModule.show()">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
                             <span>导入</span>
                         </button>
                     </div>
+                    <!-- 分享按钮 -->
                     <button class="toolbar-btn" onclick="shareSong()">
                         <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
                     </button>
+                    <!-- 工具栏展开/收起按钮（仅移动端） -->
                     <button class="toolbar-toggle" id="toolbarToggle" onclick="toggleToolbar()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- 加载粤拼字典 -->
+    <!-- ========================================
+         外部 JavaScript 模块加载
+         ======================================== -->
+    <!-- 粤拼字典：汉字到粤拼音的映射 -->
     <script src="jyutping-dict.js?v=2"></script>
-
-    <!-- 歌曲清单（独立文件，方便维护） -->
+    <!-- 歌曲文件清单 -->
     <script src="songFiles.js"></script>
-    
     <!-- 工具函数模块 -->
     <script src="js/utils.js"></script>
-    
     <!-- 主题切换模块 -->
     <script src="js/theme.js"></script>
-
     <!-- TTS 语音播报模块 -->
     <script src="js/tts-loading.js"></script>
     <script src="js/tts.js"></script>
-    
     <!-- 导入歌词模块 -->
     <script src="js/import.js"></script>
-    
     <!-- 纠错模式模块 -->
     <script src="js/correction.js"></script>
-    
     <!-- 修改歌词模式模块 -->
     <script src="js/edit-lyrics.js"></script>
-    
     <!-- 删除歌曲功能模块 -->
     <script src="js/delete.js"></script>
 
+    <!-- ========================================
+         主应用 JavaScript 逻辑
+         ======================================== -->
     <script>
-    // 全局筛选函数（必须在HTML调用之前定义）
-
+    // ========================================
+    // 歌曲数据加载函数
+    // ========================================
+    
+    /**
+     * 异步加载所有歌曲数据
+     * 通过动态创建 script 标签加载分散在各个文件中的歌曲数据
+     * @returns {Promise<Array>} 返回包含所有歌曲数据的数组
+     */
     async function loadAllSongs() {
         window.__songs = [];
         const loadPromises = songFiles.map(file => {
@@ -1399,40 +1521,84 @@
         return window.__songs;
     }
     </script>
+
     <script>
-    // 应用状态
+    // ========================================
+    // 全局状态变量
+    // ========================================
+    
+    /** @type {Array} 所有歌曲数据 */
     let songs = [];
     window.songs = [];
+    
+    /** @type {Array} 所有歌手列表（去重后） */
     let artists = [];
+    
+    /** @type {Object|null} 当前选中的歌曲 */
     let currentSong = null;
     window.currentSong = null;
+    
+    /** @type {string} 当前筛选条件（歌手名或'all'） */
     let currentFilter = 'all';
+    
+    /** @type {number} 当前字体大小（px） */
+    let fontSize = 20;
+    
+    /** @type {number} 懒加载显示的歌曲数量，0表示自动计算 */
+    let displayedSongs = 0;
+    
+    /** @type {number} 每个歌曲项的大致高度（px），用于懒加载计算 */
+    const SONG_ITEM_HEIGHT = 56;
+    
+    /** @type {number} 字间距（px），范围 0-10 */
+    let letterSpacing = 0;
+    
+    /** @type {number} 行高倍数，范围 1.0-2.0 */
+    let lineHeight = 1.6;
+    
+    /** @type {number} 最小字体大小 */
+    const MIN_FONT_SIZE = 12;
+    
+    /** @type {number} 最大字体大小 */
+    const MAX_FONT_SIZE = 24;
+
+    // ========================================
+    // 筛选和过滤函数
+    // ========================================
+
+    /**
+     * 设置歌手筛选条件
+     * @param {string} artist - 歌手名或'all'表示全部
+     */
     function setFilter(artist) {
         currentFilter = artist;
+        // 更新筛选按钮的激活状态
         document.querySelectorAll(".filter-btn").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.filter === artist);
         });
         renderSongList();
     }
-    let fontSize = 20;
-    // 懒加载状态：初始显示数量根据容器高度动态计算
-    let displayedSongs = 0;  // 0 表示自动计算
-    const SONG_ITEM_HEIGHT = 56;  // 每个歌曲项的大致高度(px)
-    let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
-    let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
-    const MIN_FONT_SIZE = 12;
-    const MAX_FONT_SIZE = 24;
 
-    // 异步初始化：先加载歌曲数据，再渲染页面
+    // ========================================
+    // 初始化函数
+    // ========================================
+
+    /**
+     * 应用初始化函数
+     * 加载歌曲数据、初始化各模块、渲染界面
+     */
     async function init() {
+        // 初始化主题模块
         ThemeModule.init();
+        
+        // 加载所有歌曲数据
         songs = await loadAllSongs();
         window.songs = songs;
 
-        // 加载 TTS manifest
+        // 加载 TTS 语音数据清单
         await TTSModule.init();
 
-        // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
+        // 提取所有歌手（处理合唱歌曲如"古巨基/梁咏琪"）
         const artistSet = new Set();
         songs.forEach(s => {
             s.artist.split(/[\/、,，&]/).forEach(a => {
@@ -1441,13 +1607,25 @@
             });
         });
         artists = [...artistSet];
+        
+        // 渲染界面
         renderArtistFilter();
         renderSongList();
     }
 
+    // ========================================
+    // 歌手筛选渲染
+    // ========================================
+
+    /**
+     * 渲染歌手筛选标签
+     * 按歌曲数量排序，默认显示前5个，可展开显示全部
+     */
     function renderArtistFilter() {
         const container = document.getElementById('artistFilter');
         const MAX_VISIBLE = 5;
+        
+        // 统计每个歌手的歌曲数量
         const artistCounts = {};
         songs.forEach(s => {
             s.artist.split(/[\/、,，&]/).forEach(a => {
@@ -1457,14 +1635,20 @@
                 }
             });
         });
+        
+        // 按歌曲数量排序
         const sortedArtists = Object.keys(artistCounts).sort((a, b) => artistCounts[b] - artistCounts[a]);
         const isExpanded = window.artistFilterExpanded || false;
         const visibleArtists = isExpanded ? sortedArtists : sortedArtists.slice(0, MAX_VISIBLE);
         const hasMore = sortedArtists.length > MAX_VISIBLE;
+        
+        // 生成 HTML
         let html = '<span class="filter-btn active" data-filter="all" onclick="setFilter(\'all\')">全部</span>';
         visibleArtists.forEach(artist => {
             html += `<span class="filter-btn" data-filter="${artist}" onclick="setFilter('${artist}')">${artist}</span>`;
         });
+        
+        // 添加展开/收起按钮
         if (hasMore) {
             if (isExpanded) {
                 html += `<span class="filter-btn expand-btn" onclick="toggleArtistFilter()">收起 ▲</span>`;
@@ -1475,21 +1659,35 @@
         container.innerHTML = html;
     }
 
+    /**
+     * 切换歌手筛选的展开/收起状态
+     */
     function toggleArtistFilter() {
         window.artistFilterExpanded = !window.artistFilterExpanded;
         renderArtistFilter();
     }
 
+    // ========================================
+    // 歌曲列表渲染
+    // ========================================
+
+    /**
+     * 渲染歌曲列表
+     * 支持筛选、搜索、懒加载
+     */
     function renderSongList() {
         const container = document.getElementById('songList');
         let filtered = songs;
+        
+        // 按歌手筛选
         if (currentFilter !== 'all') {
-            // 合唱歌曲：歌手字段包含筛选的歌手名即可匹配
             filtered = filtered.filter(s => {
                 const songArtists = s.artist.split(/[\/、,，&]/).map(a => a.trim());
                 return songArtists.includes(currentFilter);
             });
         }
+        
+        // 搜索过滤
         const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
         if (searchQuery) {
             filtered = filtered.filter(s => {
@@ -1508,15 +1706,19 @@
             });
         }
 
-        // 懒加载：动态计算初始显示数量（填满容器可视高度）
+        // 懒加载：动态计算初始显示数量
         if (displayedSongs === 0) {
             const containerHeight = container.clientHeight || 400;
             displayedSongs = Math.max(Math.ceil(containerHeight / SONG_ITEM_HEIGHT), 5);
         }
+        
         const songsToShow = filtered.slice(0, displayedSongs);
         let html = '';
+        
+        // 渲染歌曲项
         songsToShow.forEach((song, index) => {
             const isActive = currentSong && currentSong.id === song.id;
+            // 删除模式下点击切换选择，正常模式下点击选择歌曲
             const clickAction = DeleteModule.isActive() ? `DeleteModule.toggleSelect(${song.id}, event)` : `selectSong(${song.id})`;
             html += `
                 <div class="song-item ${isActive ? 'active' : ''}" onclick="${clickAction}">
@@ -1529,7 +1731,7 @@
             `;
         });
         
-        // 如果还有更多歌曲，显示"加载更多"按钮
+        // 显示"加载更多"按钮
         if (filtered.length > displayedSongs) {
             html += `
                 <div class="load-more-btn" onclick="loadMoreSongs()">
@@ -1541,26 +1743,42 @@
         container.innerHTML = html;
     }
     
-    // 加载更多歌曲
+    /**
+     * 加载更多歌曲（懒加载）
+     */
     function loadMoreSongs() {
         displayedSongs += 10;
         renderSongList();
     }
     
-    // 重置懒加载计数器（切换筛选时重新计算）
+    /**
+     * 重置懒加载计数器
+     */
     function resetLazyLoad() {
         displayedSongs = 0;
     }
 
+    /**
+     * 搜索过滤函数（输入框事件处理）
+     */
     function filterSongs() {
         renderSongList();
     }
 
+    // ========================================
+    // 歌曲选择和视图切换
+    // ========================================
+
+    /**
+     * 选择歌曲并显示歌词
+     * @param {number} id - 歌曲ID
+     */
     function selectSong(id) {
-        // Exit correction mode if active
+        // 如果处于纠错模式，先退出
         if (CorrectionModule.isActive()) {
             CorrectionModule.toggle();
         }
+        
         currentSong = songs.find(s => s.id === id);
         window.currentSong = currentSong;
         renderSongList();
@@ -1572,23 +1790,34 @@
             mainContent.scrollTop = 0;
         }
 
-        // Mobile: switch to lyrics view
+        // 移动端：切换到歌词视图
         if (window.innerWidth < 1024) {
             document.getElementById('appContainer').classList.add('view-lyrics');
             document.getElementById('mobileHeader').style.display = 'flex';
         }
     }
 
+    /**
+     * 返回歌曲列表（移动端）
+     */
     function showSongList() {
         document.getElementById('appContainer').classList.remove('view-lyrics');
         document.getElementById('mobileHeader').style.display = 'none';
-        // 清除当前歌曲，返回首页时不显示歌词
+        // 清除当前歌曲
         currentSong = null;
         window.currentSong = null;
         renderLyrics();
         renderSongList();
     }
 
+    // ========================================
+    // 歌词渲染
+    // ========================================
+
+    /**
+     * 渲染歌词内容
+     * 包括：标题、歌手信息、歌词正文
+     */
     function renderLyrics() {
         if (!currentSong) {
             // 没有选中歌曲时显示空状态
@@ -1601,7 +1830,7 @@
         document.getElementById('lyricsView').style.display = 'block';
         document.getElementById('mobileTitle').textContent = currentSong.title;
 
-        // Render title with jyutping
+        // 渲染标题（带粤拼）
         const titleHtml = currentSong.title.split('').map((char, i) => {
             const jp = currentSong.titleJyutping[i] || '';
             return `
@@ -1613,61 +1842,73 @@
         }).join('');
         document.getElementById('songTitle').innerHTML = titleHtml;
 
-        // Render metadata with jyutping
+        // 渲染元数据（带粤拼）
         document.getElementById('songArtist').innerHTML = renderMetaName(currentSong.artist, currentSong.artistJyutping);
         document.getElementById('songLyricist').innerHTML = renderMetaName(currentSong.lyricist, currentSong.lyricistJyutping);
         document.getElementById('songComposer').innerHTML = renderMetaName(currentSong.composer, currentSong.composerJyutping);
 
-        // Render lyrics with font size, letter spacing and line height
+        // 渲染歌词内容
         let lyricsHtml = '';
-        let displayLineIndex = 0; // 用户可见的行号（每个segment算一行）
+        let displayLineIndex = 0; // 用户可见的行号
+        
         currentSong.lyrics.forEach((line, index) => {
+            // 段落分隔
             if (line.paragraphBreak) {
                 lyricsHtml += '<div class="lyric-paragraph-break"></div>';
                 return;
             }
-            // 将所有字符放入同一个 segment（不再按空格分割）
-            // 空格保留在 segment 中，渲染时会跳过空格字符不创建 char-group
-            // 这样英文句子如 "You make me cry" 会在同一个 segment 中正确显示
+            
+            // 将所有字符放入同一个 segment
             const segments = [];
             const currentSegment = [];
-            let inBrackets = 0; // 括号/书名号嵌套层级（保留用于未来扩展）
+            let inBrackets = 0; // 括号/书名号嵌套层级
+            
             line.chars.forEach((char, i) => {
                 // 跟踪书名号和括号的嵌套
                 if (char === '《' || char === '(' || char === '（') inBrackets++;
                 if (char === '》' || char === ')' || char === '）') inBrackets = Math.max(0, inBrackets - 1);
-                // 所有字符（包括空格）都放入同一个 segment
+                // 所有字符都放入同一个 segment
                 currentSegment.push({ char, jp: line.jp[i] || '', index: i });
             });
+            
             if (currentSegment.length > 0) {
                 segments.push(currentSegment);
             }
-            // 渲染每个分段为一个独立的 lyric-line
+            
+            // 渲染每个分段
             segments.forEach((segment, segIdx) => {
-                // 渲染每个字符：空格保留间距但不创建 char-group（不显示粤拼）
-                // 这样英文句子如 "You make me cry" 正确显示，空格有间距但不占独立列
+                // 渲染每个字符
                 const segmentHtml = segment.map(({ char, jp, index: charIndex }) => {
-                    // 空格字符：保留空格间距，但不创建 char-group（不匹配粤拼、不显示粤拼列）
+                    // 空格字符：保留间距但不创建 char-group
                     if (char === ' ' || char === '\u3000') {
                         return '<span style="display:inline-block;width:1em;"></span>';
                     }
-                    // 非空格字符：正常创建 char-group（显示粤拼+汉字）
+                    // 非空格字符：正常创建 char-group
                     return `
                     <span class="char-group" data-line="${displayLineIndex}" data-song-index="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${displayLineIndex}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>`;
                 }).join('');
-                // 每个分段都添加播放按钮（只播放该分段的语音）
+                
+                // 生成播放按钮
                 const segJp = segment.map(s => s.jp).filter(j => j).map(j => "'" + j.replace(/'/g, "\\'") + "'").join(',');
                 const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); TTSModule.playSegment([${segJp}], this)" title="播放语音"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg></button>`;
+                
                 lyricsHtml += `<div class="lyric-line" data-line="${displayLineIndex}" data-song-index="${index}" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${displayLineIndex})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
                 displayLineIndex++;
             });
         });
+        
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
     }
 
+    /**
+     * 渲染带粤拼的人名
+     * @param {string} name - 人名
+     * @param {Array} jyutpingArr - 粤拼音节数组
+     * @returns {string} HTML字符串
+     */
     function renderMetaName(name, jyutpingArr) {
         if (!jyutpingArr || jyutpingArr.length === 0) return name;
         return name.split('').map((char, i) => {
@@ -1681,6 +1922,14 @@
         }).join('');
     }
 
+    // ========================================
+    // 字体和布局调整
+    // ========================================
+
+    /**
+     * 调整字体大小
+     * @param {number} delta - 变化量（正数放大，负数缩小）
+     */
     function adjustFontSize(delta) {
         const newSize = fontSize + delta;
         if (newSize < MIN_FONT_SIZE) {
@@ -1695,6 +1944,10 @@
         renderLyrics();
     }
 
+    /**
+     * 调整字间距
+     * @param {number} delta - 变化量（px）
+     */
     function adjustLetterSpacing(delta) {
         const newSpacing = letterSpacing + delta;
         if (newSpacing < 0) {
@@ -1709,6 +1962,10 @@
         renderLyrics();
     }
 
+    /**
+     * 调整行高
+     * @param {number} delta - 变化量
+     */
     function adjustLineHeight(delta) {
         const newHeight = Math.round((lineHeight + delta) * 10) / 10;
         if (newHeight < 1.0) {
@@ -1723,6 +1980,14 @@
         renderLyrics();
     }
 
+    // ========================================
+    // 工具函数
+    // ========================================
+
+    /**
+     * 显示提示消息（Toast）
+     * @param {string} message - 消息内容
+     */
     function showToast(message) {
         const existingToast = document.querySelector('.toast-message');
         if (existingToast) {
@@ -1748,6 +2013,9 @@
         setTimeout(() => toast.remove(), 1500);
     }
 
+    /**
+     * 切换工具栏展开/收起状态（移动端）
+     */
     function toggleToolbar() {
         const toolbar = document.getElementById('toolbar');
         const toggle = document.getElementById('toolbarToggle');
@@ -1757,6 +2025,9 @@
         toggle.innerHTML = toolbar.classList.contains('expanded') ? chevronDown : chevronUp;
     }
 
+    /**
+     * 分享当前歌曲（复制链接到剪贴板）
+     */
     function shareSong() {
         if (!currentSong) return;
         const url = `${window.location.origin}${window.location.pathname}#${currentSong.id}`;
@@ -1767,7 +2038,10 @@
         }
     }
 
-    // 跳转到投稿表单并自动填入歌曲名称
+    /**
+     * 打开投稿表单
+     * @param {string} type - 投稿类型
+     */
     function openSubmitForm(type) {
         if (!currentSong) {
             showToast('请先选择一首歌曲');
@@ -1777,6 +2051,17 @@
         window.open(`submit.html?type=${type}&song=${songName}`, '_blank');
     }
 
+    // ========================================
+    // 事件处理函数
+    // ========================================
+
+    /**
+     * 字符点击事件处理
+     * 根据当前模式处理：TTS播放模式或纠错模式
+     * @param {Event} event - 点击事件
+     * @param {number} lineIndex - 行索引
+     * @param {number} charIndex - 字符索引
+     */
     function onCharClick(event, lineIndex, charIndex) {
         // 播放模式下，点击单字播放语音
         if (TTSModule.isModeActive()) {
@@ -1793,15 +2078,26 @@
         }
     }
 
+    /**
+     * 歌词行点击事件处理
+     * 用于修改歌词模式
+     * @param {Event} event - 点击事件
+     * @param {number} lineIndex - 行索引
+     */
     function onLyricLineClick(event, lineIndex) {
         if (EditLyricsModule.handleLineClick(event, lineIndex)) {
             return;
         }
     }
 
+    // ========================================
+    // 主题相关函数
+    // ========================================
 
-
-
+    /**
+     * 循环切换主题模式
+     * 顺序：日间 -> 夜间 -> 跟随系统 -> 日间
+     */
     function cycleThemeMode() {
         const mode = ThemeModule.getMode();
         const nextMode = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
@@ -1809,6 +2105,9 @@
         updateThemeToggleButton();
     }
 
+    /**
+     * 更新主题切换按钮的显示
+     */
     function updateThemeToggleButton() {
         const btn = document.getElementById('themeToggleBtn');
         if (!btn) return;
@@ -1822,9 +2121,13 @@
         }
     }
 
+    /**
+     * 切换设置菜单的显示/隐藏
+     */
     function toggleSettings() {
         const dropdown = document.getElementById('settingsDropdown');
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; if (dropdown.style.display === 'block') updateThemeToggleButton();
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        if (dropdown.style.display === 'block') updateThemeToggleButton();
     }
 
     // 点击页面其他地方关闭设置菜单
@@ -1837,7 +2140,9 @@
     });
     </script>
 
-    <!-- 导入歌词模态框 -->
+    <!-- ========================================
+         导入歌词模态框
+         ======================================== -->
     <div class="import-modal" id="importModal" style="display:none;">
         <div class="import-modal-content">
             <div class="import-modal-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>导入新歌词</div>
@@ -1880,7 +2185,9 @@
         </div>
     </div>
 
-    <!-- 生成的代码模态框 -->
+    <!-- ========================================
+         生成代码模态框（导入结果）
+         ======================================== -->
     <div class="import-modal" id="codeModal" style="display:none;">
         <div class="import-modal-content" style="max-width: 700px;">
             <div class="import-modal-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>生成的歌曲文件代码</div>
@@ -1895,7 +2202,9 @@
         </div>
     </div>
 
-    <!-- Init -->
+    <!-- ========================================
+         应用启动
+         ======================================== -->
     <script>
     init();
     </script>
