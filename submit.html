@@ -1,17 +1,31 @@
 <!DOCTYPE html>
+<!-- ==================== HTML 文档声明 ==================== -->
+<!-- 粤拼歌词投稿页面 - 用于用户提交新歌、粤拼纠错、歌词纠错和删除歌曲请求 -->
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 视口设置：确保在移动设备上正确显示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>投稿 - 粤拼歌词</title>
+    
+    <!-- ==================== CSS 样式区域 ==================== -->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== 全局重置样式 ===== */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        /* ===== 页面基础样式 ===== */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             color: #333;
             min-height: 100vh;
         }
+        
+        /* ===== 页面头部样式 ===== */
         .header {
             background: #fff;
             padding: 16px 20px;
@@ -27,11 +41,15 @@
             text-decoration: none;
             font-size: 13px;
         }
+        
+        /* ===== 主容器样式 ===== */
         .container {
             max-width: 600px;
             margin: 20px auto;
             padding: 0 16px;
         }
+        
+        /* ===== 标签页切换样式 ===== */
         .tabs {
             display: flex;
             gap: 8px;
@@ -48,18 +66,25 @@
             font-size: 14px;
             transition: all 0.2s;
         }
+        /* 激活状态的标签页 */
         .tab.active {
             border-color: #1890ff;
             color: #1890ff;
             background: #e6f7ff;
         }
-        .tab:hover { border-color: #1890ff; }
+        .tab:hover { 
+            border-color: #1890ff; 
+        }
+        
+        /* ===== 表单卡片样式 ===== */
         .form-card {
             background: #fff;
             border-radius: 12px;
             padding: 24px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
+        
+        /* ===== 表单组样式 ===== */
         .form-group {
             margin-bottom: 16px;
         }
@@ -70,9 +95,11 @@
             margin-bottom: 6px;
             color: #555;
         }
+        /* 必填项标记 */
         .form-group label .required {
             color: #ff4d4f;
         }
+        /* 输入框通用样式 */
         .form-group input,
         .form-group textarea {
             width: 100%;
@@ -83,21 +110,26 @@
             transition: border-color 0.2s;
             font-family: inherit;
         }
+        /* 输入框聚焦状态 */
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
             border-color: #1890ff;
             box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
         }
+        /* 文本域特殊样式 */
         .form-group textarea {
             min-height: 200px;
             resize: vertical;
         }
+        /* 提示文字样式 */
         .form-group .hint {
             font-size: 12px;
             color: #999;
             margin-top: 4px;
         }
+        
+        /* ===== 提交按钮样式 ===== */
         .submit-btn {
             width: 100%;
             padding: 12px;
@@ -109,23 +141,30 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .submit-btn:hover { background: #40a9ff; }
+        .submit-btn:hover { 
+            background: #40a9ff; 
+        }
+        /* 禁用状态的按钮 */
         .submit-btn:disabled {
             background: #d9d9d9;
             cursor: not-allowed;
         }
+        
+        /* ===== 结果提示样式 ===== */
         .result {
             margin-top: 16px;
             padding: 16px;
             border-radius: 8px;
             display: none;
         }
+        /* 成功提示 */
         .result.success {
             display: block;
             background: #f6ffed;
             border: 1px solid #b7eb8f;
             color: #52c41a;
         }
+        /* 错误提示 */
         .result.error {
             display: block;
             background: #fff2f0;
@@ -136,6 +175,8 @@
             color: #1890ff;
             text-decoration: none;
         }
+        
+        /* ===== 纠错行样式（用于粤拼纠错和歌词纠错） ===== */
         .correction-row {
             display: flex;
             gap: 8px;
@@ -153,6 +194,7 @@
             outline: none;
             border-color: #1890ff;
         }
+        /* 删除按钮 */
         .correction-row .remove-btn {
             width: 28px;
             height: 28px;
@@ -164,6 +206,8 @@
             font-size: 16px;
             flex-shrink: 0;
         }
+        
+        /* ===== 添加行按钮样式 ===== */
         .add-row-btn {
             padding: 6px 16px;
             border: 1px dashed #d9d9d9;
@@ -174,18 +218,34 @@
             color: #666;
             width: 100%;
         }
-        .add-row-btn:hover { border-color: #1890ff; color: #1890ff; }
-        .panel { display: none; }
-        .panel.active { display: block; }
+        .add-row-btn:hover { 
+            border-color: #1890ff; 
+            color: #1890ff; 
+        }
+        
+        /* ===== 面板切换样式 ===== */
+        .panel { 
+            display: none; 
+        }
+        /* 激活的面板 */
+        .panel.active { 
+            display: block; 
+        }
     </style>
 </head>
+
+<!-- ==================== HTML 主体内容 ==================== -->
 <body>
+    <!-- 页面头部：标题和返回链接 -->
     <div class="header">
         <h1>🎵 粤拼歌词投稿</h1>
         <a href="./">← 返回歌词列表</a>
     </div>
 
+    <!-- 主容器 -->
     <div class="container">
+        <!-- ===== 标签页导航 ===== -->
+        <!-- 四个功能标签：投稿新歌、粤拼纠错、歌词纠错、删除歌曲 -->
         <div class="tabs">
             <div class="tab active" onclick="switchTab('new-song')">📝 投稿新歌</div>
             <div class="tab" onclick="switchTab('jyutping')">✏️ 粤拼纠错</div>
@@ -193,44 +253,54 @@
             <div class="tab" onclick="switchTab('delete')">🗑️ 删除歌曲</div>
         </div>
 
-        <!-- 投稿新歌 -->
+        <!-- ===== 面板1：投稿新歌 ===== -->
         <div class="panel active" id="panel-new-song">
             <div class="form-card">
+                <!-- 歌曲名称输入 -->
                 <div class="form-group">
                     <label>歌曲名称 <span class="required">*</span></label>
                     <input type="text" id="ns-title" placeholder="例如：喜欢你">
                 </div>
+                <!-- 歌手输入 -->
                 <div class="form-group">
                     <label>歌手 <span class="required">*</span></label>
                     <input type="text" id="ns-artist" placeholder="例如：Beyond（合唱用 / 分隔）">
                 </div>
+                <!-- 填词人输入（选填） -->
                 <div class="form-group">
                     <label>填词</label>
                     <input type="text" id="ns-lyricist" placeholder="填词人（选填）">
                 </div>
+                <!-- 作曲人输入（选填） -->
                 <div class="form-group">
                     <label>作曲</label>
                     <input type="text" id="ns-composer" placeholder="作曲人（选填）">
                 </div>
+                <!-- 完整歌词输入 -->
                 <div class="form-group">
                     <label>完整歌词 <span class="required">*</span></label>
                     <textarea id="ns-lyrics" placeholder="请粘贴完整歌词&#10;&#10;换行 = 新的一句歌词&#10;空一行 = 段落分隔"></textarea>
                     <div class="hint">换行表示新的一句歌词，空一行表示段落分隔</div>
                 </div>
+                <!-- 提交按钮 -->
                 <button class="submit-btn" onclick="submitNewSong()">提交投稿</button>
+                <!-- 结果显示区域 -->
                 <div class="result" id="ns-result"></div>
             </div>
         </div>
 
-        <!-- 粤拼纠错 -->
+        <!-- ===== 面板2：粤拼纠错 ===== -->
         <div class="panel" id="panel-jyutping">
             <div class="form-card">
+                <!-- 歌曲名称输入 -->
                 <div class="form-group">
                     <label>歌曲名称 <span class="required">*</span></label>
                     <input type="text" id="jp-song" placeholder="例如：喜欢你">
                 </div>
+                <!-- 纠错内容输入区 -->
                 <div class="form-group">
                     <label>纠错内容 <span class="required">*</span></label>
+                    <!-- 表头行 -->
                     <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
                         <input placeholder="行号" style="flex:0.5;">
                         <input placeholder="字">
@@ -238,18 +308,23 @@
                         <input placeholder="正确粤拼">
                         <div style="width:28px;"></div>
                     </div>
+                    <!-- 动态添加的纠错行容器 -->
                     <div id="jp-rows"></div>
+                    <!-- 添加行按钮 -->
                     <button class="add-row-btn" onclick="addJpRow()">+ 添加一行</button>
                     <div class="hint">请先在歌词页面找到需要纠错的行号</div>
                 </div>
+                <!-- 提交按钮 -->
                 <button class="submit-btn" onclick="submitJyutpingCorrection()">提交纠错</button>
+                <!-- 结果显示区域 -->
                 <div class="result" id="jp-result"></div>
             </div>
         </div>
 
-        <!-- 歌词纠错 -->
+        <!-- ===== 面板3：歌词纠错 ===== -->
         <div class="panel" id="panel-lyrics">
             <div class="form-card">
+                <!-- 歌曲名称输入 -->
                 <div class="form-group">
                     <label>歌曲名称 <span class="required">*</span></label>
                     <input type="text" id="lc-song" placeholder="例如：喜欢你">
@@ -259,14 +334,17 @@
                 <div class="form-group">
                     <label>纠错类型 <span class="required">*</span></label>
                     <div class="correction-type" style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                        <!-- 逐行修改选项 -->
                         <label class="type-label active" id="type-line-label" onclick="selectCorrectionType('line')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #1890ff;border-radius:6px;background:#e6f7ff;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="line" checked onchange="switchCorrectionType('line')" style="margin:0;">
                             <span>逐行修改</span>
                         </label>
+                        <!-- 整首替换选项 -->
                         <label class="type-label" id="type-full-label" onclick="selectCorrectionType('full')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="full" onchange="switchCorrectionType('full')" style="margin:0;">
                             <span>整首替换</span>
                         </label>
+                        <!-- 插入行选项 -->
                         <label class="type-label" id="type-insert-label" onclick="selectCorrectionType('insert')" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 16px;border:2px solid #e0e0e0;border-radius:6px;white-space:nowrap;">
                             <input type="radio" name="correctionType" value="insert" onchange="switchCorrectionType('insert')" style="margin:0;">
                             <span>插入行</span>
@@ -274,23 +352,25 @@
                     </div>
                 </div>
 
-                <!-- 逐行修改 -->
+                <!-- 逐行修改区域 -->
                 <div id="correction-line" class="correction-section">
                     <div class="form-group">
                         <label>纠错内容</label>
+                        <!-- 表头行 -->
                         <div class="correction-row" style="font-weight:500;font-size:12px;color:#999;">
                             <input placeholder="行号" style="flex:0.5;">
                             <input placeholder="原歌词" style="flex:1;">
                             <input placeholder="正确歌词" style="flex:1;">
                             <div style="width:28px;"></div>
                         </div>
+                        <!-- 动态添加的纠错行容器 -->
                         <div id="lc-rows"></div>
                         <button class="add-row-btn" onclick="addLcRow()">+ 添加一行</button>
                         <div class="hint">请先在歌词页面找到需要纠错的行号</div>
                     </div>
                 </div>
 
-                <!-- 整首替换 -->
+                <!-- 整首替换区域 -->
                 <div id="correction-full" class="correction-section" style="display:none;">
                     <div class="form-group">
                         <label>完整歌词 <span class="required">*</span></label>
@@ -299,18 +379,21 @@
                     </div>
                 </div>
 
-                <!-- 插入行 -->
+                <!-- 插入行区域 -->
                 <div id="correction-insert" class="correction-section" style="display:none;">
+                    <!-- 已添加的插入项列表 -->
                     <div id="lc-insert-list" style="margin-bottom:16px;"></div>
                     <!-- 手动添加区域（有预填充数据时隐藏） -->
                     <div id="lc-insert-manual">
                         <div class="form-group">
                             <label>添加新的插入</label>
                             <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                                <!-- 插入位置选择 -->
                                 <select id="lc-insert-position" style="flex:1;padding:10px;border:1px solid #d9d9d9;border-radius:6px;background:#fff;">
                                     <option value="before">在第...行前插入</option>
                                     <option value="after">在第...行后插入</option>
                                 </select>
+                                <!-- 行号输入 -->
                                 <input type="number" id="lc-insert-line" placeholder="行号" min="1" style="flex:0.5;padding:10px;border:1px solid #d9d9d9;border-radius:6px;">
                             </div>
                         </div>
@@ -325,87 +408,129 @@
                     </div>
                 </div>
 
+                <!-- 提交按钮 -->
                 <button class="submit-btn" onclick="submitLyricsCorrection()">提交纠错</button>
+                <!-- 结果显示区域 -->
                 <div class="result" id="lc-result"></div>
             </div>
-        </div><!-- 删除歌曲 -->
+        </div>
+
+        <!-- ===== 面板4：删除歌曲 ===== -->
         <div class="panel" id="panel-delete">
             <div class="form-card">
                 <div class="form-group">
                     <label>要删除的歌曲列表</label>
+                    <!-- 已选择的歌曲列表 -->
                     <div id="delete-list" style="min-height:100px;border:1px dashed #d9d9d9;border-radius:6px;padding:12px;margin-bottom:12px;">
                         <div style="color:#999;font-size:13px;">暂无选择的歌曲</div>
                     </div>
                     <div class="hint">请在主页面点击「管理」按钮选择要删除的歌曲</div>
                 </div>
+                <!-- 提交按钮 -->
                 <button class="submit-btn" onclick="submitDeleteRequest()">提交删除请求</button>
+                <!-- 结果显示区域 -->
                 <div class="result" id="del-result"></div>
             </div>
         </div>
     </div>
 
+    <!-- ==================== JavaScript 代码区域 ==================== -->
     <script>
-        // Worker URL（部署后替换为实际地址）
+        // ===== 全局配置 =====
+        // Worker URL（部署后替换为实际地址）- 用于提交数据的后端接口
         const WORKER_URL = 'https://lyrics-submit.floral-term-5139.workers.dev';
 
-        // Tab 切换
+        // ===== 标签页切换功能 =====
+        
+        /**
+         * 切换标签页
+         * @param {string} tab - 要切换到的标签页标识，可选值：'new-song', 'jyutping', 'lyrics', 'delete'
+         */
         function switchTab(tab) {
+            // 更新标签按钮的激活状态
             document.querySelectorAll('.tab').forEach((t, i) => {
                 t.classList.toggle('active', ['new-song', 'jyutping', 'lyrics', 'delete'][i] === tab);
             });
+            // 隐藏所有面板
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            // 显示目标面板
             document.getElementById('panel-' + tab).classList.add('active');
         }
 
-        // 显示结果
+        // ===== 结果显示功能 =====
+        
+        /**
+         * 显示操作结果提示
+         * @param {string} id - 结果容器的元素ID
+         * @param {boolean} success - 是否成功
+         * @param {string} message - 要显示的HTML消息内容
+         */
         function showResult(id, success, message) {
             const el = document.getElementById(id);
             el.className = 'result ' + (success ? 'success' : 'error');
             el.innerHTML = message;
         }
 
-        // 投稿新歌
+        // ===== 投稿新歌功能 =====
+        
+        /**
+         * 提交新歌投稿
+         * 收集表单数据，验证必填项，通过API提交到后端
+         */
         async function submitNewSong() {
+            // 获取表单数据
             const title = document.getElementById('ns-title').value.trim();
             const artist = document.getElementById('ns-artist').value.trim();
             const lyricist = document.getElementById('ns-lyricist').value.trim();
             const composer = document.getElementById('ns-composer').value.trim();
             const lyrics = document.getElementById('ns-lyrics').value.trim();
 
+            // 验证必填项
             if (!title || !artist || !lyrics) {
                 showResult('ns-result', false, '请填写歌曲名称、歌手和歌词');
                 return;
             }
 
+            // 获取提交按钮并设置加载状态
             const btn = document.querySelector('#panel-new-song .submit-btn');
             btn.disabled = true;
             btn.textContent = '提交中...';
 
             try {
+                // 发送POST请求到Worker
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'new-song', title, artist, lyricist, composer, lyrics }),
                 });
                 const data = await res.json();
+                // 根据响应显示结果
                 if (data.success) {
                     showResult('ns-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
                 } else {
                     showResult('ns-result', false, `❌ 提交失败：${data.error}`);
                 }
             } catch (e) {
+                // 网络错误处理
                 showResult('ns-result', false, '❌ 网络错误，请稍后重试');
             } finally {
+                // 恢复按钮状态
                 btn.disabled = false;
                 btn.textContent = '提交投稿';
             }
         }
 
-        // 粤拼纠错行管理
+        // ===== 粤拼纠错功能 =====
+        
+        /**
+         * 添加一行粤拼纠错输入行
+         * 动态创建包含行号、字、原粤拼、正确粤拼的输入行
+         */
         function addJpRow() {
             const container = document.getElementById('jp-rows');
             const row = document.createElement('div');
             row.className = 'correction-row';
+            // 创建输入行HTML，包含删除按钮
             row.innerHTML = `
                 <input placeholder="行号" class="jp-line">
                 <input placeholder="字" class="jp-char">
@@ -416,6 +541,10 @@
             container.appendChild(row);
         }
 
+        /**
+         * 提交粤拼纠错请求
+         * 收集所有纠错行数据，验证后提交到后端
+         */
         async function submitJyutpingCorrection() {
             const songName = document.getElementById('jp-song').value.trim();
             if (!songName) {
@@ -423,6 +552,7 @@
                 return;
             }
 
+            // 收集所有纠错行数据
             const rows = document.querySelectorAll('#jp-rows .correction-row');
             const corrections = [];
             rows.forEach(row => {
@@ -430,21 +560,25 @@
                 const char = row.querySelector('.jp-char')?.value.trim();
                 const originalJp = row.querySelector('.jp-original')?.value.trim();
                 const newJp = row.querySelector('.jp-new')?.value.trim();
+                // 只添加有行号和正确粤拼的数据
                 if (line && newJp) {
                     corrections.push({ line, char, originalJp, newJp });
                 }
             });
 
+            // 验证至少有一行纠错数据
             if (corrections.length === 0) {
                 showResult('jp-result', false, '请至少添加一行纠错');
                 return;
             }
 
+            // 设置按钮加载状态
             const btn = document.querySelector('#panel-jyutping .submit-btn');
             btn.disabled = true;
             btn.textContent = '提交中...';
 
             try {
+                // 发送请求
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -464,27 +598,42 @@
             }
         }
 
-        // 歌词纠错类型切换
+        // ===== 歌词纠错功能 =====
+        
+        /**
+         * 选择纠错类型（更新样式）
+         * @param {string} type - 纠错类型，可选值：'line', 'full', 'insert'
+         */
         function selectCorrectionType(type) {
             document.querySelectorAll('.type-label').forEach(label => {
                 label.style.borderColor = '#e0e0e0';
                 label.style.background = '#fff';
                 label.classList.remove('active');
             });
+            // 高亮选中的类型
             document.getElementById('type-' + type + '-label').style.borderColor = '#1890ff';
             document.getElementById('type-' + type + '-label').style.background = '#e6f7ff';
             document.getElementById('type-' + type + '-label').classList.add('active');
         }
 
+        /**
+         * 切换纠错类型（显示对应输入区域）
+         * @param {string} type - 纠错类型，可选值：'line', 'full', 'insert'
+         */
         function switchCorrectionType(type) {
+            // 隐藏所有纠错区域
             document.querySelectorAll('.correction-section').forEach(section => {
                 section.style.display = 'none';
             });
+            // 显示选中的区域
             document.getElementById('correction-' + type).style.display = 'block';
             selectCorrectionType(type);
         }
 
-        // 原有的歌词纠错行管理
+        /**
+         * 添加一行歌词纠错输入行
+         * 用于逐行修改模式
+         */
         function addLcRow() {
             const container = document.getElementById('lc-rows');
             const row = document.createElement('div');
@@ -498,6 +647,10 @@
             container.appendChild(row);
         }
 
+        /**
+         * 提交歌词纠错请求
+         * 根据选择的纠错类型收集数据并提交
+         */
         async function submitLyricsCorrection() {
             const songName = document.getElementById('lc-song').value.trim();
             if (!songName) {
@@ -505,11 +658,13 @@
                 return;
             }
 
+            // 获取选中的纠错类型
             const correctionType = document.querySelector('input[name="correctionType"]:checked').value;
             let payload = { type: 'lyrics-correction', songName, correctionType };
 
+            // 根据纠错类型收集数据
             if (correctionType === 'line') {
-                // 逐行修改
+                // 逐行修改：收集所有纠错行
                 const rows = document.querySelectorAll('#lc-rows .correction-row');
                 const corrections = [];
                 rows.forEach(row => {
@@ -527,7 +682,7 @@
                 payload.corrections = corrections;
 
             } else if (correctionType === 'full') {
-                // 整首替换
+                // 整首替换：获取完整歌词
                 const fullLyrics = document.getElementById('lc-full-lyrics').value.trim();
                 if (!fullLyrics) {
                     showResult('lc-result', false, '请填写完整歌词');
@@ -536,7 +691,7 @@
                 payload.fullLyrics = fullLyrics;
 
             } else if (correctionType === 'insert') {
-                // 插入行 - 收集所有插入项
+                // 插入行：收集所有插入项
                 if (insertItems.length === 0) {
                     showResult('lc-result', false, '请至少添加一个插入项');
                     return;
@@ -544,11 +699,13 @@
                 payload.insertions = insertItems;
             }
 
+            // 设置按钮加载状态
             const btn = document.querySelector('#panel-lyrics .submit-btn');
             btn.disabled = true;
             btn.textContent = '提交中...';
 
             try {
+                // 发送请求
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -568,32 +725,43 @@
             }
         }
 
-        // 插入行数据
+        // ===== 插入行功能 =====
+        
+        // 存储所有插入项的数组
         let insertItems = [];
 
-        // 添加插入项
+        /**
+         * 添加插入项到列表
+         * 从输入框获取位置、行号和歌词，添加到insertItems数组
+         */
         function addInsertItem() {
             const position = document.getElementById('lc-insert-position').value;
             const line = parseInt(document.getElementById('lc-insert-line').value) || 1;
             const lyrics = document.getElementById('lc-insert-lyrics').value;
             
+            // 验证歌词不为空
             if (!lyrics) {
                 alert('请填写要插入的歌词或空行');
                 return;
             }
             
+            // 添加到数组并重新渲染列表
             insertItems.push({ position, line, lyrics });
             renderInsertList();
             
-            // 清空输入
+            // 清空歌词输入框（保留位置和行号）
             document.getElementById('lc-insert-lyrics').value = '';
         }
 
-        // 渲染插入列表
+        /**
+         * 渲染插入项列表
+         * 显示所有已添加的插入项，并提供删除功能
+         */
         function renderInsertList() {
             const container = document.getElementById('lc-insert-list');
             const manualArea = document.getElementById('lc-insert-manual');
             
+            // 如果没有插入项，显示提示并显示手动输入区域
             if (insertItems.length === 0) {
                 container.innerHTML = '<div style="color:#999;font-size:13px;">暂无插入项</div>';
                 if (manualArea) manualArea.style.display = 'block';
@@ -603,6 +771,7 @@
             // 有插入项时隐藏手动输入区域
             if (manualArea) manualArea.style.display = 'none';
             
+            // 渲染插入项列表
             container.innerHTML = insertItems.map((item, i) => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:8px;background:#f5f5f5;border-radius:6px;">
                     <div>
@@ -614,28 +783,38 @@
             `).join('');
         }
 
-        // 移除插入项
+        /**
+         * 移除指定索引的插入项
+         * @param {number} index - 要移除的插入项索引
+         */
         function removeInsertItem(index) {
             insertItems.splice(index, 1);
             renderInsertList();
             // renderInsertList 会自动处理手动输入区域的显示/隐藏
         }
 
-        // 删除歌曲数据
+        // ===== 删除歌曲功能 =====
+        
+        // 存储要删除的歌曲列表
         let deleteSongs = [];
 
-        // 提交删除请求
+        /**
+         * 提交删除歌曲请求
+         * 将deleteSongs数组提交到后端
+         */
         async function submitDeleteRequest() {
             if (deleteSongs.length === 0) {
                 showResult('del-result', false, '请选择要删除的歌曲');
                 return;
             }
 
+            // 设置按钮加载状态
             const btn = document.querySelector('#panel-delete .submit-btn');
             btn.disabled = true;
             btn.textContent = '提交中...';
 
             try {
+                // 发送请求
                 const res = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -655,13 +834,17 @@
             }
         }
 
-        // 渲染删除歌曲列表
+        /**
+         * 渲染删除歌曲列表
+         * 显示所有已选择的待删除歌曲
+         */
         function renderDeleteList() {
             const container = document.getElementById('delete-list');
             if (deleteSongs.length === 0) {
                 container.innerHTML = '<div style="color:#999;font-size:13px;">暂无选择的歌曲</div>';
                 return;
             }
+            // 渲染歌曲列表，每项带移除按钮
             container.innerHTML = deleteSongs.map((s, i) => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;">
                     <span>${i + 1}. ${s.title} - ${s.artist}</span>
@@ -670,17 +853,29 @@
             `).join('');
         }
 
+        /**
+         * 从删除列表中移除指定歌曲
+         * @param {number} index - 要移除的歌曲索引
+         */
         function removeDeleteSong(index) {
             deleteSongs.splice(index, 1);
             renderDeleteList();
         }
 
-        // 初始化：各添加一行空行
-        addJpRow();
-        addLcRow();
-        renderInsertList();
+        // ===== 页面初始化 =====
+        
+        // 初始化：各添加一行空行，避免空列表
+        addJpRow();      // 添加一行粤拼纠错输入行
+        addLcRow();      // 添加一行歌词纠错输入行
+        renderInsertList(); // 初始化插入项列表显示
 
-                // 优先读取 localStorage（从纠错/改歌词模式跳转过来）
+        // ===== LocalStorage 数据加载 =====
+        
+        /**
+         * 从 localStorage 加载预填充数据
+         * 用于从歌词详情页跳转到投稿页面时自动填充数据
+         * @returns {boolean} 是否成功加载数据
+         */
         function loadFromStorage() {
             const stored = localStorage.getItem('submitForm');
             if (!stored) return false;
@@ -688,6 +883,7 @@
             localStorage.removeItem('submitForm');
             try {
                 const data = JSON.parse(stored);
+                // 处理粤拼纠错数据
                 if (data.type === 'jyutping' && data.corrections) {
                     switchTab('jyutping');
                     document.getElementById('jp-song').value = data.song || '';
@@ -702,15 +898,20 @@
                         lastRow.querySelector('.jp-new').value = c.newJp || '';
                     });
                     return true;
-                } else if (data.type === 'lyrics') {
+                } 
+                // 处理歌词纠错数据
+                else if (data.type === 'lyrics') {
                     switchTab('lyrics');
                     document.getElementById('lc-song').value = data.song || '';
                     
+                    // 根据纠错类型填充不同数据
                     if (data.correctionType === 'full' && data.fullLyrics) {
+                        // 整首替换模式
                         document.querySelector('input[name="correctionType"][value="full"]').checked = true;
                         switchCorrectionType('full');
                         document.getElementById('lc-full-lyrics').value = data.fullLyrics;
                     } else if (data.correctionType === 'insert') {
+                        // 插入行模式
                         document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
                         switchCorrectionType('insert');
                         // 支持多个插入项 (insertions) 或单个 (insert)
@@ -722,6 +923,7 @@
                             document.getElementById('lc-insert-lyrics').value = insertions[0].lyrics || '';
                         }
                     } else if (data.corrections) {
+                        // 逐行修改模式
                         document.getElementById('lc-rows').innerHTML = '';
                         data.corrections.forEach(c => {
                             addLcRow();
@@ -733,7 +935,9 @@
                         });
                     }
                     return true;
-                } else if (data.type === 'delete' && data.songs) {
+                } 
+                // 处理删除歌曲数据
+                else if (data.type === 'delete' && data.songs) {
                     switchTab('delete');
                     deleteSongs = data.songs;
                     renderDeleteList();
@@ -745,7 +949,9 @@
             return false;
         }
         
-        // 立即读取 localStorage
+        // ===== 页面加载时执行的数据恢复逻辑 =====
+        
+        // 立即读取 localStorage，检查是否有预填充数据
         const stored = localStorage.getItem('submitForm');
         if (stored) {
             localStorage.removeItem('submitForm');
@@ -753,6 +959,7 @@
                 const data = JSON.parse(stored);
                 console.log('Loaded submitForm:', data);
                 
+                // 处理歌词纠错数据
                 if (data.type === 'lyrics') {
                     // 先切换到歌词纠错标签页
                     switchTab('lyrics');
@@ -760,10 +967,12 @@
                     
                     // 再根据纠错类型填充数据
                     if (data.correctionType === 'full' && data.fullLyrics) {
+                        // 整首替换
                         document.querySelector('input[name="correctionType"][value="full"]').checked = true;
                         switchCorrectionType('full');
                         document.getElementById('lc-full-lyrics').value = data.fullLyrics;
                     } else if (data.correctionType === 'insert') {
+                        // 插入行
                         document.querySelector('input[name="correctionType"][value="insert"]').checked = true;
                         switchCorrectionType('insert');
                         // 支持多个插入项 (insertions) 或单个 (insert)
@@ -774,6 +983,7 @@
                             setTimeout(() => renderInsertList(), 0);
                         }
                     } else if (data.corrections && data.corrections.length > 0) {
+                        // 逐行修改
                         document.getElementById('lc-rows').innerHTML = '';
                         data.corrections.forEach(c => {
                             addLcRow();
@@ -784,7 +994,9 @@
                             lastRow.querySelector('.lc-new').value = c.newText || '';
                         });
                     }
-                } else if (data.type === 'jyutping' && data.corrections) {
+                } 
+                // 处理粤拼纠错数据
+                else if (data.type === 'jyutping' && data.corrections) {
                     switchTab('jyutping');
                     document.getElementById('jp-song').value = data.song || '';
                     document.getElementById('jp-rows').innerHTML = '';
@@ -797,7 +1009,9 @@
                         lastRow.querySelector('.jp-original').value = c.originalJp || '';
                         lastRow.querySelector('.jp-new').value = c.newJp || '';
                     });
-                } else if (data.type === 'delete' && data.songs) {
+                } 
+                // 处理删除歌曲数据
+                else if (data.type === 'delete' && data.songs) {
                     switchTab('delete');
                     deleteSongs = data.songs;
                     renderDeleteList();
@@ -812,9 +1026,11 @@
             const song = params.get('song');
             if (song) {
                 if (type === 'jyutping') {
+                    // URL参数指定粤拼纠错
                     switchTab('jyutping');
                     document.getElementById('jp-song').value = song;
                 } else if (type === 'lyrics') {
+                    // URL参数指定歌词纠错
                     switchTab('lyrics');
                     document.getElementById('lc-song').value = song;
                 }
