@@ -1,48 +1,69 @@
-// 主入口：根据 Issue 标签分发到对应的处理模块
+// ============================================
+// 处理 Issue 入口脚本
+// 功能：根据 Issue 标签自动分发到对应的处理脚本
+// 本脚本由 GitHub Actions 调用，是所有 Issue 处理的统一入口
+// ============================================
 
-const { getIssueInfo, addComment } = require('./utils');
+// 引入工具函数
+const {
+    getIssueInfo,      // 获取 Issue 信息
+    addComment,         // 添加 Issue 评论
+} = require('./utils');
 
-function main() {
+// ============================================
+// 主函数
+// 功能：根据 Issue 标签选择对应的处理脚本
+// ============================================
+async function main() {
+    // 获取 Issue 信息
     const issue = getIssueInfo();
-    console.log(`Processing Issue #${issue.number}: ${issue.title}`);
-    console.log(`Labels: ${issue.labels.join(', ')}`);
+    const labels = issue.labels || [];
 
+    console.log(`Processing Issue #${issue.number}: ${issue.title}`);
+    console.log(`Labels: ${labels.join(', ')}`);
+
+    // 根据标签分发到对应的处理脚本
     try {
-        // 根据标签分发
-        if (issue.labels.includes('投稿')) {
-            console.log('→ Type: New Song');
-            const { processNewSong } = require('./new-song');
-            processNewSong();
-        } else if (issue.labels.includes('纠错')) {
-            // 区分粤拼纠错和歌词纠错
-            if (issue.title.includes('粤拼')) {
-                console.log('→ Type: Jyutping Correction');
-                const { processJyutpingCorrection } = require('./jyutping-correction');
-                processJyutpingCorrection();
-            } else {
-                console.log('→ Type: Lyrics Correction');
-                const { processLyricsCorrection } = require('./lyrics-correction');
-                processLyricsCorrection();
+        // 遍历标签，找到匹配的处理脚本
+        for (const label of labels) {
+            switch (label) {
+                case '投稿-新歌':
+                    // 处理新歌投稿
+                    const { processNewSong } = require('./new-song');
+                    processNewSong();
+                    return;
+
+                case '投稿-纠错':
+                case '纠错':
+                    // 处理歌词纠错
+                    const { processLyricsCorrection } = require('./lyrics-correction');
+                    processLyricsCorrection();
+                    return;
+
+                case '投稿-粤拼':
+                    // 处理粤拼纠错
+                    const { processJyutpingCorrection } = require('./jyutping-correction');
+                    processJyutpingCorrection();
+                    return;
+
+                case '投稿-删除':
+                    // 处理删除歌曲
+                    const { processDeleteSong } = require('./delete-song');
+                    processDeleteSong();
+                    return;
             }
-        } else if (issue.labels.includes('歌词纠错')) {
-            console.log('→ Type: Lyrics Correction');
-            const { processLyricsCorrection } = require('./lyrics-correction');
-            processLyricsCorrection();
-        } else if (issue.labels.includes('删除')) {
-            console.log('→ Type: Delete Song');
-            const { processDeleteSong } = require('./delete-song');
-            processDeleteSong();
-        } else {
-            console.log('→ Unknown type, skipping');
-            addComment(issue.number, 'ℹ️ 此 Issue 没有匹配的自动化标签（投稿/纠错/歌词纠错/删除），已跳过自动处理。');
         }
 
-        console.log('Done!');
+        // 没有匹配到标签
+        addComment(issue.number, `❌ 未识别的 Issue 类型。当前标签：${labels.join(', ') || '无'}`);
+        console.log('No matching handler found for labels:', labels);
+
     } catch (error) {
-        console.error('Error:', error.message);
-        console.error('Stack:', error.stack);
-        addComment(issue.number, `❌ 自动处理失败：\n\n\`\`\`\n${error.message}\n\n${error.stack}\n\`\`\`\n\n请手动处理。`);
+        // 处理脚本执行出错
+        console.error('Error processing issue:', error);
+        addComment(issue.number, `❌ 处理过程中发生错误：${error.message}`);
     }
 }
 
+// 执行主函数
 main();
