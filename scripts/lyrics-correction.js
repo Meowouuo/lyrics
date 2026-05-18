@@ -623,8 +623,8 @@ function processLineByLine(content, body, songTitle) {
             continue;
         }
         
-        // 提取当前行的歌词文本（去除引号和逗号）
-        const currentChars = charsMatch[1].replace(/"/g, '').replace(/,\s*/g, '');
+        // 提取当前行的歌词文本（去除引号和逗号，但保留字符之间的空格）
+        const currentChars = charsMatch[1].replace(/"/g, '').replace(/,/g, '');
         
         // 繁体→简体转换
         const simplifiedOriginal = toSimplified(originalText.toString().trim());
