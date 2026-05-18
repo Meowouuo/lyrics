@@ -505,6 +505,47 @@ function updateEditList() {
         }
         displayLine += 1; // 转换为1-based索引
         
+        // 如果编辑的是某个 segment（有 segStart），需要加上该行中之前的 segment 数
+        if (item.segStart !== null && item.segStart !== undefined) {
+            const editLine = song.lyrics[item.lineIndex];
+            if (editLine && editLine.chars) {
+                // 计算该行中 segStart 之前有多少个 segment 分割点
+                let segBefore = 0;
+                let inB = 0;
+                let ccSinceLast = 0;
+                let pw = '';
+                for (let ci = 0; ci < item.segStart; ci++) {
+                    const c = editLine.chars[ci];
+                    if (c === '\u3000' || c === '《' || c === '(' || c === '（') { if (c === '《' || c === '(' || c === '（') inB++; }
+                    if (c === '》' || c === ')' || c === '）') inB = Math.max(0, inB - 1);
+                    if ((c === ' ' || c === '\u3000') && inB === 0) {
+                        let nw = '';
+                        for (let ni = ci + 1; ni < editLine.chars.length; ni++) {
+                            if (editLine.chars[ni] === ' ' || editLine.chars[ni] === '\u3000') break;
+                            nw += editLine.chars[ni];
+                        }
+                        if (nw && pw === nw) { /* 不分割 */ }
+                        else if (/^[a-zA-Z]/.test(pw) && /^[a-zA-Z]/.test(nw)) { /* 不分割 */ }
+                        else if (ccSinceLast < 3) { /* 不分割 */ }
+                        else { segBefore++; }
+                        ccSinceLast = 0;
+                        pw = '';
+                        for (let ni = ci + 1; ni < editLine.chars.length; ni++) {
+                            if (editLine.chars[ni] === ' ' || editLine.chars[ni] === '\u3000') break;
+                            pw += editLine.chars[ni];
+                        }
+                    } else {
+                        if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(c)) ccSinceLast++;
+                        if (c !== ' ' && c !== '\u3000') {
+                            if (!pw || editLine.chars[ci - 1] === ' ' || editLine.chars[ci - 1] === '\u3000') pw = c;
+                            else pw += c;
+                        }
+                    }
+                }
+                displayLine += segBefore;
+            }
+        }
+        
         // 显示修改项（截断过长的文本）
         const preview = item.newText.substring(0, 20);
         html += `<div class="edit-list-item"><span class="edit-list-tag line">第${displayLine}行</span> ${preview}${item.newText.length > 20 ? '...' : ''} <button onclick="removeLineEdit(${idx})" class="edit-list-remove">删除</button></div>`;
@@ -585,7 +626,6 @@ function handleLineClick(event, displayLineIndex) {
     
     // 获取当前歌曲数据
     const song = window.currentSong;
-    // displayLineIndex是用户可见的行号，通过data-song-index获取实际的数组索引
     const songIndex = parseInt(event.currentTarget.dataset.songIndex);
     if (isNaN(songIndex)) return;
     const line = song.lyrics[songIndex];
@@ -594,33 +634,45 @@ function handleLineClick(event, displayLineIndex) {
     // displayLineIndex + 1 就是用户看到的行号（1-based）
     const displayLine = displayLineIndex + 1;
     
-    // 获取原始歌词文本（从chars数组拼接）
-    const originalText = line.chars.join('');
-    // 检查是否已有编辑记录（同一行可能被编辑多次）
-    const existingEdit = editedLyrics.find(e => e.lineIndex === songIndex);
-    // 如果有记录，用记录中的新文本；否则用原始文本
+    // 获取该 segment 的字符范围（前端渲染时记录的 data-segment-start/end）
+    const segStart = parseInt(event.currentTarget.dataset.segmentStart);
+    const segEnd = parseInt(event.currentTarget.dataset.segmentEnd);
+    
+    // 提取该 segment 对应的字符子集（与页面显示一致）
+    let segmentChars;
+    if (!isNaN(segStart) && !isNaN(segEnd)) {
+        segmentChars = line.chars.slice(segStart, segEnd + 1);
+    } else {
+        segmentChars = line.chars;
+    }
+    const originalText = segmentChars.join('');
+    
+    // 检查是否已有该 segment 的编辑记录（用 songIndex + segStart 唯一标识）
+    const editKey = isNaN(segStart) ? songIndex : songIndex + '_' + segStart;
+    const existingEdit = editedLyrics.find(e => e.editKey === editKey);
     const currentText = existingEdit ? existingEdit.newText : originalText;
     
-    // 弹出编辑对话框（prompt会显示当前文本供编辑）
+    // 弹出编辑对话框
     const newText = prompt(`修改第 ${displayLine} 行歌词：`, currentText);
-    if (newText === null) return; // 用户取消编辑
+    if (newText === null) return;
     
     // 处理编辑结果
     if (newText === originalText) {
-        // 内容与原文相同（用户未修改或还原）
-        // 如果有编辑记录则删除（撤销之前的修改）
-        const idx = editedLyrics.findIndex(e => e.lineIndex === songIndex);
+        const idx = editedLyrics.findIndex(e => e.editKey === editKey);
         if (idx > -1) editedLyrics.splice(idx, 1);
     } else if (newText.trim()) {
-        // 有新内容（去除首尾空格后非空）
-        // 查找是否已有该行的编辑记录
-        const idx = editedLyrics.findIndex(e => e.lineIndex === songIndex);
+        const idx = editedLyrics.findIndex(e => e.editKey === editKey);
         if (idx > -1) {
-            // 已存在记录，更新新文本
             editedLyrics[idx].newText = newText.trim();
         } else {
-            // 不存在记录，添加新记录
-            editedLyrics.push({ lineIndex: songIndex, originalText, newText: newText.trim() });
+            editedLyrics.push({
+                editKey: editKey,
+                lineIndex: songIndex,
+                segStart: isNaN(segStart) ? null : segStart,
+                segEnd: isNaN(segEnd) ? null : segEnd,
+                originalText: originalText,
+                newText: newText.trim()
+            });
         }
     }
     
@@ -829,30 +881,92 @@ function submitEdit() {
             
             // 将编辑记录转换为提交格式
             submitData.corrections = editedLyrics.map(e => {
-                // 计算displayLine（基于segment的行号）
-                // 确保与前端渲染逻辑一致
+                // 计算displayLine（基于segment的行号，与渲染逻辑一致）
                 let displayLine = 0;
-                // 遍历之前的歌词行，累加segment数
                 for (let i = 0; i < e.lineIndex; i++) {
                     if (song.lyrics[i].paragraphBreak) continue;
                     if (!song.lyrics[i].chars) continue;
                     
                     let segments = 1;
                     let inBrackets = 0;
-                    for (const c of song.lyrics[i].chars) {
+                    let charCountSinceLastSpace = 0;
+                    let prevWord = '';
+                    for (let ci = 0; ci < song.lyrics[i].chars.length; ci++) {
+                        const c = song.lyrics[i].chars[ci];
                         if (c === '《' || c === '(' || c === '（') inBrackets++;
                         if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
-                        if (c === ' ' && inBrackets === 0) segments++;
+                        if ((c === ' ' || c === '\u3000') && inBrackets === 0) {
+                            let nextWord = '';
+                            for (let ni = ci + 1; ni < song.lyrics[i].chars.length; ni++) {
+                                if (song.lyrics[i].chars[ni] === ' ' || song.lyrics[i].chars[ni] === '\u3000') break;
+                                nextWord += song.lyrics[i].chars[ni];
+                            }
+                            if (nextWord && prevWord === nextWord) { /* 不分割 */ }
+                            else if (/^[a-zA-Z]/.test(prevWord) && /^[a-zA-Z]/.test(nextWord)) { /* 不分割 */ }
+                            else if (charCountSinceLastSpace < 3) { /* 不分割 */ }
+                            else { segments++; }
+                            charCountSinceLastSpace = 0;
+                            prevWord = '';
+                            for (let ni = ci + 1; ni < song.lyrics[i].chars.length; ni++) {
+                                if (song.lyrics[i].chars[ni] === ' ' || song.lyrics[i].chars[ni] === '\u3000') break;
+                                prevWord += song.lyrics[i].chars[ni];
+                            }
+                        } else {
+                            if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(c)) charCountSinceLastSpace++;
+                            if (c !== ' ' && c !== '\u3000') {
+                                if (!prevWord || song.lyrics[i].chars[ci - 1] === ' ' || song.lyrics[i].chars[ci - 1] === '\u3000') prevWord = c;
+                                else prevWord += c;
+                            }
+                        }
                     }
                     displayLine += segments;
                 }
-                displayLine += 1; // 转换为1-based索引
+                displayLine += 1;
                 
-                // 返回格式化后的纠错项
+                // 如果编辑的是某个 segment，加上该行中之前的 segment 数
+                if (e.segStart !== null && e.segStart !== undefined) {
+                    const editLine = song.lyrics[e.lineIndex];
+                    if (editLine && editLine.chars) {
+                        let segBefore = 0;
+                        let inB = 0;
+                        let ccSinceLast = 0;
+                        let pw = '';
+                        for (let ci = 0; ci < e.segStart; ci++) {
+                            const c = editLine.chars[ci];
+                            if (c === '《' || c === '(' || c === '（') inB++;
+                            if (c === '》' || c === ')' || c === '）') inB = Math.max(0, inB - 1);
+                            if ((c === ' ' || c === '\u3000') && inB === 0) {
+                                let nw = '';
+                                for (let ni = ci + 1; ni < editLine.chars.length; ni++) {
+                                    if (editLine.chars[ni] === ' ' || editLine.chars[ni] === '\u3000') break;
+                                    nw += editLine.chars[ni];
+                                }
+                                if (nw && pw === nw) { /* 不分割 */ }
+                                else if (/^[a-zA-Z]/.test(pw) && /^[a-zA-Z]/.test(nw)) { /* 不分割 */ }
+                                else if (ccSinceLast < 3) { /* 不分割 */ }
+                                else { segBefore++; }
+                                ccSinceLast = 0;
+                                pw = '';
+                                for (let ni = ci + 1; ni < editLine.chars.length; ni++) {
+                                    if (editLine.chars[ni] === ' ' || editLine.chars[ni] === '\u3000') break;
+                                    pw += editLine.chars[ni];
+                                }
+                            } else {
+                                if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(c)) ccSinceLast++;
+                                if (c !== ' ' && c !== '\u3000') {
+                                    if (!pw || editLine.chars[ci - 1] === ' ' || editLine.chars[ci - 1] === '\u3000') pw = c;
+                                    else pw += c;
+                                }
+                            }
+                        }
+                        displayLine += segBefore;
+                    }
+                }
+                
                 return {
-                    line: displayLine,  // 行号
-                    originalText: e.originalText,  // 原歌词
-                    newText: e.newText  // 新歌词
+                    line: displayLine,
+                    originalText: e.originalText,
+                    newText: e.newText
                 };
             });
             break;
