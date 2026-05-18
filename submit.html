@@ -871,22 +871,22 @@
                 // 根据响应结果显示成功或失败
                 if (data.success) {
                     showResult('lc-result', true, `✅ 提交成功！已创建 <a href="${data.issueUrl}" target="_blank">Issue #${data.issueNumber}</a>，请等待管理员处理。`);
+                    // 成功时更新按钮状态
+                    btn.textContent = '✓ 已提交';
+                    // 保持 disabled = true
                 } else {
                     showResult('lc-result', false, `❌ 提交失败：${data.error}`);
+                    // 失败时恢复按钮
+                    btn.disabled = false;
+                    btn.textContent = '提交纠错';
                 }
             } catch (e) {
                 // 网络错误处理
                 console.error('提交歌词纠错失败:', e);
                 showResult('lc-result', false, '❌ 网络错误，请稍后重试');
-            } finally {
-                // 只有失败时才恢复按钮，成功时保持禁用并显示"已提交"
-                if (!data || !data.success) {
-                    btn.disabled = false;
-                    btn.textContent = '提交纠错';
-                } else {
-                    btn.textContent = '✓ 已提交';
-                    // 保持 disabled = true
-                }
+                // 错误时恢复按钮
+                btn.disabled = false;
+                btn.textContent = '提交纠错';
             }
         }
 
