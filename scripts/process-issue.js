@@ -45,6 +45,7 @@ async function main() {
 
                 case '投稿-纠错':
                 case '纠错':
+                case '歌词纠错':
                     // 处理歌词纠错请求（兼容两种标签名）
                     // 动态加载 lyrics-correction 模块并调用处理函数
                     const { processLyricsCorrection } = require('./lyrics-correction');
