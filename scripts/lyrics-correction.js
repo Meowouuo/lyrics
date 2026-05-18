@@ -593,19 +593,22 @@ function processLineByLine(content, body, songTitle) {
                 continue; // paragraphBreak 不算行
             }
             if (lines[i].includes('chars:') && lines[i].includes('jp:')) {
-                if (lineCount === lineNum) {
-                    targetIndex = i;
-                    break;
-                }
-                // 计算这行歌词有多少个segment（书名号和括号内的空格不分割）
+                // 计算这行歌词有多少个segment
                 const charsMatch = lines[i].match(/chars:\s*\[([^\]]+)\]/);
+                let segments = 1;
                 if (charsMatch) {
                     const chars = charsMatch[1].match(/"([^"]*)"/g) || [];
                     const charsArray = chars.map(c => c.replace(/"/g, ''));
-                    lineCount += countSegments(charsArray);
-                } else {
-                    lineCount++;
+                    segments = countSegments(charsArray);
                 }
+                
+                // 检查目标行号是否在当前行的segment范围内
+                if (lineNum >= lineCount && lineNum < lineCount + segments) {
+                    targetIndex = i;
+                    break;
+                }
+                
+                lineCount += segments;
             }
         }
         
