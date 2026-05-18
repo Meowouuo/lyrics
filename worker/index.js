@@ -105,7 +105,7 @@ export default {
           issueTitle = `[新歌投稿] ${title} - ${artist}`;
 
           // 设置 Issue 标签
-          labels = ['投稿'];
+          labels = ['投稿-新歌'];
 
           // 生成 Issue 正文内容
           issueBody = buildNewSongBody({ title, artist, lyricist, composer, lyrics });
@@ -126,7 +126,7 @@ export default {
           issueTitle = `[粤拼纠错] ${songName}（${corrections.length}处）`;
 
           // 设置 Issue 标签
-          labels = ['纠错'];
+          labels = ['投稿-粤拼'];
 
           // 生成 Issue 正文内容
           issueBody = buildJyutpingCorrectionBody({ songName, corrections });
@@ -201,7 +201,7 @@ export default {
             }, 400);
           }
           issueTitle = `[删除歌曲] ${songs.length}首歌曲`;
-          labels = ['删除'];
+          labels = ['投稿-删除'];
           issueBody = buildDeleteSongBody({ songs });
           break;
 
