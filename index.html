@@ -2539,6 +2539,7 @@
             let inBrackets = 0;                        // 括号嵌套层级计数
             let prevWord = '';                         // 空格前累积的词（用于判断重复）
             let charCountSinceLastSpace = 0;           // 自上次空格以来的汉字计数
+            let justSplit = false;                     // 标记是否刚执行了分割
 
             // 遍历当前行的每个字符
             line.chars.forEach((char, i) => {
@@ -2568,9 +2569,15 @@
                         charCountSinceLastSpace = 0;
                     }
                     // 规则3：空格前累积汉字数 < 3 → 保留不分割
+                    // 但如果刚执行了分割（规则4），连续空格应跳过而非保留
                     else if (charCountSinceLastSpace < 3) {
-                        currentSegment.push({ char, jp: line.jp[i] || '', index: i });
-                        charCountSinceLastSpace = 0;
+                        if (justSplit) {
+                            // 分割后的连续空格，跳过不保留
+                            charCountSinceLastSpace = 0;
+                        } else {
+                            currentSegment.push({ char, jp: line.jp[i] || '', index: i });
+                            charCountSinceLastSpace = 0;
+                        }
                     }
                     // 规则4：其他情况 → 分割（换行）
                     else {
@@ -2579,9 +2586,12 @@
                             currentSegment = [];
                         }
                         charCountSinceLastSpace = 0;
+                        // 标记刚执行了分割，后续连续空格应跳过
+                        justSplit = true;
                     }
                 } else {
                     // ===== 非空格字符，存入当前 segment =====
+                    justSplit = false;  // 遇到非空格字符，重置分割标志
                     currentSegment.push({ char, jp: line.jp[i] || '', index: i });
                     // 累积汉字计数（用于规则3判断）
                     if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(char)) {
