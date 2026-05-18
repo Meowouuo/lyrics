@@ -107,10 +107,12 @@ function toTraditional(text) {
 // 计算歌词行分段数
 // 功能：计算一行歌词被分割成多少段（用于行号计算）
 //
-// 分割规则：
-// 1. 空格作为分隔符，每出现一个空格分割数 +1
-// 2. 书名号《》内的空格不分割
-// 3. 括号（）内的空格不分割
+// 分割规则（与前端渲染逻辑一致）：
+// 1. 连续重复词中间空格 → 不分割（如 等 等 等）
+// 2. 英文单词间空格 → 不分割（如 You make me cry）
+// 3. 空格前汉字数 < 3 → 不分割
+// 4. 其他空格 → 分割
+// 5. 书名号《》和括号（）内空格 → 不分割
 //
 // 参数：
 //   - chars: 字符数组，歌词行的字符列表
@@ -123,6 +125,8 @@ function countSegments(chars) {
 
     let segments = 1;  // 至少有一段
     let inBrackets = 0;  // 括号嵌套层级
+    let charCountSinceLastSpace = 0;  // 自上次空格以来的汉字计数
+    let prevWord = '';  // 空格前的累积词
 
     // 遍历每个字符
     for (let i = 0; i < chars.length; i++) {
@@ -136,9 +140,44 @@ function countSegments(chars) {
         else if (char === '》' || char === ')' || char === '）') {
             inBrackets = Math.max(0, inBrackets - 1);
         }
-        // 检测空格（仅在括号外作为分隔符）
-        else if (char === ' ' && inBrackets === 0) {
-            segments++;
+        // 检测空格（仅在括号外处理）
+        else if ((char === ' ' || char === '\u3000') && inBrackets === 0) {
+            // 收集空格后的下一个词
+            let nextWord = '';
+            for (let j = i + 1; j < chars.length; j++) {
+                if (chars[j] === ' ' || chars[j] === '\u3000') break;
+                nextWord += chars[j];
+            }
+
+            // 规则1：连续重复词中间空格 → 不分割
+            if (nextWord && prevWord === nextWord) {
+                // 不分割，继续累积
+            }
+            // 规则2：英文单词间空格 → 不分割
+            else if (/^[a-zA-Z]/.test(prevWord) && /^[a-zA-Z]/.test(nextWord)) {
+                // 不分割
+            }
+            // 规则3：空格前汉字数 < 3 → 不分割
+            else if (charCountSinceLastSpace < 3) {
+                // 不分割
+            }
+            // 规则4：其他空格 → 分割
+            else {
+                segments++;
+            }
+
+            // 重置计数，开始新的词
+            charCountSinceLastSpace = 0;
+            prevWord = nextWord;  // 空格后的词成为新的 prevWord
+        } else {
+            // 非空格字符，累积汉字计数
+            if (/[\u4e00-\u9fff\u3400-\u4dbf]/.test(char)) {
+                charCountSinceLastSpace++;
+            }
+            // 累积 prevWord（非空格字符）
+            if (char !== ' ' && char !== '\u3000') {
+                prevWord += char;
+            }
         }
     }
 
