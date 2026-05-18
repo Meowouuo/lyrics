@@ -227,7 +227,78 @@ function processLineByLine(content, body, songTitle) {
     };
 }
 
+
+// ============================================
+// 主处理函数：处理歌词纠错请求
+// 功能：解析 Issue，修改对应歌词，创建 PR
+//
+// 流程：
+// 1. 获取 Issue 信息
+// 2. 解析歌曲名称
+// 3. 查找对应歌曲文件
+// 4. 调用 processLineByLine 修改歌词
+// 5. 创建分支、提交、推送、创建 PR
+// ============================================
+function processLyricsCorrection() {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const {
+        getIssueInfo,
+        parseField,
+        findSongFile,
+        createBranch,
+        commitAndPush,
+        createPR,
+        addComment,
+    } = require('./utils');
+    
+    // 获取当前 Issue 的完整信息
+    const issue = getIssueInfo();
+    
+    // 从 Issue 正文中提取歌曲名称字段
+    const songTitle = parseField(issue.body, '歌曲名称').trim();
+    if (!songTitle) {
+        addComment(issue.number, '❌ 未找到歌曲名称，请确保填写了**歌曲名称**。');
+        return;
+    }
+    
+    // 根据歌曲名称在歌词库中查找对应的歌曲文件
+    const song = findSongFile(songTitle);
+    if (!song) {
+        addComment(issue.number, `❌ 未找到歌曲「${songTitle}」，请确认歌曲名称是否正确。`);
+        return;
+    }
+    
+    // 构建歌词文件的完整路径并读取内容
+    const filePath = path.join(__dirname, '..', 'lyrics', `${song.fileName}.js`);
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    // 调用 processLineByLine 处理歌词纠错
+    const result = processLineByLine(content, issue.body, songTitle);
+    
+    if (!result.success) {
+        addComment(issue.number, result.message);
+        return;
+    }
+    
+    // 将修改后的内容写回歌词文件
+    fs.writeFileSync(filePath, result.content, 'utf8');
+    
+    // 创建 Git 分支并提交更改
+    const branchName = `fix/lyrics-${issue.number}`;
+    createBranch(branchName);
+    commitAndPush(branchName, result.commitMsg);
+    
+    // 创建 Pull Request
+    createPR(result.prTitle, result.prBody, branchName, issue.number);
+    
+    // 在 Issue 中添加成功评论
+    addComment(issue.number, result.comment);
+}
+
 module.exports = {
+    processLyricsCorrection,
     processLineByLine,
     parseTable
 };
