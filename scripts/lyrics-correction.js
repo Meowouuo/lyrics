@@ -6,6 +6,29 @@
 const { toSimplified, countSegments } = require('./t2s-converter');
 
 // ============================================
+// 解析 meta 修改
+// 功能：从 Issue body 中提取歌名/歌手/填词/作曲修改
+//
+// 返回值：对象，包含 title, artist, lyricist, composer 字段（如果有修改）
+// ============================================
+function parseMeta(body) {
+    const meta = {};
+    const lines = body.split('\n');
+    
+    for (const line of lines) {
+        // 匹配格式：- 歌名: 旧值 → 新值
+        const match = line.match(/-\s*(歌名|歌手|填词|作曲)：\s*(.+?)\s*→\s*(.+)/);
+        if (match) {
+            const [, field, original, newValue] = match;
+            const keyMap = { '歌名': 'title', '歌手': 'artist', '填词': 'lyricist', '作曲': 'composer' };
+            meta[keyMap[field]] = { original: original.trim(), new: newValue.trim() };
+        }
+    }
+    
+    return meta;
+}
+
+// ============================================
 // 解析表格数据
 // 功能：从 Issue body 中提取纠错表格
 //
@@ -43,10 +66,13 @@ function parseTable(body) {
 //   - 对象，包含 success、content、commitMsg、prTitle、prBody、comment 等字段
 // ============================================
 function processLineByLine(content, body, songTitle) {
-    // 解析 Issue 中的表格数据
+    // 解析 Issue 中的表格数据和 meta 修改
     const rows = parseTable(body);
-    if (rows.length === 0) {
-        return { success: false, message: '❌ 未检测到纠错表格' };
+    const meta = parseMeta(body);
+    
+    // 如果没有表格且没有 meta，返回错误
+    if (rows.length === 0 && Object.keys(meta).length === 0) {
+        return { success: false, message: '❌ 未检测到纠错内容（表格或元信息修改）' };
     }
     
     let newContent = content;
@@ -283,8 +309,44 @@ function processLyricsCorrection() {
         return;
     }
     
-    // 将修改后的内容写回歌词文件
-    fs.writeFileSync(filePath, result.content, 'utf8');
+    // 处理 meta 修改（歌名、歌手等）
+    let newContent = result.content;
+    let metaChanged = false;
+    let newFilePath = filePath;
+    
+    if (result.meta && Object.keys(result.meta).length > 0) {
+        // 修改歌词文件中的 meta 字段
+        if (result.meta.title) {
+            newContent = newContent.replace(/title:\s*"[^"]+"/, `title: "${result.meta.title.new}"`);
+            metaChanged = true;
+        }
+        if (result.meta.artist) {
+            newContent = newContent.replace(/artist:\s*"[^"]+"/, `artist: "${result.meta.artist.new}"`);
+            metaChanged = true;
+        }
+        if (result.meta.lyricist) {
+            newContent = newContent.replace(/lyricist:\s*"[^"]+"/, `lyricist: "${result.meta.lyricist.new}"`);
+            metaChanged = true;
+        }
+        if (result.meta.composer) {
+            newContent = newContent.replace(/composer:\s*"[^"]+"/, `composer: "${result.meta.composer.new}"`);
+            metaChanged = true;
+        }
+        
+        // 如果歌名变了，需要重命名文件
+        if (result.meta.title) {
+            const newFileName = result.meta.title.new.replace(/[\\/:*?"<>|]/g, '_');
+            newFilePath = path.join(__dirname, '..', 'lyrics', `${newFileName}.js`);
+        }
+    }
+    
+    // 将修改后的内容写回歌词文件（或新文件）
+    fs.writeFileSync(newFilePath, newContent, 'utf8');
+    
+    // 如果重命名了文件，删除旧文件
+    if (newFilePath !== filePath) {
+        fs.unlinkSync(filePath);
+    }
     
     // 创建 Git 分支并提交更改
     const branchName = `fix/lyrics-${issue.number}`;
