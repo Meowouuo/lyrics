@@ -1,19 +1,27 @@
 # 工作流名称：生成歌曲清单
 # 功能说明：自动扫描 lyrics 目录下的歌曲文件，生成 songFiles.js 清单文件
 # 触发条件：
-#   1. 当 main 分支的 lyrics/ 目录下有文件变更时自动触发
-#   2. 支持手动触发（workflow_dispatch）
+#   1. 当 main 分支的 lyrics/ 目录下有文件变更时自动触发（push 事件）
+#   2. 当 auto-process 工作流完成后触发（workflow_run 事件，解决 GITHUB_TOKEN push 不触发问题）
+#   3. 支持手动触发（workflow_dispatch）
 # 处理流程：扫描歌词文件 -> 生成清单 -> 检测变更 -> 创建 PR 并自动合并
 
 name: Generate Songs Manifest
 
 # 触发条件
 on:
-  # 当 main 分支的 lyrics 目录下有文件推送时触发
+  # 方式1：当 main 分支的 lyrics 目录下有文件推送时触发
   push:
     branches: [main]
     paths: ['lyrics/**']
-  # 支持手动触发
+  
+  # 方式2：当 auto-process 工作流完成后触发（解决 GITHUB_TOKEN 产生的 push 不触发问题）
+  workflow_run:
+    workflows: ["Auto Process Issues"]
+    types: [completed]
+    branches: [main]
+  
+  # 方式3：支持手动触发
   workflow_dispatch:
 
 # 并发控制：同一时间只允许一个生成任务运行，新的任务不会取消正在运行的任务
