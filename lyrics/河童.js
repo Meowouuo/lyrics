@@ -1,0 +1,67 @@
+// 歌曲：河童
+
+(function() {
+    const song = {
+        id: 346,
+        title: "河童",
+        titleJyutping: ["ho4","tung4"],
+        artist: "杨千嬅",
+        artistJyutping: ["joeng4","cin1","waa6"],
+        lyricist: "林夕",
+        lyricistJyutping: ["lam4","zik6"],
+        composer: "黄丹仪",
+        composerJyutping: ["wong4","daan1","ji4"],
+        lyrics: [
+            { chars: ["河","水","会","可","怜","莲","花","落"], jp: ["ho4","seoi2","wui6","ho2","lin4","lin4","faa1","lok6"] },
+            { chars: ["落","花","会","惜","别","好","阳","光"], jp: ["lok6","faa1","wui6","sik1","bit6","hou2","joeng4","gwong1"] },
+            { chars: ["星","球","之","中","河","童","在","何","方"], jp: ["sing1","kau4","zi1","zung1","ho4","tung4","zoi6","ho4","fong1"] },
+            { chars: ["他","家","里","没","有","房"], jp: ["taa1","gaa1","lei5","mut6","jau5","fong4"] },
+            { chars: ["小","金","花","竟","拒","绝","盛","放"], jp: ["siu2","gam1","faa1","ging2","keoi5","zyut6","sing6","fong3"] },
+            { paragraphBreak: true },
+            { chars: ["迷","上","安","徒","生","宠","爱","小","王","子"], jp: ["mai4","soeng6","on1","tou4","sang1","cung2","ngoi3","siu2","wong4","zi2"] },
+            { chars: ["邂","逅","绝","世","动","人","故","事"], jp: ["haai5","hau6","zyut6","sai3","dung6","jan4","gu3","si6"] },
+            { chars: ["举","世","乐","意","知"], jp: ["geoi2","sai3","lok6","ji3","zi1"] },
+            { chars: ["祟","拜","宫","崎","骏","天","空","作","的","诗"], jp: ["seoi6","baai3","gung1","kei1","zeon3","tin1","hung1","zok3","dik1","si1"] },
+            { chars: ["巴","不","得","听","到","下","辈","子"], jp: ["baa1","bat1","dak1","ting1","dou3","haa6","bui3","zi2"] },
+            { paragraphBreak: true },
+            { chars: ["谁","吻","别","过","河","童"], jp: ["seoi4","man5","bit6","gwo3","ho4","tung4"] },
+            { chars: ["他","长","相","很","朦","胧"], jp: ["taa1","coeng4","soeng1","han2","mung4","lung4"] },
+            { chars: ["他","渴","望","到","花","园","找","一","个","梦"], jp: ["taa1","hot3","mong6","dou3","faa1","jyun4","zaau2","jat1","go3","mung6"] },
+            { chars: ["谁","爱","护","过","河","童"], jp: ["seoi4","ngoi3","wu6","gwo3","ho4","tung4"] },
+            { chars: ["我","仍","愿","意","相","信"], jp: ["ngo5","jing4","jyun6","ji3","soeng1","seon3"] },
+            { chars: ["堡","垒","和","皇","宫"], jp: ["bou2","leoi5","wo4","wong4","gung1"] },
+            { chars: ["或","者","难","容","他"], jp: ["waak6","ze2","naan4","jung4","taa1"] },
+            { chars: ["但","我","愿","与","他","拥","抱"], jp: ["daan6","ngo5","jyun6","jyu5","taa1","jung2","pou5"] },
+            { chars: ["令","这","世","界"], jp: ["ling6","ze5","sai3","gaai3"] },
+            { chars: ["别","冻"], jp: ["bit6","dung3"] },
+            { paragraphBreak: true },
+            { chars: ["如","果","美","好","如","凌","波","丽"], jp: ["jyu4","gwo2","mei5","hou2","jyu4","ling4","bo1","lai6"] },
+            { chars: ["谁","想","去","亲","近","黑","鬍","鬼"], jp: ["seoi4","soeng2","heoi3","can1","gan6","hak1","wu4","gwai2"] },
+            { chars: ["天","堂","假","使","原","来","没","楼","梯"], jp: ["tin1","tong4","gaa2","si2","jyun4","loi4","mut6","lau4","tai1"] },
+            { chars: ["怎","相","信"], jp: ["zam2","soeng1","seon3"] },
+            { chars: ["白","牡","丹","黑","乌","鸦"], jp: ["baak6","maau5","daan1","hak1","wu1","aa1"] },
+            { chars: ["都","创","自","上","帝"], jp: ["dou1","cong3","zi6","soeng6","dai3"] },
+            { paragraphBreak: true },
+            { chars: ["迷","上","安","徒","生","宠","爱","小","王","子"], jp: ["mai4","soeng6","on1","tou4","sang1","cung2","ngoi3","siu2","wong4","zi2"] },
+            { chars: ["邂","逅","绝","世","动","人","故","事"], jp: ["haai5","hau6","zyut6","sai3","dung6","jan4","gu3","si6"] },
+            { chars: ["举","世","乐","意","知"], jp: ["geoi2","sai3","lok6","ji3","zi1"] },
+            { chars: ["祟","拜","宫","崎","骏","天","空","作","的","诗"], jp: ["seoi6","baai3","gung1","kei1","zeon3","tin1","hung1","zok3","dik1","si1"] },
+            { chars: ["巴","不","得","听","到","下","辈","子"], jp: ["baa1","bat1","dak1","ting1","dou3","haa6","bui3","zi2"] },
+            { paragraphBreak: true },
+            { chars: ["谁","吻","别","过","河","童"], jp: ["seoi4","man5","bit6","gwo3","ho4","tung4"] },
+            { chars: ["他","长","相","很","朦","胧"], jp: ["taa1","coeng4","soeng1","han2","mung4","lung4"] },
+            { chars: ["他","渴","望","到","花","园","找","一","个","梦"], jp: ["taa1","hot3","mong6","dou3","faa1","jyun4","zaau2","jat1","go3","mung6"] },
+            { chars: ["谁","爱","护","过","河","童"], jp: ["seoi4","ngoi3","wu6","gwo3","ho4","tung4"] },
+            { chars: ["我","仍","愿","意","相","信"], jp: ["ngo5","jing4","jyun6","ji3","soeng1","seon3"] },
+            { chars: ["堡","垒","和","皇","宫"], jp: ["bou2","leoi5","wo4","wong4","gung1"] },
+            { chars: ["或","者","难","容","他"], jp: ["waak6","ze2","naan4","jung4","taa1"] },
+            { chars: ["但","我","愿","与","他","拥","抱"], jp: ["daan6","ngo5","jyun6","jyu5","taa1","jung2","pou5"] },
+            { paragraphBreak: true },
+            { chars: ["别","要","令","他"], jp: ["bit6","jiu3","ling6","taa1"] },
+            { chars: ["冰","冻"], jp: ["bing1","dung3"] }
+        ]
+    };
+    if (typeof window !== 'undefined' && window.__songs) {
+        window.__songs.push(song);
+    }
+})();
