@@ -805,6 +805,11 @@
                 correctionType
             };
 
+            // 如果有从编辑页面传入的元信息修改，添加到payload
+            if (window._pendingMeta && Object.keys(window._pendingMeta).length > 0) {
+                payload.meta = window._pendingMeta;
+            }
+
             // 根据纠错类型收集不同的数据
             if (correctionType === 'line') {
                 // 逐行修改模式：收集所有纠错行数据
@@ -822,12 +827,12 @@
                     }
                 });
 
-                // 验证至少有一行纠错数据
-                if (corrections.length === 0) {
+                // 验证至少有一行纠错数据（但如果只有meta修改则允许）
+                if (corrections.length === 0 && !payload.meta) {
                     showResult('lc-result', false, '请至少添加一行纠错');
                     return;
                 }
-                payload.corrections = corrections;
+                if (corrections.length > 0) payload.corrections = corrections;
 
             } else if (correctionType === 'full') {
                 // 整首替换模式：获取完整替换歌词
@@ -1220,12 +1225,15 @@
 
                     // 处理歌名/元信息修改
                     if (data.meta && Object.keys(data.meta).length > 0) {
+                        // 保存到全局变量，供提交时使用
+                        window._pendingMeta = data.meta;
                         const metaInfo = document.getElementById('lc-meta-info');
                         if (metaInfo) {
                             const metaParts = [];
-                            if (data.meta.title) metaParts.push('歌名: ' + data.meta.title.original + ' → ' + data.meta.title.new);
-                            if (data.meta.artist) metaParts.push('歌手: ' + data.meta.artist.original + ' → ' + data.meta.artist.new);
-                            if (data.meta.album) metaParts.push('专辑: ' + data.meta.album.original + ' → ' + data.meta.album.new);
+                            if (data.meta.title) metaParts.push('歌名修改为: ' + data.meta.title);
+                            if (data.meta.artist) metaParts.push('歌手修改为: ' + data.meta.artist);
+                            if (data.meta.lyricist) metaParts.push('填词修改为: ' + data.meta.lyricist);
+                            if (data.meta.composer) metaParts.push('作曲修改为: ' + data.meta.composer);
                             metaInfo.textContent = metaParts.join('；');
                             metaInfo.style.display = 'block';
                         }
