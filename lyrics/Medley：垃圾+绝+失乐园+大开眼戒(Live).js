@@ -4,7 +4,7 @@
     const song = {
         id: 291,
         title: "Medley：垃圾+绝+失乐园+大开眼戒(Live)",
-        titleJyutping: ["","","","","","","","laap6","saap3","","","zyut6","","sat1","lok6","jyun4","","daai6","hoi1","ngaan5","gaai3","","","","","","",""],
+        titleJyutping: ["","","","","","","","laap6","saap3","","zyut6","","sat1","lok6","jyun4","","daai6","hoi1","ngaan5","gaai3","","","","","",""],
         artist: "张敬轩",
         artistJyutping: ["zoeng1","ging3","hin1"],
         lyricist: "",
