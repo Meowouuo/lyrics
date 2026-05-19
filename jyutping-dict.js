@@ -21,8 +21,8 @@ function matchJyutping(text) {
             const cnJp = JYUTPING_DICT[cnChar];
             result.push({ char: char, jp: cnJp ? cnJp[0] : '', alternatives: cnJp ? cnJp.slice(1) : [] });
         } else if (/^[a-zA-Z]$/.test(char)) {
-            // 字母：直接显示字母本身作为粤拼
-            result.push({ char: char, jp: char });
+            // 字母：不显示粤拼（空字符串），避免错位
+            result.push({ char: char, jp: '' });
         } else {
             result.push({ char: char, jp: '' }); // 其他符号
         }

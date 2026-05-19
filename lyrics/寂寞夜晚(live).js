@@ -4,7 +4,7 @@
     const song = {
         id: 205,
         title: "寂寞夜晚(live)",
-        titleJyutping: ["zik6","mok6","je6","maan5","","l","i","v","e",""],
+        titleJyutping: ["zik6","mok6","je6","maan5","","","","","",""],
         artist: "陈奕迅",
         artistJyutping: ["can4","jik6","seon3"],
         lyricist: "潘伟源",
