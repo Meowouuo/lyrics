@@ -4,7 +4,7 @@
     const song = {
         id: 237,
         title: "失乐园（live）",
-        titleJyutping: ["sat1","lok6","jyun4","","l","i","v","e",""],
+        titleJyutping: ["sat1","lok6","jyun4","","","","","",""],
         artist: "容祖儿",
         artistJyutping: ["jung4","zou2","ji4"],
         lyricist: "黄伟文",

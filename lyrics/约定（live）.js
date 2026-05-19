@@ -4,7 +4,7 @@
     const song = {
         id: 303,
         title: "约定（live）",
-        titleJyutping: ["joek3","ding6","","l","i","v","e",""],
+        titleJyutping: ["joek3","ding6","","","","","",""],
         artist: "陈奕迅",
         artistJyutping: ["can4","jik6","seon3"],
         lyricist: "林夕",

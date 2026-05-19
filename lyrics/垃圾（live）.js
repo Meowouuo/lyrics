@@ -4,7 +4,7 @@
     const song = {
         id: 239,
         title: "垃圾（live）",
-        titleJyutping: ["laap6","saap3","","l","i","v","e",""],
+        titleJyutping: ["laap6","saap3","","","","","",""],
         artist: "陈奕迅",
         artistJyutping: ["can4","jik6","seon3"],
         lyricist: "黄伟文",

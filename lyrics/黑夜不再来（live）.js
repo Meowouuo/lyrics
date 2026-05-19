@@ -4,7 +4,7 @@
     const song = {
         id: 301,
         title: "黑夜不再来（live）",
-        titleJyutping: ["hak1","je6","bat1","zoi3","loi4","","l","i","v","e",""],
+        titleJyutping: ["hak1","je6","bat1","zoi3","loi4","","","","","",""],
         artist: "陈奕迅",
         artistJyutping: ["can4","jik6","seon3"],
         lyricist: "林夕",
