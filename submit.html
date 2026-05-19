@@ -1230,10 +1230,10 @@
                         const metaInfo = document.getElementById('lc-meta-info');
                         if (metaInfo) {
                             const metaParts = [];
-                            if (data.meta.title) metaParts.push('歌名修改为: ' + data.meta.title);
-                            if (data.meta.artist) metaParts.push('歌手修改为: ' + data.meta.artist);
-                            if (data.meta.lyricist) metaParts.push('填词修改为: ' + data.meta.lyricist);
-                            if (data.meta.composer) metaParts.push('作曲修改为: ' + data.meta.composer);
+                            if (data.meta.title) metaParts.push('歌名: ' + data.meta.title.original + ' → ' + data.meta.title.new);
+                            if (data.meta.artist) metaParts.push('歌手: ' + data.meta.artist.original + ' → ' + data.meta.artist.new);
+                            if (data.meta.lyricist) metaParts.push('填词: ' + data.meta.lyricist.original + ' → ' + data.meta.lyricist.new);
+                            if (data.meta.composer) metaParts.push('作曲: ' + data.meta.composer.original + ' → ' + data.meta.composer.new);
                             metaInfo.textContent = metaParts.join('；');
                             metaInfo.style.display = 'block';
                         }
