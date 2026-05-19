@@ -109,6 +109,8 @@ function parseField(body, fieldName) {
         // 模式1：**字段名**: 值（支持中文冒号）
         new RegExp(`\\*\\*${fieldName}\\*\\*[:：]\\s*(.+)`),
         // 模式2：字段名: 值
+        // 模式3：## 字段名（Markdown标题格式，值在下一行）
+        new RegExp(`## ${fieldName}\\s*\\n\\s*(.+)`),
         new RegExp(`${fieldName}[:：]\\s*(.+)`),
     ];
 
