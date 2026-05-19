@@ -4,6 +4,7 @@
 // ============================================
 
 const { toSimplified, countSegments } = require('./t2s-converter');
+const { matchJyutping } = require('./utils');
 
 // ============================================
 // 解析 meta 修改
@@ -278,7 +279,6 @@ function processLyricsCorrection() {
         commitAndPush,
         createPR,
         addComment,
-        matchJyutping,
     } = require('./utils');
     
     // 获取当前 Issue 的完整信息
