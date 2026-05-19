@@ -26,7 +26,7 @@
             { chars: ["然","后","你"], jp: ["jin4","hau6","nei5"] },
             { chars: ["你","最","多","会","笑","着","回","避"], jp: ["nei5","zeoi3","do1","wui6","siu3","zoek6","wui4","bei6"] },
             { chars: ["避","到","底"], jp: ["bei6","dou3","dai2"] },
-            { chars: ["明","明","不","筋","𫁡","都","力","疲"], jp: ["ming4","ming4","bat1","gan1","","dou1","lik6","pei4"] },
+            { chars: ["明", "明", "不", "筋", "竭", "都", "力", "疲"], jp: ["ming4", "ming4", "bat1", "gan1", "kit3", "dou1", "lik6", "pei4"] },
             { chars: ["就","当","我","还","未","放","松","自","己"], jp: ["zau6","dong1","ngo5","waan4","mei6","fong3","cung4","zi6","gei2"] },
             { paragraphBreak: true },
             { chars: ["我","想","哭"], jp: ["ngo5","soeng2","huk1"] },
