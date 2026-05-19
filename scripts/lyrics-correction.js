@@ -17,7 +17,7 @@ function parseMeta(body) {
     
     for (const line of lines) {
         // 匹配格式：- 歌名: 旧值 → 新值
-        const match = line.match(/-\s*(歌名|歌手|填词|作曲)：\s*(.+?)\s*→\s*(.+)/);
+        const match = line.match(/-\s*(歌名|歌手|填词|作曲)[:：]\s*(.+?)\s*→\s*(.+)/);
         if (match) {
             const [, field, original, newValue] = match;
             const keyMap = { '歌名': 'title', '歌手': 'artist', '填词': 'lyricist', '作曲': 'composer' };
