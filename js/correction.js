@@ -1,8 +1,8 @@
 // 纠错模式模块
 
 let correctionMode = false;
-let corrections = []; // { songIndex, charIndex, originalJp, newJp, char }
-let selectedChars = []; // [{ songIndex, charIndex, displayLine }]
+let corrections = []; // { lineIndex, charIndex, originalJp, newJp, char }
+let selectedChars = []; // [{ lineIndex, charIndex }]
 
 function toggleCorrectionMode() {
     correctionMode = !correctionMode;
@@ -67,7 +67,7 @@ function updateCorrectionCount() {
     }
 }
 
-function handleCharClick(event, displayLineIndex, charIndex, songIndex) {
+function handleCharClick(event, lineIndex, charIndex) {
     if (!correctionMode) return false; // 不处理，让其他模块处理
 
     event.stopPropagation();
@@ -75,28 +75,28 @@ function handleCharClick(event, displayLineIndex, charIndex, songIndex) {
 
     // If already corrected, allow re-edit
     if (charGroup.classList.contains('corrected')) {
-        showEditPopup(charGroup, displayLineIndex, charIndex, songIndex);
+        showEditPopup(charGroup, lineIndex, charIndex);
         return true;
     }
 
     // Toggle selection
-    const idx = selectedChars.findIndex(s => s.songIndex === songIndex && s.charIndex === charIndex);
+    const idx = selectedChars.findIndex(s => s.lineIndex === lineIndex && s.charIndex === charIndex);
     if (idx > -1) {
         selectedChars.splice(idx, 1);
         charGroup.classList.remove('selected');
     } else {
-        selectedChars.push({ songIndex, charIndex, displayLine: displayLineIndex });
+        selectedChars.push({ lineIndex, charIndex });
         charGroup.classList.add('selected');
     }
 
     // If we have selection, show edit popup
     if (selectedChars.length > 0) {
-        showEditPopup(charGroup, displayLineIndex, charIndex, songIndex);
+        showEditPopup(charGroup, lineIndex, charIndex);
     }
     return true;
 }
 
-function showEditPopup(charGroup, displayLineIndex, charIndex, songIndex) {
+function showEditPopup(charGroup, lineIndex, charIndex) {
     closeEditPopup();
 
     const overlay = document.createElement('div');
@@ -116,16 +116,16 @@ function showEditPopup(charGroup, displayLineIndex, charIndex, songIndex) {
     let currentJp = '';
 
     if (selectedChars.length > 0) {
-        const sorted = [...selectedChars].sort((a, b) => a.songIndex - b.songIndex || a.charIndex - b.charIndex);
+        const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
         charsInfo = sorted.map(s => {
-            const line = song.lyrics[s.songIndex];
-            return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], songIndex: s.songIndex, charIndex: s.charIndex, displayLine: s.displayLine };
+            const line = song.lyrics[s.lineIndex];
+            return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], lineIndex: s.lineIndex, charIndex: s.charIndex };
         });
         currentJp = charsInfo.map(c => c.jp).join(' ');
     } else {
-        const line = song.lyrics[songIndex];
-        const existingCorrection = corrections.find(c => c.songIndex === songIndex && c.charIndex === charIndex);
-        charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], songIndex, charIndex, displayLine: displayLineIndex }];
+        const line = song.lyrics[lineIndex];
+        const existingCorrection = corrections.find(c => c.lineIndex === lineIndex && c.charIndex === charIndex);
+        charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], lineIndex, charIndex }];
         currentJp = charsInfo[0].jp;
     }
 
@@ -184,21 +184,21 @@ function confirmEdit() {
     const song = window.currentSong;
 
     if (selectedChars.length > 0) {
-        const sorted = [...selectedChars].sort((a, b) => a.songIndex - b.songIndex || a.charIndex - b.charIndex);
+        const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
         const newJpArr = newJp.split(/\s+/);
 
         sorted.forEach((s, i) => {
-            const line = song.lyrics[s.songIndex];
+            const line = song.lyrics[s.lineIndex];
             const originalJp = line.jp[s.charIndex];
             const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
             const char = line.chars[s.charIndex];
 
-            const existingIdx = corrections.findIndex(c => c.songIndex === s.songIndex && c.charIndex === s.charIndex);
+            const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
             if (existingIdx > -1) {
                 corrections[existingIdx].newJp = correctedJp;
             } else {
                 corrections.push({
-                    songIndex: s.songIndex,
+                    lineIndex: s.lineIndex,
                     charIndex: s.charIndex,
                     char: char,
                     originalJp: originalJp,
@@ -206,8 +206,7 @@ function confirmEdit() {
                 });
             }
 
-            // 使用 displayLine 查找 DOM 元素
-            const charEl = document.querySelector(`.char-group[data-line="${s.displayLine}"][data-char="${s.charIndex}"]`);
+            const charEl = document.querySelector(`.char-group[data-line="${s.lineIndex}"][data-char="${s.charIndex}"]`);
             if (charEl) {
                 charEl.classList.remove('selected');
                 charEl.classList.add('corrected');
@@ -244,18 +243,16 @@ function confirmEdit() {
                     }
                     if (!match) continue;
                     const syncCi = wi + charOffsetInWord;
-                    // 使用 songIndex 进行去重判断
-                    if (sorted.some(sel => sel.songIndex === li && sel.charIndex === syncCi)) continue;
-                    if (corrections.some(ex => ex.songIndex === li && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
+                    if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === syncCi)) continue;
+                    if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
                     corrections.push({
-                        songIndex: li,
+                        lineIndex: li,
                         charIndex: syncCi,
                         char: l.chars[syncCi],
                         originalJp: l.jp[syncCi],
                         newJp: correctedJp
                     });
-                    // 同步的行需要通过 songIndex 找到对应的 displayLine 来查找 DOM
-                    const syncEl = document.querySelector(`.char-group[data-song-index="${li}"][data-char="${syncCi}"]`);
+                    const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${syncCi}"]`);
                     if (syncEl) {
                         syncEl.classList.add('corrected');
                         syncEl.querySelector('.char-jyutping').textContent = correctedJp;
@@ -284,33 +281,13 @@ function clearCorrections() {
     });
 }
 
-// 计算 songIndex 对应的 displayLine（segment-based，与渲染逻辑一致）
-function songIndexToDisplayLine(songIndex) {
-    const song = window.currentSong;
-    let displayLine = 0;
-    for (let i = 0; i < songIndex; i++) {
-        if (song.lyrics[i].paragraphBreak) continue;
-        if (!song.lyrics[i].chars) continue;
-        // 计算这行有多少个 segment（书名号和括号内的空格不分割）
-        let segments = 1;
-        let inBrackets = 0;
-        for (const c of song.lyrics[i].chars) {
-            if (c === '《' || c === '(' || c === '（') inBrackets++;
-            if (c === '》' || c === ')' || c === '）') inBrackets = Math.max(0, inBrackets - 1);
-            if (c === ' ' && inBrackets === 0) segments++;
-        }
-        displayLine += segments;
-    }
-    return displayLine + 1; // 1-based
-}
-
 function submitCorrections() {
     if (corrections.length === 0) return;
 
     // 将纠错数据存入 localStorage，跳转到表单页面
     const songName = window.currentSong ? window.currentSong.title : '';
     const correctionsData = corrections.map(c => ({
-        line: songIndexToDisplayLine(c.songIndex),
+        line: c.lineIndex + 1,
         char: c.char,
         originalJp: c.originalJp,
         newJp: c.newJp,

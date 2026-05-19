@@ -1248,6 +1248,27 @@
     
     <!-- 纠错模式模块 -->
     <script src="js/correction.js"></script>
+
+    <!-- onCharClick：字符点击事件入口，由歌词渲染模板中的 onclick 调用 -->
+    <script>
+    function onCharClick(event, lineIndex, charIndex) {
+        // ========== TTS播放模式 ==========
+        // 如果 TTS 播放模式激活，点击字符播放语音
+        if (window.TTSModule && TTSModule.isModeActive()) {
+            event.stopPropagation();
+            const charGroup = event.currentTarget;
+            const jp = charGroup.dataset.originalJp;
+            TTSModule.playChar(jp, charGroup);
+            return;
+        }
+
+        // ========== 粤拼纠错模式 ==========
+        // 如果纠错模式激活，让纠错模块处理点击事件（修改粤拼）
+        if (window.CorrectionModule && CorrectionModule.handleCharClick(event, lineIndex, charIndex)) {
+            return;
+        }
+    }
+    </script>
     
     <!-- 修改歌词模式模块 -->
     <script src="js/edit-lyrics.js"></script>
