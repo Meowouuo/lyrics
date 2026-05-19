@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: '合并模式'
+        description: '合并模式 (recent=自动最近N个, manual=手动指定)'
         required: true
         default: 'recent'
         type: choice
@@ -12,17 +12,17 @@ on:
           - recent
           - manual
       count:
-        description: '合并数量（recent模式）'
+        description: '合并数量 (recent模式)'
         required: false
         default: '5'
         type: string
       exclude:
-        description: '排除的PR编号（recent模式，逗号分隔）'
+        description: '排除的PR编号 (recent模式,逗号分隔如: 123,456)'
         required: false
         default: ''
         type: string
       pr_numbers:
-        description: 'PR编号列表（manual模式，逗号分隔）'
+        description: 'PR编号列表 (manual模式,逗号分隔如: 100,101,102)'
         required: false
         default: ''
         type: string
@@ -39,113 +39,24 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-
     steps:
-      - name: Get PR list
-        id: get-prs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MODE="${{ inputs.mode }}"
-          REPO="Meowouuo/lyrics"
-          API="https://api.github.com/repos/$REPO"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-          if [ "$MODE" = "recent" ]; then
-            COUNT="${{ inputs.count }}"
-            EXCLUDE="${{ inputs.exclude }}"
-            echo "mode=recent count=$COUNT exclude=$EXCLUDE"
-
-            curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "$API/pulls?state=open&sort=created&direction=desc&per_page=100" > /tmp/all_prs.json
-
-            cat > /tmp/filter.py << 'SCRIPT'
-import json, sys
-with open('/tmp/all_prs.json') as f:
-    data = json.load(f)
-exclude_raw = sys.argv[1]
-exclude_set = set(exclude_raw.split(',')) if exclude_raw.strip() else set()
-target = int(sys.argv[2])
-result = []
-for pr in data:
-    num = str(pr['number'])
-    if num not in exclude_set and len(result) < target:
-        result.append(num)
-print(','.join(result))
-SCRIPT
-
-            PR_LIST=$(python3 /tmp/filter.py "$EXCLUDE" "$COUNT")
-
-          else
-            PR_LIST="${{ inputs.pr_numbers }}"
-            echo "mode=manual prs=$PR_LIST"
-          fi
-
-          echo "将要合并的PR: $PR_LIST"
-          echo "pr_list=$PR_LIST" >> $GITHUB_OUTPUT
-
-          if [ -z "$PR_LIST" ]; then
-            echo "没有需要合并的PR"
-            exit 0
-          fi
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Batch merge PRs
-        if: steps.get-prs.outputs.pr_list != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          COUNT: ${{ inputs.count }}
+          EXCLUDE: ${{ inputs.exclude }}
+          PR_NUMBERS: ${{ inputs.pr_numbers }}
           AUTO_CLOSE: ${{ inputs.auto_close_issue }}
-        run: |
-          REPO="Meowouuo/lyrics"
-          API="https://api.github.com/repos/$REPO"
-          PRS="${{ steps.get-prs.outputs.pr_list }}"
-          echo "开始批量合并PR: $PRS"
-
-          IFS=',' read -ra PR_LIST <<< "$PRS"
-          for pr in "${PR_LIST[@]}"; do
-            pr=$(echo "$pr" | tr -d ' ')
-            if [ -z "$pr" ]; then continue; fi
-            echo "正在处理 PR #$pr..."
-
-            pr_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API/pulls/$pr")
-            pr_state=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('state',''))" 2>/dev/null)
-            pr_merged=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
-            pr_title=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('title',''))" 2>/dev/null)
-            pr_body=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('body','') or '')" 2>/dev/null)
-            pr_head=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('head',{}).get('ref',''))" 2>/dev/null)
-
-            if [ "$pr_state" = "closed" ]; then echo "  ⏭️ PR #$pr 已关闭，跳过"; continue; fi
-            if [ "$pr_merged" = "True" ]; then echo "  ⏭️ PR #$pr 已合并，跳过"; continue; fi
-            if [ -z "$pr_title" ]; then echo "  ❌ 无法获取 PR #$pr 信息，跳过"; continue; fi
-
-            echo "  PR标题: $pr_title"
-            issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
-            if [ -z "$issue_number" ]; then
-              issue_number=$(echo "$pr_head" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
-            fi
-
-            echo "  正在合并 PR #$pr..."
-            merge_result=$(curl -s -X PUT -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "$API/pulls/$pr/merge" -d '{"merge_method":"squash"}')
-            merge_ok=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
-
-            if [ "$merge_ok" = "True" ]; then
-              echo "  ✅ PR #$pr 合并成功"
-              if [ "$AUTO_CLOSE" = "true" ] && [ -n "$issue_number" ]; then
-                echo "  正在关闭 Issue #$issue_number..."
-                curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
-                  -H "Accept: application/vnd.github+json" \
-                  "$API/issues/$issue_number" -d '{"state":"closed"}' > /dev/null 2>&1
-                curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
-                  -H "Accept: application/vnd.github+json" \
-                  "$API/issues/$issue_number/labels" -d '["已完成"]' > /dev/null 2>&1
-                echo "  📌 Issue #$issue_number 已关闭"
-              fi
-            else
-              merge_msg=$(echo "$merge_result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('message',''))" 2>/dev/null)
-              echo "  ❌ PR #$pr 合并失败: $merge_msg"
-            fi
-          done
-          echo "✅ 批量处理完成"
+        run: node scripts/batch-merge.js
 
       - name: Trigger song list update
         if: success()
@@ -157,4 +68,4 @@ SCRIPT
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/Meowouuo/lyrics/actions/workflows/generate-song-list.yml/dispatches" \
             -d '{"ref":"main"}'
-          echo "✅ 已触发歌曲清单更新"
+          echo "已触发歌曲清单更新"
