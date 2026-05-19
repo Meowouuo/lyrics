@@ -1,67 +1,31 @@
-// ============================================
-// 歌词纠错模块（粤拼纠错）
-// 功能：点击单个字符修改其粤拼标注
-// 支持批量选择、同步修改相同词汇
-// ============================================
+// 纠错模式模块
 
-// ============================================
-// 全局状态变量
-// ============================================
-
-// 纠错模式开关：是否处于粤拼纠错编辑状态
 let correctionMode = false;
+let corrections = []; // { lineIndex, charIndex, originalJp, newJp, char }
+let selectedChars = []; // [{ lineIndex, charIndex }]
 
-// 纠错列表：存储用户修改的所有粤拼纠错项
-// 格式：[{ lineIndex, charIndex, char, originalJp, newJp }]
-let corrections = [];
-
-// 当前选中的字符列表（用于批量修改）
-// 格式：[{ lineIndex, charIndex }]
-let selectedChars = [];
-
-// ============================================
-// 切换纠错模式
-// 功能：点击"纠错"按钮时的入口函数
-// ============================================
 function toggleCorrectionMode() {
+    correctionMode = !correctionMode;
     const lyricsContent = document.getElementById('lyricsContent');
-    const song = window.currentSong;
 
-    if (!song) {
-        alert('请先选择一首歌曲');
-        return;
-    }
-
-    // 如果已在纠错模式，退出
     if (correctionMode) {
-        correctionMode = false;
+        lyricsContent.classList.add('correction-mode');
+        corrections = [];
+        selectedChars = [];
+        showCorrectionBanner();
+        updateCorrectionBtn();
+    } else {
         lyricsContent.classList.remove('correction-mode');
         hideCorrectionBanner();
         clearSelection();
         clearCorrections();
         updateCorrectionBtn();
-        restoreSongListInteraction();
-        return;
     }
-
-    // 进入纠错模式
-    correctionMode = true;
-    corrections = [];
-    selectedChars = [];
-    
-    lyricsContent.classList.add('correction-mode');
-    showCorrectionBanner();
-    updateCorrectionBtn();
-    disableSongListInteraction();
 }
 
-// ============================================
-// 更新纠错按钮显示
-// ============================================
 function updateCorrectionBtn() {
-    const btn = document.querySelector('.toolbar-btn[onclick="CorrectionModule.toggle()"]');
+    const btn = document.querySelector('.toolbar-btn[onclick="CorrectionModule.submitFeedback()"]');
     if (!btn) return;
-    
     if (correctionMode) {
         btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
         btn.style.color = '#d48806';
@@ -71,12 +35,8 @@ function updateCorrectionBtn() {
     }
 }
 
-// ============================================
-// 显示纠错横幅
-// ============================================
 function showCorrectionBanner() {
     hideCorrectionBanner();
-    
     const banner = document.createElement('div');
     banner.className = 'correction-banner';
     banner.id = 'correctionBanner';
@@ -86,29 +46,18 @@ function showCorrectionBanner() {
         <button class="correction-banner-btn submit" id="submitCorrectionsBtn" onclick="CorrectionModule.submit()" disabled>提交反馈</button>
         <button class="correction-banner-btn cancel" onclick="CorrectionModule.toggle()">退出</button>
     `;
-    
     document.body.appendChild(banner);
-    document.body.style.paddingTop = '60px';
 }
 
-// ============================================
-// 隐藏纠错横幅
-// ============================================
 function hideCorrectionBanner() {
     const existing = document.getElementById('correctionBanner');
     if (existing) existing.remove();
-    document.body.style.paddingTop = '';
 }
 
-// ============================================
-// 更新纠错计数显示
-// ============================================
 function updateCorrectionCount() {
     const text = document.getElementById('correctionCountText');
     const btn = document.getElementById('submitCorrectionsBtn');
-    
     if (!text || !btn) return;
-    
     if (corrections.length > 0) {
         text.innerHTML = `<span class="correction-count">${corrections.length}</span> 处修改`;
         btn.disabled = false;
@@ -118,37 +67,19 @@ function updateCorrectionCount() {
     }
 }
 
-// ============================================
-// 处理字符点击事件
-// 功能：在纠错模式下处理字符点击
-// 参数：
-//   - event: 点击事件对象
-//   - lineIndex: 行索引（displayLineIndex）
-//   - charIndex: 字符索引
-// 返回值：true 表示已处理，false 表示未处理
-// ============================================
 function handleCharClick(event, lineIndex, charIndex) {
-    if (!correctionMode) return false;
+    if (!correctionMode) return false; // 不处理，让其他模块处理
 
     event.stopPropagation();
     const charGroup = event.currentTarget;
 
-    // 获取当前歌曲和对应的歌词行
-    const song = window.currentSong;
-    const songLineIndex = parseInt(charGroup.closest('.lyric-line').dataset.songIndex);
-    
-    if (isNaN(songLineIndex)) return true;
-    
-    const line = song.lyrics[songLineIndex];
-    if (!line || !line.chars || !line.jp) return true;
-
-    // 如果该字符已被修改过，允许重新编辑
+    // If already corrected, allow re-edit
     if (charGroup.classList.contains('corrected')) {
-        showEditPopup(charGroup, lineIndex, charIndex, songLineIndex);
+        showEditPopup(charGroup, lineIndex, charIndex);
         return true;
     }
 
-    // 切换选中状态
+    // Toggle selection
     const idx = selectedChars.findIndex(s => s.lineIndex === lineIndex && s.charIndex === charIndex);
     if (idx > -1) {
         selectedChars.splice(idx, 1);
@@ -158,27 +89,20 @@ function handleCharClick(event, lineIndex, charIndex) {
         charGroup.classList.add('selected');
     }
 
-    // 如果有选中字符，显示编辑弹窗
+    // If we have selection, show edit popup
     if (selectedChars.length > 0) {
-        showEditPopup(charGroup, lineIndex, charIndex, songLineIndex);
+        showEditPopup(charGroup, lineIndex, charIndex);
     }
-    
     return true;
 }
 
-// ============================================
-// 显示编辑弹窗
-// ============================================
-function showEditPopup(charGroup, displayLineIndex, charIndex, songLineIndex) {
+function showEditPopup(charGroup, lineIndex, charIndex) {
     closeEditPopup();
 
     const overlay = document.createElement('div');
     overlay.className = 'edit-overlay';
     overlay.id = 'editOverlay';
-    overlay.onclick = () => { 
-        clearSelection(); 
-        closeEditPopup(); 
-    };
+    overlay.onclick = () => { clearSelection(); closeEditPopup(); };
     document.body.appendChild(overlay);
 
     const popup = document.createElement('div');
@@ -187,35 +111,21 @@ function showEditPopup(charGroup, displayLineIndex, charIndex, songLineIndex) {
 
     const song = window.currentSong;
 
-    // 收集选中字符的信息
+    // Gather selected chars info
     let charsInfo = [];
     let currentJp = '';
 
     if (selectedChars.length > 0) {
         const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
         charsInfo = sorted.map(s => {
-            const lyricLineElement = document.querySelector(`.lyric-line[data-line="${s.lineIndex}"]`);
-            const actualSongIndex = parseInt(lyricLineElement.dataset.songIndex);
-            const line = song.lyrics[actualSongIndex];
-            return { 
-                char: line.chars[s.charIndex], 
-                jp: line.jp[s.charIndex], 
-                lineIndex: s.lineIndex, 
-                charIndex: s.charIndex 
-            };
+            const line = song.lyrics[s.lineIndex];
+            return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], lineIndex: s.lineIndex, charIndex: s.charIndex };
         });
         currentJp = charsInfo.map(c => c.jp).join(' ');
     } else {
-        const line = song.lyrics[songLineIndex];
-        const existingCorrection = corrections.find(c => 
-            c.lineIndex === displayLineIndex && c.charIndex === charIndex
-        );
-        charsInfo = [{ 
-            char: line.chars[charIndex], 
-            jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], 
-            lineIndex: displayLineIndex, 
-            charIndex: charIndex 
-        }];
+        const line = song.lyrics[lineIndex];
+        const existingCorrection = corrections.find(c => c.lineIndex === lineIndex && c.charIndex === charIndex);
+        charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], lineIndex, charIndex }];
         currentJp = charsInfo[0].jp;
     }
 
@@ -235,37 +145,29 @@ function showEditPopup(charGroup, displayLineIndex, charIndex, songLineIndex) {
 
     document.body.appendChild(popup);
 
-    // 定位弹窗
+    // Position popup near the clicked element
     const rect = charGroup.getBoundingClientRect();
-    const popupWidth = 320;
-    const popupHeight = 200;
+    const popupRect = popup.getBoundingClientRect();
     let top = rect.bottom + 8;
-    let left = rect.left + rect.width / 2 - popupWidth / 2;
+    let left = rect.left + rect.width / 2 - popupRect.width / 2;
 
-    if (top + popupHeight > window.innerHeight - 60) {
-        top = rect.top - popupHeight - 8;
+    if (top + popupRect.height > window.innerHeight - 60) {
+        top = rect.top - popupRect.height - 8;
     }
     if (left < 8) left = 8;
-    if (left + popupWidth > window.innerWidth - 8) {
-        left = window.innerWidth - popupWidth - 8;
+    if (left + popupRect.width > window.innerWidth - 8) {
+        left = window.innerWidth - popupRect.width - 8;
     }
 
     popup.style.top = top + 'px';
     popup.style.left = left + 'px';
-    popup.style.width = popupWidth + 'px';
 
     setTimeout(() => {
         const input = document.getElementById('editJpInput');
-        if (input) { 
-            input.focus(); 
-            input.select(); 
-        }
+        if (input) { input.focus(); input.select(); }
     }, 50);
 }
 
-// ============================================
-// 关闭编辑弹窗
-// ============================================
 function closeEditPopup() {
     const popup = document.getElementById('editPopup');
     const overlay = document.getElementById('editOverlay');
@@ -273,13 +175,9 @@ function closeEditPopup() {
     if (overlay) overlay.remove();
 }
 
-// ============================================
-// 确认编辑
-// ============================================
 function confirmEdit() {
     const input = document.getElementById('editJpInput');
     if (!input) return;
-    
     const newJp = input.value.trim();
     if (!newJp) return;
 
@@ -290,19 +188,12 @@ function confirmEdit() {
         const newJpArr = newJp.split(/\s+/);
 
         sorted.forEach((s, i) => {
-            const lyricLineElement = document.querySelector(`.lyric-line[data-line="${s.lineIndex}"]`);
-            const actualSongIndex = parseInt(lyricLineElement.dataset.songIndex);
-            const line = song.lyrics[actualSongIndex];
-            
+            const line = song.lyrics[s.lineIndex];
             const originalJp = line.jp[s.charIndex];
             const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
             const char = line.chars[s.charIndex];
 
-            // 检查是否已有该位置的纠错记录
-            const existingIdx = corrections.findIndex(c => 
-                c.lineIndex === s.lineIndex && c.charIndex === s.charIndex
-            );
-            
+            const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
             if (existingIdx > -1) {
                 corrections[existingIdx].newJp = correctedJp;
             } else {
@@ -315,7 +206,6 @@ function confirmEdit() {
                 });
             }
 
-            // 更新界面显示
             const charEl = document.querySelector(`.char-group[data-line="${s.lineIndex}"][data-char="${s.charIndex}"]`);
             if (charEl) {
                 charEl.classList.remove('selected');
@@ -323,8 +213,52 @@ function confirmEdit() {
                 charEl.querySelector('.char-jyutping').textContent = correctedJp;
             }
 
-            // 同步修改相同的词汇
-            syncSameWordCorrections(line, s.charIndex, correctedJp, char, sorted);
+            // 同步相同词汇
+            const line_chars = line.chars;
+            const line_jp = line.jp;
+            const ci = s.charIndex;
+            let wordChars = [char];
+            let wordStart = ci;
+            let wordEnd = ci;
+            if (ci > 0 && line_chars[ci - 1] && line_chars[ci - 1] !== ' ') {
+                wordChars.unshift(line_chars[ci - 1]);
+                wordStart = ci - 1;
+            }
+            if (ci < line_chars.length - 1 && line_chars[ci + 1] && line_chars[ci + 1] !== ' ') {
+                wordChars.push(line_chars[ci + 1]);
+                wordEnd = ci + 1;
+            }
+            const charOffsetInWord = ci - wordStart;
+            const wordJp = line_jp.slice(wordStart, wordEnd + 1);
+
+            song.lyrics.forEach((l, li) => {
+                if (!l.chars || !l.jp) return;
+                for (let wi = 0; wi <= l.chars.length - wordChars.length; wi++) {
+                    let match = true;
+                    for (let k = 0; k < wordChars.length; k++) {
+                        if (l.chars[wi + k] !== wordChars[k] || l.jp[wi + k] !== wordJp[k]) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (!match) continue;
+                    const syncCi = wi + charOffsetInWord;
+                    if (sorted.some(sel => sel.lineIndex === li && sel.charIndex === syncCi)) continue;
+                    if (corrections.some(ex => ex.lineIndex === li && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
+                    corrections.push({
+                        lineIndex: li,
+                        charIndex: syncCi,
+                        char: l.chars[syncCi],
+                        originalJp: l.jp[syncCi],
+                        newJp: correctedJp
+                    });
+                    const syncEl = document.querySelector(`.char-group[data-line="${li}"][data-char="${syncCi}"]`);
+                    if (syncEl) {
+                        syncEl.classList.add('corrected');
+                        syncEl.querySelector('.char-jyutping').textContent = correctedJp;
+                    }
+                }
+            });
         });
     }
 
@@ -333,121 +267,24 @@ function confirmEdit() {
     updateCorrectionCount();
 }
 
-// ============================================
-// 同步修改相同词汇
-// ============================================
-function syncSameWordCorrections(line, charIndex, correctedJp, char, sorted) {
-    const song = window.currentSong;
-    const line_chars = line.chars;
-    const line_jp = line.jp;
-    const ci = charIndex;
-    
-    // 构建词汇（包含前后字符）
-    let wordChars = [char];
-    let wordStart = ci;
-    let wordEnd = ci;
-    
-    if (ci > 0 && line_chars[ci - 1] && line_chars[ci - 1] !== ' ') {
-        wordChars.unshift(line_chars[ci - 1]);
-        wordStart = ci - 1;
-    }
-    if (ci < line_chars.length - 1 && line_chars[ci + 1] && line_chars[ci + 1] !== ' ') {
-        wordChars.push(line_chars[ci + 1]);
-        wordEnd = ci + 1;
-    }
-    
-    const charOffsetInWord = ci - wordStart;
-    const wordJp = line_jp.slice(wordStart, wordEnd + 1);
-
-    // 在所有歌词行中查找相同的词汇
-    song.lyrics.forEach((l, li) => {
-        if (!l.chars || !l.jp) return;
-        
-        for (let wi = 0; wi <= l.chars.length - wordChars.length; wi++) {
-            let match = true;
-            for (let k = 0; k < wordChars.length; k++) {
-                if (l.chars[wi + k] !== wordChars[k] || l.jp[wi + k] !== wordJp[k]) {
-                    match = false;
-                    break;
-                }
-            }
-            
-            if (!match) continue;
-            
-            const syncCi = wi + charOffsetInWord;
-            
-            // 跳过当前选中的字符
-            if (sorted.some(sel => {
-                const lyricLineElement = document.querySelector(`.lyric-line[data-line="${sel.lineIndex}"]`);
-                const actualSongIndex = parseInt(lyricLineElement?.dataset.songIndex);
-                return actualSongIndex === li && sel.charIndex === syncCi;
-            })) continue;
-            
-            // 跳过已经同步过的字符
-            if (corrections.some(ex => ex.lineIndex === sel.lineIndex && ex.charIndex === syncCi && ex.newJp === correctedJp)) continue;
-            
-            // 添加同步纠错记录
-            corrections.push({
-                lineIndex: getDisplayLineIndex(li),
-                charIndex: syncCi,
-                char: l.chars[syncCi],
-                originalJp: l.jp[syncCi],
-                newJp: correctedJp
-            });
-            
-            const syncEl = document.querySelector(`.char-group[data-line="${getDisplayLineIndex(li)}"][data-char="${syncCi}"]`);
-            if (syncEl) {
-                syncEl.classList.add('corrected');
-                syncEl.querySelector('.char-jyutping').textContent = correctedJp;
-            }
-        }
-    });
-}
-
-// ============================================
-// 获取显示行索引
-// ============================================
-function getDisplayLineIndex(songLineIndex) {
-    let displayIndex = 0;
-    const lines = document.querySelectorAll('.lyric-line');
-    for (let i = 0; i < lines.length; i++) {
-        if (parseInt(lines[i].dataset.songIndex) === songLineIndex) {
-            return parseInt(lines[i].dataset.line);
-        }
-    }
-    return songLineIndex;
-}
-
-// ============================================
-// 清除选中状态
-// ============================================
 function clearSelection() {
     selectedChars = [];
-    document.querySelectorAll('.char-group.selected').forEach(el => {
-        el.classList.remove('selected');
-    });
+    document.querySelectorAll('.char-group.selected').forEach(el => el.classList.remove('selected'));
 }
 
-// ============================================
-// 清除所有纠错
-// ============================================
 function clearCorrections() {
     corrections = [];
     document.querySelectorAll('.char-group.corrected').forEach(el => {
         el.classList.remove('corrected');
         const originalJp = el.dataset.originalJp;
-        if (originalJp) {
-            el.querySelector('.char-jyutping').textContent = originalJp;
-        }
+        el.querySelector('.char-jyutping').textContent = originalJp;
     });
 }
 
-// ============================================
-// 提交纠错
-// ============================================
 function submitCorrections() {
     if (corrections.length === 0) return;
 
+    // 将纠错数据存入 localStorage，跳转到表单页面
     const songName = window.currentSong ? window.currentSong.title : '';
     const correctionsData = corrections.map(c => ({
         line: c.lineIndex + 1,
@@ -455,41 +292,24 @@ function submitCorrections() {
         originalJp: c.originalJp,
         newJp: c.newJp,
     }));
-    
     localStorage.setItem('submitForm', JSON.stringify({
         type: 'jyutping',
         song: songName,
         corrections: correctionsData,
     }));
-    
     window.open('submit.html', '_blank');
 }
 
-// ============================================
-// 禁用歌曲列表交互
-// ============================================
-function disableSongListInteraction() {
-    const songItems = document.querySelectorAll('.song-item');
-    songItems.forEach(item => {
-        item.style.pointerEvents = 'none';
-        item.style.opacity = '0.6';
-    });
+// 纠错：进入纠错模式（替换原跳转逻辑）
+function submitFeedback() {
+    if (!window.currentSong) return;
+    if (window.EditLyricsModule && window.EditLyricsModule.isActive()) {
+        window.EditLyricsModule.toggle();
+    }
+    toggleCorrectionMode();
 }
 
-// ============================================
-// 恢复歌曲列表交互
-// ============================================
-function restoreSongListInteraction() {
-    const songItems = document.querySelectorAll('.song-item');
-    songItems.forEach(item => {
-        item.style.pointerEvents = '';
-        item.style.opacity = '';
-    });
-}
-
-// ============================================
 // 导出模块
-// ============================================
 window.CorrectionModule = {
     toggle: toggleCorrectionMode,
     handleCharClick: handleCharClick,
@@ -498,5 +318,6 @@ window.CorrectionModule = {
     clearCorrections: clearCorrections,
     closeEditPopup: closeEditPopup,
     submit: submitCorrections,
+    submitFeedback: submitFeedback,
     isActive: () => correctionMode
 };
