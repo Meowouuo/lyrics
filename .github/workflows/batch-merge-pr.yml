@@ -1,48 +1,31 @@
-# 工作流名称：批量合并 PR
-# 功能说明：批量合并 PR 并自动关闭关联的 Issue
-# 使用方式：
-#   1. 最近N个模式：自动获取最近N个open PR，支持排除指定编号
-#   2. 手动模式：输入指定的PR编号列表（逗号分隔）
-# 处理流程：获取PR列表 -> 过滤排除项 -> 逐个合并 -> 关闭关联Issue -> 触发歌曲清单更新
-
 name: Batch Merge PRs
 
-# 触发条件：手动触发
 on:
   workflow_dispatch:
     inputs:
-      # 合并模式选择
       mode:
         description: '合并模式'
         required: true
         default: 'recent'
         type: choice
         options:
-          - recent  # 合并最近N个PR
-          - manual  # 手动指定PR编号
-      
-      # 最近N个模式：合并数量
+          - recent
+          - manual
       count:
-        description: '合并数量（recent模式下，默认5）'
+        description: '合并数量（recent模式）'
         required: false
         default: '5'
         type: string
-      
-      # 最近N个模式：排除的PR编号
       exclude:
-        description: '排除的PR编号（recent模式下，逗号分隔，如: 123,456）'
+        description: '排除的PR编号（recent模式，逗号分隔）'
         required: false
         default: ''
         type: string
-      
-      # 手动模式：PR编号列表
       pr_numbers:
-        description: 'PR编号列表（manual模式下，逗号分隔，如: 16,18,20）'
+        description: 'PR编号列表（manual模式，逗号分隔）'
         required: false
         default: ''
         type: string
-      
-      # 是否自动关闭关联Issue
       auto_close_issue:
         description: '自动关闭关联Issue'
         required: false
@@ -50,7 +33,6 @@ on:
         type: boolean
 
 jobs:
-  # 任务：批量合并PR
   batch-merge:
     runs-on: ubuntu-latest
     permissions:
@@ -59,7 +41,6 @@ jobs:
       issues: write
 
     steps:
-      # 步骤1：获取PR列表
       - name: Get PR list
         id: get-prs
         env:
@@ -70,26 +51,20 @@ jobs:
           API="https://api.github.com/repos/$REPO"
           
           if [ "$MODE" = "recent" ]; then
-            # 最近N个模式
             COUNT="${{ inputs.count }}"
             EXCLUDE="${{ inputs.exclude }}"
             
             echo "模式: 最近 $COUNT 个PR"
             echo "排除: $EXCLUDE"
             
-            # 获取所有open的PR，按创建时间倒序
             prs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
               "$API/pulls?state=open&sort=created&direction=desc&per_page=100")
             
-            # 构建排除列表
             exclude_list=""
             if [ -n "$EXCLUDE" ]; then
               exclude_list=$(echo "$EXCLUDE" | tr ',' '|')
             fi
             
-            # 过滤并选择PR
-            selected_prs=""
-            count=0
             echo "$prs" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
@@ -109,7 +84,6 @@ print(','.join(result))
             PR_LIST=$(cat /tmp/pr_list.txt)
             
           else
-            # 手动模式
             PR_LIST="${{ inputs.pr_numbers }}"
             echo "模式: 手动指定PR"
           fi
@@ -122,7 +96,6 @@ print(','.join(result))
             exit 0
           fi
 
-      # 步骤2：批量合并PR
       - name: Batch merge PRs
         if: steps.get-prs.outputs.pr_list != ''
         env:
@@ -136,7 +109,6 @@ print(','.join(result))
           echo "开始批量合并PR: $PRS"
           echo ""
           
-          # 按逗号分隔PR编号，逐个处理
           IFS=',' read -ra PR_LIST <<< "$PRS"
           for pr in "${PR_LIST[@]}"; do
             pr=$(echo "$pr" | tr -d ' ')
@@ -144,7 +116,6 @@ print(','.join(result))
             
             echo "正在处理 PR #$pr..."
             
-            # 获取PR信息
             pr_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$API/pulls/$pr")
             pr_state=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('state',''))" 2>/dev/null)
             pr_merged=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
@@ -153,7 +124,6 @@ print(','.join(result))
             pr_head=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('head',{}).get('ref',''))" 2>/dev/null)
             pr_mergeable=$(echo "$pr_info" | python3 -c "import sys,json; print(json.load(sys.stdin).get('mergeable',False))" 2>/dev/null)
             
-            # 跳过已关闭或已合并的PR
             if [ "$pr_state" = "closed" ]; then
               echo "  ⏭️ PR #$pr 已关闭，跳过"
               echo ""
@@ -175,13 +145,11 @@ print(','.join(result))
             echo "  PR标题: $pr_title"
             echo "  可合并: $pr_mergeable"
             
-            # 从PR body中提取关联的Issue编号
             issue_number=$(echo "$pr_body" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
             if [ -z "$issue_number" ]; then
               issue_number=$(echo "$pr_head" | grep -oE '/[0-9]+-' | head -1 | tr -d '/-')
             fi
             
-            # 合并PR
             echo "  正在合并 PR #$pr..."
             merge_result=$(curl -s -X PUT -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github+json" \
@@ -193,7 +161,6 @@ print(','.join(result))
             if [ "$merge_ok" = "True" ]; then
               echo "  ✅ PR #$pr 合并成功"
               
-              # 关闭关联的Issue
               if [ "$AUTO_CLOSE" = "true" ] && [ -n "$issue_number" ]; then
                 echo "  正在关闭 Issue #$issue_number..."
                 curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
@@ -218,7 +185,6 @@ print(','.join(result))
           
           echo "✅ 批量处理完成"
 
-      # 步骤3：触发歌曲清单更新
       - name: Trigger song list update
         if: success()
         env:
