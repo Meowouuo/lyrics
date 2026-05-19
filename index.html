@@ -1292,6 +1292,77 @@
         }
 
         /* ========================================
+           粤拼纠错模式样式
+           用户可点击字符修改粤拼拼音
+           ======================================== */
+        .jyutping-correction-mode .char-group {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px;
+            margin-right: 2px;
+            transition: all 0.15s;
+            position: relative;
+        }
+        @media (min-width: 1024px) {
+            .jyutping-correction-mode .char-group { margin-right: 4px; }
+        }
+        .jyutping-correction-mode .char-group:hover {
+            background: #e8f4fd;
+        }
+        .jyutping-correction-mode .char-group.selected-jp {
+            background: #d0e8ff;
+            outline: 2px solid var(--info);
+            outline-offset: -1px;
+        }
+        .jyutping-correction-mode .char-group.corrected-jp {
+            background: #fff3cd;
+            outline: 2px solid #ffc107;
+            outline-offset: -1px;
+        }
+        .jyutping-correction-mode .char-group.corrected-jp .char-jyutping {
+            color: #d48806;
+            font-weight: 600;
+        }
+
+        /* 粤拼纠错模式顶部提示条 */
+        .jyutping-correction-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff3cd;
+            border-bottom: 2px solid #ffc107;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+        .jyutping-correction-banner .correction-banner-btn {
+            padding: 6px 14px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .jyutping-correction-banner .correction-banner-btn.submit {
+            background: #1890ff;
+            color: #fff;
+        }
+        .jyutping-correction-banner .correction-banner-btn.submit:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+        .jyutping-correction-banner .correction-banner-btn.cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        /* ========================================
            纠错模式顶部提示条样式
            固定在页面顶部，提示用户当前处于纠错模式
            ======================================== */
@@ -2052,8 +2123,8 @@
                             <option value="adjustLineHeight(0.1)">行距 +</option>
                             <option value="adjustLineHeight(-0.1)">行距 -</option>
                         </select>
-                        <!-- 纠错模式按钮（点击进入/退出歌词纠错模式） -->
-                        <button class="toolbar-btn" onclick="CorrectionModule.toggle()">
+                        <!-- 粤拼纠错按钮（点击进入/退出粤拼纠错模式，可点击字修改粤拼） -->
+                        <button class="toolbar-btn" onclick="JyutpingCorrectionModule.toggle()">
                             <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
                             <span>纠错</span>
                         </button>
@@ -2102,6 +2173,7 @@
     <script src="js/import.js"></script>
     <!-- 纠错模式模块：点击字符修改粤拼 -->
     <script src="js/correction.js"></script>
+    <script src="js/jyutping-correction-ui.js"></script>
     <!-- 修改歌词模式模块：点击歌词行修改内容 -->
     <script src="js/edit-lyrics.js"></script>
     <!-- 删除歌曲功能模块：批量删除歌曲 -->
@@ -2875,9 +2947,9 @@
             return;
         }
 
-        // ========== 纠错模式 ==========
-        // 尝试让纠错模块处理点击事件
-        if (CorrectionModule.handleCharClick(event, lineIndex, charIndex)) {
+        // ========== 粤拼纠错模式 ==========
+        // 尝试让粤拼纠错模块处理点击事件
+        if (JyutpingCorrectionModule.handleCharClick(event, lineIndex, charIndex)) {
             return;                                       // 已处理则返回
         }
     }
