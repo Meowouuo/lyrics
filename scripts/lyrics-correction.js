@@ -336,7 +336,7 @@ function processLyricsCorrection() {
         
         // 如果歌名变了，需要重命名文件
         if (result.meta.title) {
-            const newFileName = result.meta.title.new.replace(/[\\/:*?"<>|]/g, '_');
+            const newFileName = result.meta.title.new.replace(/[\\\/*?"<>|]/g, '_').replace(/:/g, '：');
             newFilePath = path.join(__dirname, '..', 'lyrics', `${newFileName}.js`);
         }
     }
