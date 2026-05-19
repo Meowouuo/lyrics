@@ -66,7 +66,7 @@ jobs:
       # songFiles.js 是自动生成的文件，创建 PR 后立即通过 API 自动合并
       - name: Create PR and merge if changed
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 配置 Git 用户信息（使用 github-actions 机器人身份）
           git config user.name "github-actions[bot]"
@@ -85,24 +85,35 @@ jobs:
           git commit -m "chore: 自动更新歌曲清单"
           git push origin "$branch"
 
-          # 创建 PR
-          pr_url=$(gh pr create \
-            --title "chore: 自动更新歌曲清单" \
-            --body "此 PR 由 Actions 自动生成，更新 songFiles.js 以包含最新的歌曲文件。" \
-            --base main \
-            --head "$branch" \
-            --json url -q .url)
-          echo "PR 已创建: $pr_url"
+          # 通过 GitHub API 创建 PR
+          sleep 2
+          pr_response=$(curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls" \
+            -d "{\"title\":\"chore: 自动更新歌曲清单\",\"body\":\"此 PR 由 Actions 自动生成。\",\"head\":\"$branch\",\"base\":\"main\"}")
+          pr_num=$(echo "$pr_response" | python3 -c "import sys,json; print(json.load(sys.stdin).get('number',''))" 2>/dev/null)
+          echo "PR 已创建: #$pr_num"
 
-          # 提取 PR 编号
-          pr_num=$(echo "$pr_url" | grep -oE '[0-9]+$')
+          if [ -z "$pr_num" ]; then
+            echo "❌ PR 创建失败"
+            echo "$pr_response"
+            exit 1
+          fi
 
-          # 通过 GitHub API 合并 PR（GITHUB_TOKEN 有权限通过 API 合并）
+          # 通过 GitHub API 合并 PR
           sleep 3
-          curl -s -X PUT \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          merge_response=$(curl -s -X PUT \
+            -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/$pr_num/merge" \
-            -d '{"merge_method":"squash"}'
+            -d '{"merge_method":"squash"}')
+          merged=$(echo "$merge_response" | python3 -c "import sys,json; print(json.load(sys.stdin).get('merged',False))" 2>/dev/null)
 
-          echo "✅ 歌曲清单已更新并合并到 main 分支"
+          if [ "$merged" = "True" ]; then
+            echo "✅ 歌曲清单已更新并合并到 main 分支"
+          else
+            echo "❌ PR 合并失败"
+            echo "$merge_response"
+            exit 1
+          fi
