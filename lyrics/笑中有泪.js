@@ -1,0 +1,68 @@
+// 歌曲：笑中有泪
+
+(function() {
+    const song = {
+        id: 373,
+        title: "笑中有泪",
+        titleJyutping: ["siu3","zung1","jau5","leoi6"],
+        artist: "杨千嬅",
+        artistJyutping: ["joeng4","cin1","waa6"],
+        lyricist: "林夕",
+        lyricistJyutping: ["lam4","zik6"],
+        composer: "于逸尧",
+        composerJyutping: ["jyu1","jat6","jiu4"],
+        lyrics: [
+            { chars: ["我"," ","要","多","得","自","己"], jp: ["ngo5","","jiu3","do1","dak1","zi6","gei2"] },
+            { chars: ["更","加","多","谢","你"], jp: ["gang1","gaa1","do1","ze6","nei5"] },
+            { chars: ["你","将","我","磨","成","利","器"], jp: ["nei5","zoeng1","ngo5","mo4","sing4","lei6","hei3"] },
+            { chars: ["恋","爱","路","有","幸","捱","不","死"], jp: ["lyun2","ngoi3","lou6","jau5","hang6","ngaai4","bat1","sei2"] },
+            { chars: ["竞","技","场","上","当","嬉","戏"], jp: ["ging6","gei6","coeng4","soeng6","dong1","hei1","hei3"] },
+            { chars: ["今","天","讲","来","仿","佛","一","世","纪"], jp: ["gam1","tin1","gong2","loi4","fong2","fat6","jat1","sai3","gei2"] },
+            { paragraphBreak: true },
+            { chars: ["早","已"," ","记","不","起","自","己"], jp: ["zou2","ji5","","gei3","bat1","hei2","zi6","gei2"] },
+            { chars: ["有","否","憎","恨","你"], jp: ["jau5","fau2","zang1","han6","nei5"] },
+            { chars: ["至","少","今","天","再","站","起"], jp: ["zi3","siu2","gam1","tin1","zoi3","zaam6","hei2"] },
+            { paragraphBreak: true },
+            { chars: ["从","前","在","快","乐","时","以","苦","调","味"], jp: ["cung4","cin4","zoi6","faai3","lok6","si4","ji5","fu2","diu6","mei6"] },
+            { chars: ["在","过","山","车","里","上","天","落","地"], jp: ["zoi6","gwo3","saan1","ce1","lei5","soeng6","tin1","lok6","dei6"] },
+            { chars: ["经","历","就","当","福","气"], jp: ["ging1","lik6","zau6","dong1","fuk1","hei3"] },
+            { paragraphBreak: true },
+            { chars: ["当","我","无","情","无","恨","望","过","去"], jp: ["dong1","ngo5","mou4","cing4","mou4","han6","mong6","gwo3","heoi3"] },
+            { chars: ["还","是","笑","中","有","泪"], jp: ["waan4","si6","siu3","zung1","jau5","leoi6"] },
+            { chars: ["抓","紧","爱","侣","只","靠","宽","容","不","靠","泪","水"], jp: ["zaau2","gan2","ngoi3","leoi5","zi2","kaau3","fun1","jung4","bat1","kaau3","leoi6","seoi2"] },
+            { chars: ["无","奈","要","被","你","抛","弃","后"], jp: ["mou4","noi6","jiu3","bei6","nei5","paau1","hei3","hau6"] },
+            { chars: ["先","了","解","我","是","谁"], jp: ["sin1","liu5","gaai2","ngo5","si6","seoi4"] },
+            { chars: ["如","若","那","天","我","大","多","几","岁"], jp: ["jyu4","joek6","naa5","tin1","ngo5","daai6","do1","gei2","seoi3"] },
+            { chars: ["这","一","刻","也","许"], jp: ["ze5","jat1","hak1","jaa5","heoi2"] },
+            { chars: ["还","是","一","双","好","爱","侣"], jp: ["waan4","si6","jat1","soeng1","hou2","ngoi3","leoi5"] },
+            { paragraphBreak: true },
+            { chars: ["不","错"," ","过","得","到","自","己"], jp: ["bat1","co3","","gwo3","dak1","dou3","zi6","gei2"] },
+            { chars: ["便","可","体","谅","你"], jp: ["bin6","ho2","tai2","loeng6","nei5"] },
+            { chars: ["也","许","都","因","我","自","卑"], jp: ["jaa5","heoi2","dou1","jan1","ngo5","zi6","bei1"] },
+            { paragraphBreak: true },
+            { chars: ["携","同","着","压","力","陪","你","赶","场","地"], jp: ["kwai4","tung4","zoek6","aat3","lik6","pui4","nei5","gon2","coeng4","dei6"] },
+            { chars: ["渡","过","了","春","光","再","幻","想","明","媚"], jp: ["dou6","gwo3","liu5","ceon1","gwong1","zoi3","waan6","soeng2","ming4","mei6"] },
+            { chars: ["当","日","是","我","逼","你"], jp: ["dong1","jat6","si6","ngo5","bik1","nei5"] },
+            { paragraphBreak: true },
+            { chars: ["当","我","无","情","无","恨","望","过","去"], jp: ["dong1","ngo5","mou4","cing4","mou4","han6","mong6","gwo3","heoi3"] },
+            { chars: ["还","是","笑","中","有","泪"], jp: ["waan4","si6","siu3","zung1","jau5","leoi6"] },
+            { chars: ["抓","紧","爱","侣","只","靠","宽","容","不","靠","泪","水"], jp: ["zaau2","gan2","ngoi3","leoi5","zi2","kaau3","fun1","jung4","bat1","kaau3","leoi6","seoi2"] },
+            { chars: ["无","奈","要","被","你","抛","弃","后"], jp: ["mou4","noi6","jiu3","bei6","nei5","paau1","hei3","hau6"] },
+            { chars: ["先","了","解","我","是","谁"], jp: ["sin1","liu5","gaai2","ngo5","si6","seoi4"] },
+            { chars: ["如","若","那","天","我","大","多","几","岁"], jp: ["jyu4","joek6","naa5","tin1","ngo5","daai6","do1","gei2","seoi3"] },
+            { chars: ["什","么","都","去","追"], jp: ["sap6","maa1","dou1","heoi3","zeoi1"] },
+            { paragraphBreak: true },
+            { chars: ["明","白","到","无","需","因","你","会","分","手","过","虑"], jp: ["ming4","baak6","dou3","mou4","seoi1","jan1","nei5","wui6","fan1","sau2","gwo3","leoi6"] },
+            { chars: ["谁","亦","可","以","没","谁"], jp: ["seoi4","jik6","ho2","ji5","mut6","seoi4"] },
+            { chars: ["离","合","全","为","了","大","家","高","兴"], jp: ["lei4","hap6","cyun4","wai4","liu5","daai6","gaa1","gou1","hing1"] },
+            { chars: ["到","今","天","也","许"], jp: ["dou3","gam1","tin1","jaa5","heoi2"] },
+            { chars: ["还","是","一","双","好","爱","侣"], jp: ["waan4","si6","jat1","soeng1","hou2","ngoi3","leoi5"] },
+            { paragraphBreak: true },
+            { chars: ["如","果","将","来","能","得","到","谁"], jp: ["jyu4","gwo2","zoeng1","loi4","nang4","dak1","dou3","seoi4"] },
+            { chars: ["其","实","多","得","这","过","去"], jp: ["kei4","sat6","do1","dak1","ze5","gwo3","heoi3"] }
+        ]
+    };
+    if (typeof window !== 'undefined' && window.__songs) {
+        window.__songs.push(song);
+    }
+})();
