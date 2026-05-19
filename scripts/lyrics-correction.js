@@ -233,7 +233,7 @@ function processLineByLine(content, body, songTitle) {
     }
     
     // 没有任何修改成功，返回错误
-    if (appliedCount === 0) {
+    if (appliedCount === 0 && Object.keys(meta).length === 0) {
         return { 
             success: false, 
             message: `❌ 未能应用任何纠错。请检查行号、原歌词是否正确。\n\n失败的行：\n${failedRows.map(r => r.join(' | ')).join('\n')}` 
