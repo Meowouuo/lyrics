@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>粤拼歌词 | Cantonese Lyrics with Jyutping</title>
+    <link rel="icon" type="image/png" href="icon.png">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -79,9 +80,35 @@
         .search-box {
             padding: 16px 24px;
             border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         @media (min-width: 1024px) {
             .search-box { padding: 16px 28px; }
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .manage-btn {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border: 1px solid #dc2626;
+            background: transparent;
+            color: #dc2626;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .manage-btn:hover { background: #fef2f2; }
+        .manage-btn.active {
+            background: #dc2626;
+            color: #fff;
         }
 
         .search-input {
@@ -176,6 +203,45 @@
             background: #f5f5f5;
             border-left-color: #000;
         }
+
+        .song-delete-btn { display: none; }
+        .delete-mode .song-item { cursor: pointer; }
+        .delete-mode .song-item.delete-selected {
+            background: #fef2f2;
+            border-left-color: #dc2626;
+        }
+        .delete-mode .song-item.delete-selected .song-number {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .delete-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            border-top: 1px solid #f0f0f0;
+            background: #fff;
+            position: sticky;
+            bottom: 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .delete-submit-btn {
+            padding: 8px 16px;
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: opacity 0.15s;
+        }
+        .delete-submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .delete-submit-btn:not(:disabled):hover { opacity: 0.85; }
 
         .song-number {
             width: 28px;
@@ -368,17 +434,11 @@
 
         /* Lyrics Content */
         .lyrics-content {
-            line-height: 2.2;
-        }
-
-        .lyric-line {
-            margin-bottom: 20px;
-            animation: fadeIn 0.3s ease forwards;
-            opacity: 0;
+            line-height: 2;
         }
 
         .lyric-paragraph-break {
-            height: 24px;
+            height: 16px;
         }
 
         .lyric-line:nth-child(1) { animation-delay: 0.02s; }
@@ -395,15 +455,22 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+
         .char-group {
             display: inline-flex;
             flex-direction: column;
             align-items: center;
-            margin-right: 4px;
+            margin-right: 2px;
             vertical-align: bottom;
         }
         @media (min-width: 1024px) {
-            .char-group { margin-right: 6px; }
+            .char-group { margin-right: 3px; }
         }
 
         .char-jyutping {
@@ -426,6 +493,75 @@
         }
         @media (min-width: 1024px) {
             .char-hanzi { font-size: 24px; }
+        }
+
+        /* TTS Play Button */
+        .tts-play-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+        .tts-play-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .tts-play-btn:active {
+            transform: scale(0.95);
+        }
+        .tts-play-btn.playing {
+            background: #4CAF50;
+            color: #fff;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        /* 播放模式样式 */
+        .tts-mode .char-group {
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .tts-mode .char-group:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .tts-mode .char-group.tts-char-playing {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .tts-mode .char-group.tts-char-playing .char-hanzi {
+            color: #4CAF50;
+        }
+        .toolbar-btn.tts-active {
+            background: #4CAF50;
+            color: #fff;
+            border-color: #4CAF50;
+        }
+        .toolbar-btn.tts-active:hover {
+            background: #43a047;
+        }
+        .lyric-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease forwards;
+            opacity: 0;
+        }
+        .lyric-line-content {
+            flex: 1;
         }
 
         /* Toolbar */
@@ -453,7 +589,13 @@
 
         .toolbar-left {
             display: flex;
-            gap: 16px;
+            gap: 4px;
+            flex: 1;
+        }
+        @media (max-width: 1023px) {
+            .toolbar-left {
+                flex-wrap: wrap;
+            }
         }
 
         .toolbar-btn {
@@ -465,9 +607,10 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 6px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .toolbar-btn:hover {
@@ -476,7 +619,15 @@
         }
 
         .toolbar-btn .icon {
-            font-size: 18px;
+            font-size: 16px;
+        }
+        .toolbar-btn span:not(.icon) {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .toolbar-btn span:not(.icon) {
+                display: inline;
+            }
         }
 
         .toolbar-btn.primary {
@@ -486,6 +637,52 @@
 
         .toolbar-btn.primary:hover {
             background: #333;
+        }
+
+        .toolbar-select {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 2px;
+            margin: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+            min-width: 28px;
+        }
+        .toolbar-select:focus { outline: none; }
+
+        .toolbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            padding: 8px;
+        }
+        @media (max-width: 1023px) {
+            .toolbar-toggle {
+                display: block;
+            }
+            /* 手机端默认收起 */
+            .toolbar {
+                padding: 8px 16px;
+            }
+            .toolbar .toolbar-left,
+            .toolbar .toolbar-btn:not(.toolbar-toggle) {
+                display: none;
+            }
+            /* 展开状态 */
+            .toolbar.expanded {
+                padding: 12px 24px;
+            }
+            .toolbar.expanded .toolbar-left,
+            .toolbar.expanded .toolbar-btn:not(.toolbar-toggle) {
+                display: flex;
+            }
         }
 
         /* Mobile Header (only on mobile) */
@@ -694,6 +891,213 @@
             border-radius: 10px;
             margin-left: 4px;
         }
+
+        /* ===== 修改歌词模式 ===== */
+        .edit-lyrics-mode .lyric-line {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-left: -8px;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .edit-lyrics-mode .lyric-line:hover {
+            background: #e8f4fd;
+        }
+        .edit-lyrics-mode .lyric-line.selected {
+            background: #d0e8ff;
+            outline: 2px solid #4a9eff;
+        }
+
+        /* Edit lyrics popup */
+        .edit-lyrics-popup {
+            position: fixed;
+            z-index: 200;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            padding: 16px;
+            min-width: 320px;
+            max-width: 90vw;
+            animation: popIn 0.15s ease;
+        }
+        .edit-lyrics-popup-title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        .edit-lyrics-popup-line-num {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .edit-lyrics-popup-original {
+            font-size: 14px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .edit-lyrics-popup-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.15s;
+            margin-bottom: 12px;
+        }
+        .edit-lyrics-popup-input:focus {
+            border-color: #4a9eff;
+        }
+        .edit-lyrics-popup-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .edit-lyrics-popup-btn {
+            padding: 6px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s;
+        }
+        .edit-lyrics-popup-btn.confirm {
+            background: #28a745;
+            color: #fff;
+        }
+        .edit-lyrics-popup-btn.confirm:hover { background: #218838; }
+        .edit-lyrics-popup-btn.dismiss {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .edit-lyrics-popup-btn.dismiss:hover { background: #eee; }
+
+        /* Import Modal */
+        .import-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+        }
+        .import-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .import-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+        .import-form-group {
+            margin-bottom: 16px;
+        }
+        .import-form-group label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .import-form-group input,
+        .import-form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .import-form-group input:focus,
+        .import-form-group textarea:focus {
+            border-color: #4a9eff;
+        }
+        .import-form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+        .import-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .import-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .import-btn.cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+        .import-btn.cancel:hover { background: #eee; }
+        .import-btn.confirm {
+            background: #4a9eff;
+            color: #fff;
+        }
+        .import-btn.confirm:hover { background: #3a8bee; }
+        .import-preview {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+        .import-preview-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .import-preview-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        .import-preview-char {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 24px;
+        }
+        .import-preview-jp {
+            font-size: 10px;
+            color: #888;
+        }
+        .import-preview-hanzi {
+            font-size: 14px;
+        }
+        .import-tip {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -708,8 +1112,9 @@
             <div class="search-box">
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲..." oninput="filterSongs()">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌名、歌手、填词、作曲或歌词..." oninput="filterSongs()">
                 </div>
+                <button class="manage-btn" id="deleteModeBtn" onclick="DeleteModule.toggle()">🗑️ 管理</button>
             </div>
 
             <div class="artist-filter" id="artistFilter">
@@ -717,6 +1122,12 @@
             </div>
 
             <div class="song-list" id="songList"></div>
+
+            <!-- 删除操作栏 -->
+            <div class="delete-bar" id="deleteBar" style="display:none;">
+                <span id="deleteCount">请选择要删除的歌曲</span>
+                <button class="delete-submit-btn" id="deleteSubmitBtn" onclick="DeleteModule.submit()" disabled>🗑️ 提交删除</button>
+            </div>
         </aside>
 
         <!-- Main Content: Lyrics -->
@@ -772,46 +1183,78 @@
 
                 <div class="lyrics-content" id="lyricsContent"></div>
 
-                <div class="toolbar">
-                    <div class="toolbar-left">
-                        <button class="toolbar-btn" onclick="toggleFavorite()">
-                            <span class="icon" id="favIcon">☆</span>
-                            <span>收藏</span>
+                <div class="toolbar" id="toolbar">
+                    <div class="toolbar-left" id="toolbarLeft">
+                        <button class="toolbar-btn" id="ttsModeBtn" onclick="TTSModule.toggleMode()">
+                            <span class="icon">🔊</span>
+                            <span>播放</span>
                         </button>
-                        <button class="toolbar-btn" onclick="adjustFontSize(-1)">
-                            <span class="icon">A-</span>
-                        </button>
-                        <button class="toolbar-btn" onclick="adjustFontSize(1)">
-                            <span class="icon">A+</span>
-                        </button>
-                        <button class="toolbar-btn" onclick="submitFeedback()">
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">A</option>
+                            <option value="adjustFontSize(1)">A+ 放大</option>
+                            <option value="adjustFontSize(-1)">A- 缩小</option>
+                        </select>
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">↔️</option>
+                            <option value="adjustLetterSpacing(1)">字距 +</option>
+                            <option value="adjustLetterSpacing(-1)">字距 -</option>
+                        </select>
+                        <select class="toolbar-select" onchange="if(this.value){eval(this.value);this.value=''}">
+                            <option value="">↕️</option>
+                            <option value="adjustLineHeight(0.1)">行距 +</option>
+                            <option value="adjustLineHeight(-0.1)">行距 -</option>
+                        </select>
+                        <button class="toolbar-btn" onclick="CorrectionModule.submitFeedback()">
                             <span class="icon">✏️</span>
                             <span>纠错</span>
                         </button>
-                        <button class="toolbar-btn" onclick="submitNewSong()">
+                        <button class="toolbar-btn" onclick="EditLyricsModule.toggle()">
+                            <span class="icon">📝</span>
+                            <span>改歌词</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="EditLyricsModule.submitNewSong()">
                             <span class="icon">➕</span>
                             <span>投稿</span>
                         </button>
+                        <button class="toolbar-btn" onclick="ImportModule.show()">
+                            <span class="icon">📥</span>
+                            <span>导入</span>
+                        </button>
                     </div>
-                    <button class="toolbar-btn primary" onclick="shareSong()">
-                        <span>分享</span>
+                    <button class="toolbar-btn" onclick="shareSong()">
+                        <span class="icon">🔗</span>
                     </button>
+                    <button class="toolbar-toggle" id="toolbarToggle" onclick="toggleToolbar()">▼</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- 歌曲清单（内联，避免缓存问题。新增歌曲时在此数组添加一行） -->
-    <script>
-    const songFiles = [
-        'lyrics/重复犯错.js',
-        'lyrics/喜欢你.js',
-        'lyrics/海阔天空.js',
-        'lyrics/富士山下.js',
-        'lyrics/明年今日.js',
-        'lyrics/千千阙歌.js',
-    ];
+    <!-- 加载粤拼字典 -->
+    <script src="jyutping-dict.js?v=2"></script>
 
+    <!-- 歌曲清单（独立文件，方便维护） -->
+    <script src="songFiles.js"></script>
+    
+    <!-- 工具函数模块 -->
+    <script src="js/utils.js"></script>
+    
+    <!-- TTS 语音播报模块 -->
+    <script src="js/tts.js"></script>
+    
+    <!-- 导入歌词模块 -->
+    <script src="js/import.js"></script>
+    
+    <!-- 纠错模式模块 -->
+    <script src="js/correction.js"></script>
+    
+    <!-- 修改歌词模式模块 -->
+    <script src="js/edit-lyrics.js"></script>
+    
+    <!-- 删除歌曲功能模块 -->
+    <script src="js/delete.js"></script>
+
+    <script>
     async function loadAllSongs() {
         window.__songs = [];
         const loadPromises = songFiles.map(file => {
@@ -836,13 +1279,28 @@
     let artists = [];
     let currentSong = null;
     let currentFilter = 'all';
-    let favorites = JSON.parse(localStorage.getItem('jyutping_favs') || '[]');
     let fontSize = 20;
+    let letterSpacing = 0;  // 字间距，范围 0-10px，默认 0
+    let lineHeight = 1.6;   // 行间距，范围 1.0-2.0，默认 1.6
+    const MIN_FONT_SIZE = 12;
+    const MAX_FONT_SIZE = 24;
 
     // 异步初始化：先加载歌曲数据，再渲染页面
     async function init() {
         songs = await loadAllSongs();
-        artists = [...new Set(songs.map(s => s.artist))];
+
+        // 加载 TTS manifest
+        await TTSModule.init();
+
+        // 拆分合唱歌手，如"古巨基/梁咏琪" → ["古巨基", "梁咏琪"]
+        const artistSet = new Set();
+        songs.forEach(s => {
+            s.artist.split(/[\/、,，&]/).forEach(a => {
+                const trimmed = a.trim();
+                if (trimmed) artistSet.add(trimmed);
+            });
+        });
+        artists = [...artistSet];
         renderArtistFilter();
         renderSongList();
     }
@@ -868,18 +1326,36 @@
         const container = document.getElementById('songList');
         let filtered = songs;
         if (currentFilter !== 'all') {
-            filtered = filtered.filter(s => s.artist === currentFilter);
+            // 合唱歌曲：歌手字段包含筛选的歌手名即可匹配
+            filtered = filtered.filter(s => {
+                const songArtists = s.artist.split(/[\/、,，&]/).map(a => a.trim());
+                return songArtists.includes(currentFilter);
+            });
         }
-        const searchQuery = document.getElementById('searchInput').value.trim();
+        const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
         if (searchQuery) {
-            filtered = filtered.filter(s => s.title.includes(searchQuery));
+            filtered = filtered.filter(s => {
+                // 搜索歌名、歌手、填词、作曲
+                if (s.title.toLowerCase().includes(searchQuery)) return true;
+                if (s.artist.toLowerCase().includes(searchQuery)) return true;
+                if (s.lyricist && s.lyricist.toLowerCase().includes(searchQuery)) return true;
+                if (s.composer && s.composer.toLowerCase().includes(searchQuery)) return true;
+                // 搜索歌词内容
+                const lyricsText = s.lyrics
+                    .filter(l => l.chars)
+                    .map(l => l.chars.join(''))
+                    .join('');
+                if (lyricsText.toLowerCase().includes(searchQuery)) return true;
+                return false;
+            });
         }
 
         let html = '';
         filtered.forEach((song, index) => {
             const isActive = currentSong && currentSong.id === song.id;
+            const clickAction = DeleteModule.isActive() ? `DeleteModule.toggleSelect(${song.id}, event)` : `selectSong(${song.id})`;
             html += `
-                <div class="song-item ${isActive ? 'active' : ''}" onclick="selectSong(${song.id})">
+                <div class="song-item ${isActive ? 'active' : ''}" onclick="${clickAction}">
                     <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
                     <div class="song-info-compact">
                         <div class="song-title-compact">${song.title}</div>
@@ -897,8 +1373,8 @@
 
     function selectSong(id) {
         // Exit correction mode if active
-        if (correctionMode) {
-            toggleCorrectionMode();
+        if (CorrectionModule.isActive()) {
+            CorrectionModule.toggle();
         }
         currentSong = songs.find(s => s.id === id);
         renderSongList();
@@ -940,30 +1416,44 @@
         document.getElementById('songLyricist').innerHTML = renderMetaName(currentSong.lyricist, currentSong.lyricistJyutping);
         document.getElementById('songComposer').innerHTML = renderMetaName(currentSong.composer, currentSong.composerJyutping);
 
-        // Render lyrics
+        // Render lyrics with font size, letter spacing and line height
         let lyricsHtml = '';
         currentSong.lyrics.forEach((line, index) => {
             if (line.paragraphBreak) {
                 lyricsHtml += '<div class="lyric-paragraph-break"></div>';
                 return;
             }
-            const lineHtml = line.chars.map((char, i) => {
-                const jp = line.jp[i] || '';
+            // 按空格分割成多行，确保每行行高一致
+            const segments = [];
+            let currentSegment = [];
+            line.chars.forEach((char, i) => {
                 if (char === ' ') {
-                    return '<br>';
+                    if (currentSegment.length > 0) {
+                        segments.push(currentSegment);
+                        currentSegment = [];
+                    }
+                } else {
+                    currentSegment.push({ char, jp: line.jp[i] || '', index: i });
                 }
-                return `
-                    <span class="char-group" data-line="${index}" data-char="${i}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${i})">
+            });
+            if (currentSegment.length > 0) {
+                segments.push(currentSegment);
+            }
+            // 渲染每个分段为一个独立的 lyric-line
+            segments.forEach((segment, segIdx) => {
+                const segmentHtml = segment.map(({ char, jp, index: charIndex }) => `
+                    <span class="char-group" data-line="${index}" data-char="${charIndex}" data-original-jp="${jp}" onclick="onCharClick(event, ${index}, ${charIndex})" style="margin-right:${letterSpacing}px">
                         <span class="char-jyutping">${jp}</span>
                         <span class="char-hanzi" style="font-size:${fontSize}px">${char}</span>
                     </span>
-                `;
-            }).join('');
-            lyricsHtml += `<div class="lyric-line">${lineHtml}</div>`;
+                `).join('');
+                // 每个分段都添加播放按钮（只播放该分段的语音）
+                const segJp = segment.map(s => s.jp).filter(j => j).map(j => "'" + j.replace(/'/g, "\\'") + "'").join(',');
+                const playBtn = `<button class="tts-play-btn" onclick="event.stopPropagation(); TTSModule.playSegment([${segJp}], this)" title="播放语音">▶</button>`;
+                lyricsHtml += `<div class="lyric-line" style="line-height:${lineHeight}" onclick="onLyricLineClick(event, ${index})">${playBtn}<div class="lyric-line-content">${segmentHtml}</div></div>`;
+            });
         });
         document.getElementById('lyricsContent').innerHTML = lyricsHtml;
-
-        updateFavIcon();
     }
 
     function renderMetaName(name, jyutpingArr) {
@@ -980,303 +1470,151 @@
     }
 
     function adjustFontSize(delta) {
-        fontSize = Math.max(16, Math.min(28, fontSize + delta));
+        const newSize = fontSize + delta;
+        if (newSize < MIN_FONT_SIZE) {
+            showToast('已是最小字号');
+            return;
+        }
+        if (newSize > MAX_FONT_SIZE) {
+            showToast('已是最大字号');
+            return;
+        }
+        fontSize = newSize;
         renderLyrics();
     }
 
-    function toggleFavorite() {
-        if (!currentSong) return;
-        const idx = favorites.indexOf(currentSong.id);
-        if (idx > -1) favorites.splice(idx, 1);
-        else favorites.push(currentSong.id);
-        localStorage.setItem('jyutping_favs', JSON.stringify(favorites));
-        updateFavIcon();
+    function adjustLetterSpacing(delta) {
+        const newSpacing = letterSpacing + delta;
+        if (newSpacing < 0) {
+            showToast('已是最小字间距');
+            return;
+        }
+        if (newSpacing > 10) {
+            showToast('已是最大字间距');
+            return;
+        }
+        letterSpacing = newSpacing;
+        renderLyrics();
     }
 
-    function updateFavIcon() {
-        if (!currentSong) return;
-        const icon = document.getElementById('favIcon');
-        const isFav = favorites.includes(currentSong.id);
-        icon.textContent = isFav ? '★' : '☆';
+    function adjustLineHeight(delta) {
+        const newHeight = Math.round((lineHeight + delta) * 10) / 10;
+        if (newHeight < 1.0) {
+            showToast('已是最小行间距');
+            return;
+        }
+        if (newHeight > 2.0) {
+            showToast('已是最大行间距');
+            return;
+        }
+        lineHeight = newHeight;
+        renderLyrics();
+    }
+
+    function showToast(message) {
+        const existingToast = document.querySelector('.toast-message');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            animation: fadeInOut 1.5s ease forwards;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
+    }
+
+    function toggleToolbar() {
+        const toolbar = document.getElementById('toolbar');
+        const toggle = document.getElementById('toolbarToggle');
+        toolbar.classList.toggle('expanded');
+        toggle.textContent = toolbar.classList.contains('expanded') ? '▼' : '▲';
     }
 
     function shareSong() {
         if (!currentSong) return;
-        const text = `🎵 ${currentSong.title} - ${currentSong.artist}`;
+        const url = `${window.location.origin}${window.location.pathname}#${currentSong.id}`;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
-        }
-    }
-
-    // ===== 纠错模式 =====
-    let correctionMode = false;
-    let corrections = []; // { lineIndex, charIndex, originalJp, newJp, char }
-    let selectedChars = []; // [{ lineIndex, charIndex }]
-
-    function toggleCorrectionMode() {
-        correctionMode = !correctionMode;
-        const lyricsContent = document.getElementById('lyricsContent');
-        const toolbar = document.querySelector('.toolbar');
-
-        if (correctionMode) {
-            lyricsContent.classList.add('correction-mode');
-            corrections = [];
-            selectedChars = [];
-            showCorrectionBanner();
-            updateCorrectionBtn();
+            navigator.clipboard.writeText(url).then(() => showToast('链接已复制'));
         } else {
-            lyricsContent.classList.remove('correction-mode');
-            hideCorrectionBanner();
-            clearSelection();
-            clearCorrections();
-            updateCorrectionBtn();
+            showToast('链接: ' + url);
         }
     }
 
-    function updateCorrectionBtn() {
-        const btn = document.querySelector('.toolbar-btn[onclick="submitFeedback()"]');
-        if (!btn) return;
-        if (correctionMode) {
-            btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
-            btn.style.color = '#d48806';
-        } else {
-            btn.innerHTML = '<span class="icon">✏️</span><span>纠错</span>';
-            btn.style.color = '';
-        }
-    }
+    </script>
 
-    function showCorrectionBanner() {
-        // Remove existing banner
-        hideCorrectionBanner();
-        const banner = document.createElement('div');
-        banner.className = 'correction-banner';
-        banner.id = 'correctionBanner';
-        banner.innerHTML = `
-            <span>✏️ 纠错模式：点击字即可修改粤拼</span>
-            <span id="correctionCountText" style="font-weight:600;"></span>
-            <button class="correction-banner-btn submit" id="submitCorrectionsBtn" onclick="submitCorrections()" disabled>提交反馈</button>
-            <button class="correction-banner-btn cancel" onclick="toggleCorrectionMode()">退出</button>
-        `;
-        document.body.appendChild(banner);
-    }
-
-    function hideCorrectionBanner() {
-        const existing = document.getElementById('correctionBanner');
-        if (existing) existing.remove();
-    }
-
-    function updateCorrectionCount() {
-        const text = document.getElementById('correctionCountText');
-        const btn = document.getElementById('submitCorrectionsBtn');
-        if (!text || !btn) return;
-        if (corrections.length > 0) {
-            text.innerHTML = `<span class="correction-count">${corrections.length}</span> 处修改`;
-            btn.disabled = false;
-        } else {
-            text.textContent = '';
-            btn.disabled = true;
-        }
-    }
-
-    function onCharClick(event, lineIndex, charIndex) {
-        if (!correctionMode) return;
-        event.stopPropagation();
-
-        const charGroup = event.currentTarget;
-
-        // If already corrected, allow re-edit
-        if (charGroup.classList.contains('corrected')) {
-            showEditPopup(charGroup, lineIndex, charIndex);
-            return;
-        }
-
-        // Toggle selection
-        const idx = selectedChars.findIndex(s => s.lineIndex === lineIndex && s.charIndex === charIndex);
-        if (idx > -1) {
-            selectedChars.splice(idx, 1);
-            charGroup.classList.remove('selected');
-        } else {
-            selectedChars.push({ lineIndex, charIndex });
-            charGroup.classList.add('selected');
-        }
-
-        // If we have selection, show edit popup
-        if (selectedChars.length > 0) {
-            // Use the last clicked char's position for popup
-            showEditPopup(charGroup, lineIndex, charIndex);
-        }
-    }
-
-    function showEditPopup(charGroup, lineIndex, charIndex) {
-        closeEditPopup();
-
-        const overlay = document.createElement('div');
-        overlay.className = 'edit-overlay';
-        overlay.id = 'editOverlay';
-        overlay.onclick = () => { clearSelection(); closeEditPopup(); };
-        document.body.appendChild(overlay);
-
-        const popup = document.createElement('div');
-        popup.className = 'edit-popup';
-        popup.id = 'editPopup';
-
-        // Gather selected chars info
-        let charsInfo = [];
-        let currentJp = '';
-
-        if (selectedChars.length > 0) {
-            // Sort by position
-            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
-            charsInfo = sorted.map(s => {
-                const line = currentSong.lyrics[s.lineIndex];
-                return { char: line.chars[s.charIndex], jp: line.jp[s.charIndex], lineIndex: s.lineIndex, charIndex: s.charIndex };
-            });
-            currentJp = charsInfo.map(c => c.jp).join(' ');
-        } else {
-            // Single char re-edit (already corrected)
-            const line = currentSong.lyrics[lineIndex];
-            const existingCorrection = corrections.find(c => c.lineIndex === lineIndex && c.charIndex === charIndex);
-            charsInfo = [{ char: line.chars[charIndex], jp: existingCorrection ? existingCorrection.newJp : line.jp[charIndex], lineIndex, charIndex }];
-            currentJp = charsInfo[0].jp;
-        }
-
-        const charsText = charsInfo.map(c => c.char).join('');
-        const title = charsInfo.length === 1 ? '修改粤拼' : `修改 ${charsInfo.length} 个字的粤拼`;
-
-        popup.innerHTML = `
-            <div class="edit-popup-title">${title}</div>
-            <div class="edit-popup-chars">${charsText}</div>
-            <input class="edit-popup-input" id="editJpInput" type="text" value="${currentJp}" placeholder="输入粤拼，多字用空格分隔"
-                   onkeydown="if(event.key==='Enter')confirmEdit();if(event.key==='Escape'){clearSelection();closeEditPopup();}">
-            <div class="edit-popup-actions">
-                <button class="edit-popup-btn dismiss" onclick="clearSelection();closeEditPopup();">取消</button>
-                <button class="edit-popup-btn confirm" onclick="confirmEdit()">确认</button>
+    <!-- 导入歌词模态框 -->
+    <div class="import-modal" id="importModal" style="display:none;">
+        <div class="import-modal-content">
+            <div class="import-modal-title">📥 导入新歌词</div>
+            
+            <div class="import-form-group">
+                <label>歌曲名称 *</label>
+                <input type="text" id="importTitle" placeholder="输入歌曲名称">
             </div>
-        `;
+            
+            <div class="import-form-group">
+                <label>歌手 *</label>
+                <input type="text" id="importArtist" placeholder="输入歌手名称（合唱用 / 分隔）">
+            </div>
+            
+            <div class="import-form-group">
+                <label>填词</label>
+                <input type="text" id="importLyricist" placeholder="填词人">
+            </div>
+            
+            <div class="import-form-group">
+                <label>作曲</label>
+                <input type="text" id="importComposer" placeholder="作曲人">
+            </div>
+            
+            <div class="import-form-group">
+                <label>歌词内容 *</label>
+                <textarea id="importLyrics" placeholder="粘贴歌词内容，换行表示新的一句，连续两个空行表示段落分隔" oninput="ImportModule.preview()"></textarea>
+                <div class="import-tip">💡 单换行 = 新的一句歌词 &nbsp;|&nbsp; 双换行 = 段落分隔（更大间距）</div>
+            </div>
+            
+            <div class="import-preview" id="importPreview" style="display:none;">
+                <div class="import-preview-title">预览（粤拼自动匹配）</div>
+                <div id="importPreviewContent"></div>
+            </div>
+            
+            <div class="import-actions">
+                <button class="import-btn cancel" onclick="ImportModule.hide()">取消</button>
+                <button class="import-btn confirm" onclick="ImportModule.generate()">生成歌曲文件</button>
+            </div>
+        </div>
+    </div>
 
-        document.body.appendChild(popup);
+    <!-- 生成的代码模态框 -->
+    <div class="import-modal" id="codeModal" style="display:none;">
+        <div class="import-modal-content" style="max-width: 700px;">
+            <div class="import-modal-title">📄 生成的歌曲文件代码</div>
+            <div class="import-form-group">
+                <label>复制以下代码，保存为 .js 文件到 lyrics 文件夹</label>
+                <textarea id="generatedCode" style="min-height: 300px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px;" readonly></textarea>
+            </div>
+            <div class="import-actions">
+                <button class="import-btn cancel" onclick="ImportModule.hideCode()">关闭</button>
+                <button class="import-btn confirm" onclick="ImportModule.copyCode()">复制代码</button>
+            </div>
+        </div>
+    </div>
 
-        // Position popup near the clicked element
-        const rect = charGroup.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        let top = rect.bottom + 8;
-        let left = rect.left + rect.width / 2 - popupRect.width / 2;
-
-        // Keep within viewport
-        if (top + popupRect.height > window.innerHeight - 60) {
-            top = rect.top - popupRect.height - 8;
-        }
-        if (left < 8) left = 8;
-        if (left + popupRect.width > window.innerWidth - 8) {
-            left = window.innerWidth - popupRect.width - 8;
-        }
-
-        popup.style.top = top + 'px';
-        popup.style.left = left + 'px';
-
-        // Focus input
-        setTimeout(() => {
-            const input = document.getElementById('editJpInput');
-            if (input) { input.focus(); input.select(); }
-        }, 50);
-    }
-
-    function closeEditPopup() {
-        const popup = document.getElementById('editPopup');
-        const overlay = document.getElementById('editOverlay');
-        if (popup) popup.remove();
-        if (overlay) overlay.remove();
-    }
-
-    function confirmEdit() {
-        const input = document.getElementById('editJpInput');
-        if (!input) return;
-        const newJp = input.value.trim();
-        if (!newJp) return;
-
-        if (selectedChars.length > 0) {
-            const sorted = [...selectedChars].sort((a, b) => a.lineIndex - b.lineIndex || a.charIndex - b.charIndex);
-            const newJpArr = newJp.split(/\s+/);
-
-            sorted.forEach((s, i) => {
-                const line = currentSong.lyrics[s.lineIndex];
-                const originalJp = line.jp[s.charIndex];
-                const correctedJp = newJpArr[i] || newJpArr[newJpArr.length - 1] || newJp;
-
-                // Update or add correction
-                const existingIdx = corrections.findIndex(c => c.lineIndex === s.lineIndex && c.charIndex === s.charIndex);
-                if (existingIdx > -1) {
-                    corrections[existingIdx].newJp = correctedJp;
-                } else {
-                    corrections.push({
-                        lineIndex: s.lineIndex,
-                        charIndex: s.charIndex,
-                        char: line.chars[s.charIndex],
-                        originalJp: originalJp,
-                        newJp: correctedJp
-                    });
-                }
-
-                // Update DOM
-                const charEl = document.querySelector(`.char-group[data-line="${s.lineIndex}"][data-char="${s.charIndex}"]`);
-                if (charEl) {
-                    charEl.classList.remove('selected');
-                    charEl.classList.add('corrected');
-                    charEl.querySelector('.char-jyutping').textContent = correctedJp;
-                }
-            });
-        }
-
-        selectedChars = [];
-        closeEditPopup();
-        updateCorrectionCount();
-    }
-
-    function clearSelection() {
-        selectedChars = [];
-        document.querySelectorAll('.char-group.selected').forEach(el => el.classList.remove('selected'));
-    }
-
-    function clearCorrections() {
-        corrections = [];
-        document.querySelectorAll('.char-group.corrected').forEach(el => {
-            el.classList.remove('corrected');
-            const originalJp = el.dataset.originalJp;
-            el.querySelector('.char-jyutping').textContent = originalJp;
-        });
-    }
-
-    function submitCorrections() {
-        if (corrections.length === 0) return;
-
-        const song = currentSong ? `${currentSong.title} - ${currentSong.artist}` : '';
-
-        // Build correction details
-        let correctionDetails = corrections.map(c => {
-            const line = currentSong.lyrics[c.lineIndex];
-            const lineText = line.chars.join('');
-            return `| 第${c.lineIndex + 1}行 | ${c.char} | ${c.originalJp} | ${c.newJp} | ${lineText} |`;
-        }).join('\n');
-
-        const title = encodeURIComponent(`[粤拼纠错] ${song}（${corrections.length}处）`);
-        const body = encodeURIComponent(`## 纠错内容\n\n**歌曲：** ${song}\n**修改数量：** ${corrections.length} 处\n\n| 行 | 字 | 原粤拼 | 正确粤拼 | 所在行 |\n|---|---|---|---|---|\n${correctionDetails}\n\n---\n*由网页纠错模式提交*`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=纠错`, '_blank');
-    }
-
-    // 纠错：进入纠错模式（替换原跳转逻辑）
-    function submitFeedback() {
-        if (!currentSong) return;
-        toggleCorrectionMode();
-    }
-
-    // 投稿：跳转到 GitHub Issues
-    function submitNewSong() {
-        const title = encodeURIComponent('[新歌投稿]');
-        const body = encodeURIComponent(`## 投稿新歌\n\n**歌曲名称：**\n\n**歌手：**\n\n**填词：**\n\n**作曲：**\n\n**完整歌词：**\n\`\`\`\n请在这里粘贴完整歌词\n\`\`\`\n\n---\n\n请尽量提供完整歌词，粤拼会由我们添加，谢谢投稿！`);
-        window.open(`https://github.com/Meowouuo/lyrics/issues/new?title=${title}&body=${body}&labels=投稿`, '_blank');
-    }
-
-    // Init
+    <!-- Init -->
+    <script>
     init();
     </script>
 </body>
