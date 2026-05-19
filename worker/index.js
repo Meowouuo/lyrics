@@ -191,7 +191,8 @@ export default {
             if (meta) {
               if (meta.title) metaParts.push('歌名: ' + meta.title.original + ' → ' + meta.title.new);
               if (meta.artist) metaParts.push('歌手: ' + meta.artist.original + ' → ' + meta.artist.new);
-              if (meta.album) metaParts.push('专辑: ' + meta.album.original + ' → ' + meta.album.new);
+              if (meta.lyricist) metaParts.push('填词: ' + meta.lyricist.original + ' → ' + meta.lyricist.new);
+              if (meta.composer) metaParts.push('作曲: ' + meta.composer.original + ' → ' + meta.composer.new);
             }
             const count = (corrections ? corrections.length : 0) + metaParts.length;
             issueTitle = `[歌词纠错] ${songName}（${count}处）`;

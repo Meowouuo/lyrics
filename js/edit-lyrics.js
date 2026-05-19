@@ -792,9 +792,12 @@ function enableTitleEditing() {
                 
                 // 弹出编辑对话框
                 const newValue = prompt(`修改${field.label}：`, field.value);
-                if (newValue !== null) {
-                    // 保存修改到editedMeta对象
-                    editedMeta[field.key] = newValue.trim();
+                if (newValue !== null && newValue.trim() !== field.value) {
+                    // 保存修改到editedMeta对象，格式为 { title: { original, new } }
+                    editedMeta[field.key] = {
+                        original: field.value,
+                        new: newValue.trim()
+                    };
                     // 添加视觉提示（绿色边框）
                     el.style.outline = '2px solid #28a745';
                     el.style.borderRadius = '4px';
