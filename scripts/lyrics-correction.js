@@ -245,9 +245,10 @@ function processLineByLine(content, body, songTitle) {
     
     return {
         success: true,
+        meta,
         content: newContent,
-        commitMsg: `fix: 歌词纠错 (${appliedCount}处)`,
-        prTitle: `[歌词纠错] ${songTitle}（${appliedCount}处）`,
+        commitMsg: `fix: 歌词纠错 (${appliedCount + Object.keys(meta).length}处)`,
+        prTitle: `[歌词纠错] ${songTitle}（${appliedCount + Object.keys(meta).length}处）`,
         prBody: `## 纠错内容\n\n**歌曲名称：** ${songTitle}\n\n### 纠错详情\n\n| 行号 | 原歌词 | 正确歌词 |\n|------|--------|----------|\n${correctionsTable}`,
         comment: `✅ 已成功应用 ${appliedCount} 处歌词纠错。\n\n${failedRows.length > 0 ? `以下行未能应用（请检查行号、原歌词是否正确）：\n${failedRows.map(r => `- 第${r[0]}行: ${r[1]} → ${r[2]}`).join('\n')}` : ''}`
     };
