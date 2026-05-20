@@ -518,14 +518,20 @@ function enableMetaCorrection() {
     
     metaIds.forEach(id => {
         const el = document.getElementById(id);
-        if (!el) return;
+        if (!el) {
+            console.log(`[MetaCorrection] Element ${id} not found`);
+            return;
+        }
         
         const charGroups = el.querySelectorAll('.meta-name-group');
+        console.log(`[MetaCorrection] Found ${charGroups.length} groups in ${id}`);
+        
         charGroups.forEach((group, index) => {
             group.style.cursor = 'pointer';
             group.dataset.metaType = id;
             group.dataset.charIndex = index;
             group.onclick = (e) => handleMetaCharClick(e, id, index);
+            console.log(`[MetaCorrection] Enabled click for ${id}[${index}]`);
         });
     });
 }
