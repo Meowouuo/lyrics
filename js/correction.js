@@ -519,19 +519,16 @@ function enableMetaCorrection() {
     metaIds.forEach(id => {
         const el = document.getElementById(id);
         if (!el) {
-            console.log(`[MetaCorrection] Element ${id} not found`);
             return;
         }
         
         const charGroups = el.querySelectorAll('.meta-name-group');
-        console.log(`[MetaCorrection] Found ${charGroups.length} groups in ${id}`);
         
         charGroups.forEach((group, index) => {
             group.style.cursor = 'pointer';
             group.dataset.metaType = id;
             group.dataset.charIndex = index;
             group.onclick = (e) => handleMetaCharClick(e, id, index);
-            console.log(`[MetaCorrection] Enabled click for ${id}[${index}]`);
         });
     });
 }
@@ -566,10 +563,8 @@ function disableMetaCorrection() {
 //   - charIndex: 字符索引
 // ============================================
 function handleMetaCharClick(event, metaType, charIndex) {
-    console.log('[handleMetaCharClick] Clicked', metaType, 'charIndex:', charIndex);
     
     if (!correctionMode) {
-        console.log('[handleMetaCharClick] Not in correction mode');
         return;
     }
     
@@ -579,7 +574,6 @@ function handleMetaCharClick(event, metaType, charIndex) {
     // 获取当前歌曲
     const song = window.currentSong;
     if (!song) {
-        console.log('[handleMetaCharClick] No current song');
         return;
     }
     
@@ -596,10 +590,7 @@ function handleMetaCharClick(event, metaType, charIndex) {
         metaJp = song.composerJyutping;
     }
     
-    console.log('[handleMetaCharClick] metaValue:', metaValue, 'metaJp:', metaJp);
-    
     if (!metaValue || !metaJp) {
-        console.log('[handleMetaCharClick] Missing metaValue or metaJp');
         return;
     }
     
@@ -611,7 +602,6 @@ function handleMetaCharClick(event, metaType, charIndex) {
 // 显示歌手/词曲人编辑弹窗
 // ============================================
 function showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp) {
-    console.log('[showMetaEditPopup] Opening popup for', metaType, 'charIndex:', charIndex);
     
     try {
         closeEditPopup();
@@ -621,7 +611,6 @@ function showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp) {
         overlay.id = 'editOverlay';
         overlay.onclick = closeEditPopup;
         document.body.appendChild(overlay);
-        console.log('[showMetaEditPopup] Overlay added');
 
         const popup = document.createElement('div');
         popup.className = 'edit-popup';
@@ -647,14 +636,12 @@ function showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp) {
         `;
 
         document.body.appendChild(popup);
-        console.log('[showMetaEditPopup] Popup added');
         
         // 聚焦输入框
         setTimeout(() => {
             const input = document.getElementById('newMetaJp');
             if (input) {
                 input.focus();
-                console.log('[showMetaEditPopup] Input focused');
             }
         }, 10);
     } catch (err) {
