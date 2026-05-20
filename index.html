@@ -745,8 +745,8 @@
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;                           /* 固定高度 */
             /* 固定宽度，确保所有粤拼区域宽度一致，实现汉字对齐 */
-            width: 2em;
-            min-width: 2em;
+            width: 2.5em;
+            min-width: 2.5em;
             /* 居中对齐 */
             text-align: center;
             /* 允许溢出显示（防止长粤拼被截断） */
@@ -761,10 +761,19 @@
             /* 文字颜色 */
             color: var(--text-secondary);
             /* 固定宽度，与粤拼区域宽度一致，确保每列对齐 */
-            width: 2em;
-            min-width: 2em;
+            width: 2.5em;
+            min-width: 2.5em;
             /* 居中对齐 */
             text-align: center;
+        }
+
+        /* 标签冒号样式（歌手：、填词：、作曲：） */
+        .meta-label-colon {
+            /* 不设固定宽度，不影响对齐 */
+            /* 字号与汉字一致 */
+            font-size: 14px;
+            /* 文字颜色 */
+            color: var(--text-tertiary);
         }
 
         /* ========================================
@@ -2030,7 +2039,8 @@
                             <div class="song-meta-item">
                                 <span class="song-meta-label">
                                     <span class="meta-name-group"><span class="meta-name-jyutping">go1</span><span class="meta-name-hanzi">歌</span></span>
-                                    <span class="meta-name-group"><span class="meta-name-jyutping">sau2</span><span class="meta-name-hanzi">手：</span></span>
+                                    <span class="meta-name-group"><span class="meta-name-jyutping">sau2</span><span class="meta-name-hanzi">手</span></span>
+                                    <span class="meta-label-colon">：</span>
                                 </span>
                                 <span id="songArtist" class="meta-value"></span>
                             </div>
@@ -2039,14 +2049,16 @@
                             <div class="song-meta-item">
                                 <span class="song-meta-label">
                                     <span class="meta-name-group"><span class="meta-name-jyutping">tim4</span><span class="meta-name-hanzi">填</span></span>
-                                    <span class="meta-name-group"><span class="meta-name-jyutping">ci4</span><span class="meta-name-hanzi">词：</span></span>
+                                    <span class="meta-name-group"><span class="meta-name-jyutping">ci4</span><span class="meta-name-hanzi">词</span></span>
+                                    <span class="meta-label-colon">：</span>
                                 </span>
                                 <span id="songLyricist" class="meta-value"></span>
                             </div>
                             <div class="song-meta-item">
                                 <span class="song-meta-label">
                                     <span class="meta-name-group"><span class="meta-name-jyutping">zok3</span><span class="meta-name-hanzi">作</span></span>
-                                    <span class="meta-name-group"><span class="meta-name-jyutping">kuk1</span><span class="meta-name-hanzi">曲：</span></span>
+                                    <span class="meta-name-group"><span class="meta-name-jyutping">kuk1</span><span class="meta-name-hanzi">曲</span></span>
+                                    <span class="meta-label-colon">：</span>
                                 </span>
                                 <span id="songComposer" class="meta-value"></span>
                             </div>
