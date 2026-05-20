@@ -732,8 +732,7 @@
             flex-direction: column;                  /* 上下排列 */
             /* 交叉轴对齐：居中对齐 */
             align-items: center;
-            /* 添加水平间距 */
-            margin: 0 2px;
+            /* 间距由内部元素宽度控制，不额外添加 margin */
         }
 
         /* 人名粤拼 */
@@ -746,8 +745,8 @@
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;                           /* 固定高度 */
             /* 固定宽度，确保所有粤拼区域宽度一致，实现汉字对齐 */
-            width: 2.5em;
-            min-width: 2.5em;
+            width: 2em;
+            min-width: 2em;
             /* 居中对齐 */
             text-align: center;
             /* 允许溢出显示（防止长粤拼被截断） */
@@ -762,8 +761,8 @@
             /* 文字颜色 */
             color: var(--text-secondary);
             /* 固定宽度，与粤拼区域宽度一致，确保每列对齐 */
-            width: 2.5em;
-            min-width: 2.5em;
+            width: 2em;
+            min-width: 2em;
             /* 居中对齐 */
             text-align: center;
         }
