@@ -77,10 +77,10 @@ function updateCorrectionBtn() {
     if (!btn) return;
     
     if (correctionMode) {
-        btn.innerHTML = '<span class="icon">✏️</span><span>退出纠错</span>';
+        btn.innerHTML = '<span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span><span>退出粤拼纠错</span>';
         btn.style.color = '#d48806';
     } else {
-        btn.innerHTML = '<span class="icon">✏️</span><span>纠错</span>';
+        btn.innerHTML = '<span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span><span>粤拼纠错</span>';
         btn.style.color = '';
     }
 }
@@ -95,7 +95,7 @@ function showCorrectionBanner() {
     banner.className = 'correction-banner';
     banner.id = 'correctionBanner';
     banner.innerHTML = `
-        <span>✏️ 纠错模式：点击字即可修改粤拼</span>
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>粤拼纠错模式：点击字即可修改粤拼</span>
         <span id="correctionCountText" style="font-weight:600;"></span>
         <button class="correction-banner-btn submit" id="submitCorrectionsBtn" onclick="CorrectionModule.submit()" disabled>提交反馈</button>
         <button class="correction-banner-btn cancel" onclick="CorrectionModule.toggle()">退出</button>
