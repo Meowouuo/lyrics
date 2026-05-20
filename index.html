@@ -745,9 +745,14 @@
             /* 字体 */
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;                           /* 固定高度 */
-            /* 添加最小宽度确保粤拼之间有间距 */
-            min-width: 1.2em;
+            /* 固定宽度，确保所有粤拼区域宽度一致，实现汉字对齐 */
+            width: 2.5em;
+            min-width: 2.5em;
+            /* 居中对齐 */
             text-align: center;
+            /* 允许溢出显示（防止长粤拼被截断） */
+            overflow: visible;
+            white-space: nowrap;
         }
 
         /* 人名汉字 */
