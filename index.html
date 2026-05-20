@@ -732,6 +732,8 @@
             flex-direction: column;                  /* 上下排列 */
             /* 交叉轴对齐：居中对齐 */
             align-items: center;
+            /* 添加水平间距 */
+            margin: 0 2px;
         }
 
         /* 人名粤拼 */
@@ -743,6 +745,9 @@
             /* 字体 */
             font-family: "SF Mono", "Fira Code", "Consolas", monospace;
             height: 11px;                           /* 固定高度 */
+            /* 添加最小宽度确保粤拼之间有间距 */
+            min-width: 1.2em;
+            text-align: center;
         }
 
         /* 人名汉字 */
