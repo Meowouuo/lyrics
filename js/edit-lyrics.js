@@ -776,32 +776,49 @@ function enableTitleEditing() {
     const song = window.currentSong;
     
     // 定义可编辑字段配置
+    // 注意：lyricist和composer为空时，页面显示空格占位符，但实际值保持为空字符串
     const fields = [
-        { id: 'songTitle', key: 'title', label: '歌名', value: song.title },
-        { id: 'songArtist', key: 'artist', label: '歌手', value: song.artist },
-        { id: 'songLyricist', key: 'lyricist', label: '填词', value: song.lyricist || '' },
-        { id: 'songComposer', key: 'composer', label: '作曲', value: song.composer || '' }
+        { id: 'songTitle', key: 'title', label: '歌名', value: song.title, isMeta: false },
+        { id: 'songArtist', key: 'artist', label: '歌手', value: song.artist, isMeta: false },
+        { id: 'songLyricist', key: 'lyricist', label: '填词', value: song.lyricist || '', isMeta: true },
+        { id: 'songComposer', key: 'composer', label: '作曲', value: song.composer || '', isMeta: true }
     ];
     
     // 为每个字段添加点击编辑功能
     fields.forEach(field => {
         const el = document.getElementById(field.id);
         if (el) {
-            // 设置鼠标样式和提示
-            el.style.cursor = 'pointer';
-            el.title = `点击编辑${field.label}`;
+            // 如果是元信息字段且当前为空，在页面上显示空格占位符（方便点击）
+            // 注意：实际值保持为空字符串，不存入数据库
+            if (field.isMeta && !field.value) {
+                el.innerHTML = '&nbsp;';  // 页面显示空格
+                el.style.color = '#999';  // 灰色显示，表示未填写
+                el.style.cursor = 'pointer';
+                el.title = `点击添加${field.label}`;
+            } else {
+                // 恢复正常样式和提示
+                el.style.color = '';
+                el.title = `点击编辑${field.label}`;
+            }
             
             // 绑定点击事件
             el.onclick = (e) => {
                 // 阻止冒泡（避免触发其他事件）
                 e.stopPropagation();
                 
-                // 弹出编辑对话框
-                const newValue = prompt(`修改${field.label}：`, field.value);
-                if (newValue !== null && newValue.trim() !== field.value) {
+                // 获取当前显示的值（可能是空格占位符）
+                const displayValue = el.innerText.trim() === '' ? '' : el.innerText.trim();
+                
+                // 弹出编辑对话框（显示实际值或空字符串）
+                const newValue = prompt(`修改${field.label}：`, displayValue);
+                
+                // 判断是否需要提交修改
+                // 条件：有输入值 且 与原值不同
+                if (newValue !== null && newValue.trim() !== displayValue) {
                     // 保存修改到editedMeta对象，格式为 { title: { original, new } }
+                    // 注意：original为空字符串表示"添加新值"
                     editedMeta[field.key] = {
-                        original: field.value,
+                        original: displayValue,  // 空字符串或其他原值
                         new: newValue.trim()
                     };
                     // 添加视觉提示（绿色边框）
