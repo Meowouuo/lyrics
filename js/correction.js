@@ -67,6 +67,9 @@ function toggleCorrectionMode() {
     showCorrectionBanner();
     updateCorrectionBtn();
     disableSongListInteraction();
+    
+    // 启用歌手/词曲人粤拼纠错
+    enableMetaCorrection();
 }
 
 // ============================================
@@ -504,6 +507,165 @@ function restoreSongListInteraction() {
 // ============================================
 // 导出模块
 // ============================================
+
+// ============================================
+// 启用歌手/词曲人粤拼纠错
+// 功能：为歌手、填词、作曲区域的每个字添加点击事件
+// 允许用户修改歌手/词曲人的粤拼
+// ============================================
+function enableMetaCorrection() {
+    const metaIds = ['songArtist', 'songLyricist', 'songComposer'];
+    
+    metaIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        
+        const charGroups = el.querySelectorAll('.meta-name-group');
+        charGroups.forEach((group, index) => {
+            group.style.cursor = 'pointer';
+            group.dataset.metaType = id;
+            group.dataset.charIndex = index;
+            group.onclick = (e) => handleMetaCharClick(e, id, index);
+        });
+    });
+}
+
+// ============================================
+// 禁用歌手/词曲人粤拼纠错
+// 功能：移除歌手、填词、作曲区域的点击事件
+// ============================================
+function disableMetaCorrection() {
+    const metaIds = ['songArtist', 'songLyricist', 'songComposer'];
+    
+    metaIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        
+        const charGroups = el.querySelectorAll('.meta-name-group');
+        charGroups.forEach(group => {
+            group.style.cursor = '';
+            group.dataset.metaType = '';
+            group.dataset.charIndex = '';
+            group.onclick = null;
+            group.classList.remove('selected', 'corrected');
+        });
+    });
+}
+
+// ============================================
+// 处理歌手/词曲人字符点击
+// 参数：
+//   - event: 点击事件
+//   - metaType: 类型（songArtist/songLyricist/songComposer）
+//   - charIndex: 字符索引
+// ============================================
+function handleMetaCharClick(event, metaType, charIndex) {
+    if (!correctionMode) return;
+    
+    event.stopPropagation();
+    const charGroup = event.currentTarget;
+    
+    // 获取当前歌曲
+    const song = window.currentSong;
+    if (!song) return;
+    
+    // 获取对应的元数据数组
+    let metaValue, metaJp;
+    if (metaType === 'songArtist') {
+        metaValue = song.artist;
+        metaJp = song.artistJyutping;
+    } else if (metaType === 'songLyricist') {
+        metaValue = song.lyricist;
+        metaJp = song.lyricistJyutping;
+    } else if (metaType === 'songComposer') {
+        metaValue = song.composer;
+        metaJp = song.composerJyutping;
+    }
+    
+    if (!metaValue || !metaJp) return;
+    
+    // 显示编辑弹窗
+    showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp);
+}
+
+// ============================================
+// 显示歌手/词曲人编辑弹窗
+// ============================================
+function showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp) {
+    closeEditPopup();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'edit-overlay';
+    overlay.id = 'editOverlay';
+    overlay.onclick = closeEditPopup;
+    document.body.appendChild(overlay);
+
+    const popup = document.createElement('div');
+    popup.className = 'edit-popup';
+    popup.id = 'editPopup';
+
+    const char = metaValue[charIndex];
+    const currentJp = metaJp[charIndex] || '';
+    
+    const typeName = metaType === 'songArtist' ? '歌手' : 
+                     metaType === 'songLyricist' ? '填词' : '作曲';
+
+    popup.innerHTML = `
+        <div class="edit-popup-title">修改${typeName}粤拼</div>
+        <div class="edit-popup-char">${char}</div>
+        <div class="edit-popup-input-group">
+            <label>当前粤拼：${currentJp}</label>
+            <input type="text" id="newMetaJp" class="edit-popup-input" value="${currentJp}" placeholder="输入新粤拼">
+        </div>
+        <div class="edit-popup-buttons">
+            <button class="edit-popup-btn cancel" onclick="closeEditPopup()">取消</button>
+            <button class="edit-popup-btn confirm" onclick="confirmMetaEdit('${metaType}', ${charIndex}, '${char}', '${currentJp}')">确定</button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+    
+    // 聚焦输入框
+    setTimeout(() => {
+        const input = document.getElementById('newMetaJp');
+        if (input) input.focus();
+    }, 10);
+}
+
+// ============================================
+// 确认歌手/词曲人粤拼修改
+// ============================================
+function confirmMetaEdit(metaType, charIndex, char, originalJp) {
+    const newJp = document.getElementById('newMetaJp')?.value.trim();
+    if (!newJp || newJp === originalJp) {
+        closeEditPopup();
+        return;
+    }
+    
+    // 添加到纠错列表
+    corrections.push({
+        type: 'meta',
+        metaType: metaType,
+        charIndex: charIndex,
+        char: char,
+        originalJp: originalJp,
+        newJp: newJp
+    });
+    
+    // 更新UI
+    const metaIds = {'songArtist': '歌手', 'songLyricist': '填词', 'songComposer': '作曲'};
+    const el = document.getElementById(metaType);
+    if (el) {
+        const charGroups = el.querySelectorAll('.meta-name-group');
+        if (charGroups[charIndex]) {
+            charGroups[charIndex].classList.add('corrected');
+        }
+    }
+    
+    updateCorrectionCount();
+    closeEditPopup();
+}
+
 window.CorrectionModule = {
     submitFeedback: submitFeedback,
     toggle: toggleCorrectionMode,
