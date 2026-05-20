@@ -118,6 +118,12 @@ function selectEditType(type) {
     // 设置编辑类型和模式标志
     editLyricsType = type;
     editLyricsMode = true;
+    // 禁用歌曲列表交互（防止编辑中切换歌曲）
+    const songItems = document.querySelectorAll('.song-item');
+    songItems.forEach(item => {
+        item.style.pointerEvents = 'none';
+        item.style.opacity = '0.6';
+    });
     
     // 重置所有编辑数据（清空之前可能存在的修改）
     editedLyrics = [];
@@ -1015,6 +1021,12 @@ function exitEditMode() {
     document.getElementById('editListPanel')?.remove();  // 移除列表面板
     document.getElementById('fullReplaceInputPanel')?.remove();  // 移除整首替换面板
     document.getElementById('insertInputPanel')?.remove();  // 移除插入行面板
+    
+    // 恢复歌曲列表交互
+    document.querySelectorAll('.song-item').forEach(item => {
+        item.style.pointerEvents = '';
+        item.style.opacity = '';
+    });
     
     // 移除歌词行的点击事件和样式
     document.querySelectorAll('.lyric-line').forEach(line => {
