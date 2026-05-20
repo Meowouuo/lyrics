@@ -20,6 +20,20 @@ let corrections = [];
 let selectedChars = [];
 
 // ============================================
+// 纠错入口函数
+// 功能：点击"粤拼纠错"按钮时的入口
+// 如果正在编辑歌词，先退出编辑模式
+// ============================================
+function submitFeedback() {
+    if (!window.currentSong) return;
+    // 如果正在编辑歌词，先退出
+    if (window.EditLyricsModule && window.EditLyricsModule.isActive()) {
+        window.EditLyricsModule.toggle();
+    }
+    toggleCorrectionMode();
+}
+
+// ============================================
 // 切换纠错模式
 // 功能：点击"纠错"按钮时的入口函数
 // ============================================
@@ -491,6 +505,7 @@ function restoreSongListInteraction() {
 // 导出模块
 // ============================================
 window.CorrectionModule = {
+    submitFeedback: submitFeedback,
     toggle: toggleCorrectionMode,
     handleCharClick: handleCharClick,
     confirmEdit: confirmEdit,
