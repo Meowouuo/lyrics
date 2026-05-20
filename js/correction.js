@@ -566,14 +566,22 @@ function disableMetaCorrection() {
 //   - charIndex: 字符索引
 // ============================================
 function handleMetaCharClick(event, metaType, charIndex) {
-    if (!correctionMode) return;
+    console.log('[handleMetaCharClick] Clicked', metaType, 'charIndex:', charIndex);
+    
+    if (!correctionMode) {
+        console.log('[handleMetaCharClick] Not in correction mode');
+        return;
+    }
     
     event.stopPropagation();
     const charGroup = event.currentTarget;
     
     // 获取当前歌曲
     const song = window.currentSong;
-    if (!song) return;
+    if (!song) {
+        console.log('[handleMetaCharClick] No current song');
+        return;
+    }
     
     // 获取对应的元数据数组
     let metaValue, metaJp;
@@ -588,7 +596,12 @@ function handleMetaCharClick(event, metaType, charIndex) {
         metaJp = song.composerJyutping;
     }
     
-    if (!metaValue || !metaJp) return;
+    console.log('[handleMetaCharClick] metaValue:', metaValue, 'metaJp:', metaJp);
+    
+    if (!metaValue || !metaJp) {
+        console.log('[handleMetaCharClick] Missing metaValue or metaJp');
+        return;
+    }
     
     // 显示编辑弹窗
     showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp);
@@ -598,44 +611,55 @@ function handleMetaCharClick(event, metaType, charIndex) {
 // 显示歌手/词曲人编辑弹窗
 // ============================================
 function showMetaEditPopup(charGroup, metaType, charIndex, metaValue, metaJp) {
-    closeEditPopup();
-
-    const overlay = document.createElement('div');
-    overlay.className = 'edit-overlay';
-    overlay.id = 'editOverlay';
-    overlay.onclick = closeEditPopup;
-    document.body.appendChild(overlay);
-
-    const popup = document.createElement('div');
-    popup.className = 'edit-popup';
-    popup.id = 'editPopup';
-
-    const char = metaValue[charIndex];
-    const currentJp = metaJp[charIndex] || '';
+    console.log('[showMetaEditPopup] Opening popup for', metaType, 'charIndex:', charIndex);
     
-    const typeName = metaType === 'songArtist' ? '歌手' : 
-                     metaType === 'songLyricist' ? '填词' : '作曲';
+    try {
+        closeEditPopup();
 
-    popup.innerHTML = `
-        <div class="edit-popup-title">修改${typeName}粤拼</div>
-        <div class="edit-popup-char">${char}</div>
-        <div class="edit-popup-input-group">
-            <label>当前粤拼：${currentJp}</label>
-            <input type="text" id="newMetaJp" class="edit-popup-input" value="${currentJp}" placeholder="输入新粤拼">
-        </div>
-        <div class="edit-popup-buttons">
-            <button class="edit-popup-btn cancel" onclick="closeEditPopup()">取消</button>
-            <button class="edit-popup-btn confirm" onclick="confirmMetaEdit('${metaType}', ${charIndex}, '${char}', '${currentJp}')">确定</button>
-        </div>
-    `;
+        const overlay = document.createElement('div');
+        overlay.className = 'edit-overlay';
+        overlay.id = 'editOverlay';
+        overlay.onclick = closeEditPopup;
+        document.body.appendChild(overlay);
+        console.log('[showMetaEditPopup] Overlay added');
 
-    document.body.appendChild(popup);
-    
-    // 聚焦输入框
-    setTimeout(() => {
-        const input = document.getElementById('newMetaJp');
-        if (input) input.focus();
-    }, 10);
+        const popup = document.createElement('div');
+        popup.className = 'edit-popup';
+        popup.id = 'editPopup';
+
+        const char = metaValue[charIndex];
+        const currentJp = metaJp[charIndex] || '';
+        
+        const typeName = metaType === 'songArtist' ? '歌手' : 
+                         metaType === 'songLyricist' ? '填词' : '作曲';
+
+        popup.innerHTML = `
+            <div class="edit-popup-title">修改${typeName}粤拼</div>
+            <div class="edit-popup-char">${char}</div>
+            <div class="edit-popup-input-group">
+                <label>当前粤拼：${currentJp}</label>
+                <input type="text" id="newMetaJp" class="edit-popup-input" value="${currentJp}" placeholder="输入新粤拼">
+            </div>
+            <div class="edit-popup-buttons">
+                <button class="edit-popup-btn cancel" onclick="closeEditPopup()">取消</button>
+                <button class="edit-popup-btn confirm" onclick="confirmMetaEdit('${metaType}', ${charIndex}, '${char}', '${currentJp}')">确定</button>
+            </div>
+        `;
+
+        document.body.appendChild(popup);
+        console.log('[showMetaEditPopup] Popup added');
+        
+        // 聚焦输入框
+        setTimeout(() => {
+            const input = document.getElementById('newMetaJp');
+            if (input) {
+                input.focus();
+                console.log('[showMetaEditPopup] Input focused');
+            }
+        }, 10);
+    } catch (err) {
+        console.error('[showMetaEditPopup] Error:', err);
+    }
 }
 
 // ============================================
