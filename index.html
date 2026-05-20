@@ -684,11 +684,11 @@
         .song-meta-label {
             /* 文字颜色 */
             color: var(--text-tertiary);
-            /* 显示方式 */
+            /* 显示方式：横排，每个字一组（粤拼在上，汉字在下） */
             display: inline-flex;
-            flex-direction: column;                  /* 上下排列 */
+            flex-direction: row;                     /* 横向排列 */
             /* 交叉轴对齐 */
-            align-items: center;
+            align-items: flex-start;
         }
 
         /* 元数据标签的粤拼（小号） */
