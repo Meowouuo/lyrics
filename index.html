@@ -687,8 +687,10 @@
             /* 显示方式：横排，每个字一组（粤拼在上，汉字在下） */
             display: inline-flex;
             flex-direction: row;                     /* 横向排列 */
-            /* 交叉轴对齐 */
-            align-items: flex-start;
+            /* 允许换行 */
+            flex-wrap: wrap;
+            /* 交叉轴对齐：底部对齐 */
+            align-items: flex-end;
         }
 
         /* 元数据标签的粤拼（小号） */
@@ -713,11 +715,22 @@
            人名组样式（用于歌手、填词、作曲）
            上下排列：粤拼 + 汉字
            ======================================== */
+        /* 元数据值区域样式（歌手、填词、作曲的具体值） */
+        .meta-value {
+            /* 显示方式：横排，每个字一组 */
+            display: inline-flex;
+            flex-direction: row;
+            /* 交叉轴对齐：底部对齐 */
+            align-items: flex-end;
+            /* 字体颜色：主要文字颜色 */
+            color: var(--text-primary);
+        }
+
         .meta-name-group {
             /* 显示方式 */
             display: inline-flex;
             flex-direction: column;                  /* 上下排列 */
-            /* 交叉轴对齐 */
+            /* 交叉轴对齐：居中对齐 */
             align-items: center;
         }
 
@@ -2001,7 +2014,7 @@
                                     <span class="meta-name-group"><span class="meta-name-jyutping">go1</span><span class="meta-name-hanzi">歌</span></span>
                                     <span class="meta-name-group"><span class="meta-name-jyutping">sau2</span><span class="meta-name-hanzi">手：</span></span>
                                 </span>
-                                <span id="songArtist"></span>
+                                <span id="songArtist" class="meta-value"></span>
                             </div>
                         </div>
                         <div class="song-meta-row-inner">
@@ -2010,14 +2023,14 @@
                                     <span class="meta-name-group"><span class="meta-name-jyutping">tim4</span><span class="meta-name-hanzi">填</span></span>
                                     <span class="meta-name-group"><span class="meta-name-jyutping">ci4</span><span class="meta-name-hanzi">词：</span></span>
                                 </span>
-                                <span id="songLyricist"></span>
+                                <span id="songLyricist" class="meta-value"></span>
                             </div>
                             <div class="song-meta-item">
                                 <span class="song-meta-label">
                                     <span class="meta-name-group"><span class="meta-name-jyutping">zok3</span><span class="meta-name-hanzi">作</span></span>
                                     <span class="meta-name-group"><span class="meta-name-jyutping">kuk1</span><span class="meta-name-hanzi">曲：</span></span>
                                 </span>
-                                <span id="songComposer"></span>
+                                <span id="songComposer" class="meta-value"></span>
                             </div>
                         </div>
                     </div>
